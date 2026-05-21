@@ -1,12 +1,28 @@
-<!-- Pagina de prueba -->
-<!DOCTYPE html>
-<html><head><title>Registro</title></head>
-<body>
-  <h2>Crear cuenta</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Registrarse</button>
-  </form>
-  <p>¿Ya tenés cuenta? <a href="{% url 'login' %}">Iniciá sesión</a></p>
-</body></html>
+{% extends 'base.html' %}
+
+{% block title %}Registro — Assistech{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-md mx-auto px-6 py-12">
+
+    <div class="mb-8 text-center">
+        <h2 class="text-3xl font-bold tracking-tight">Crear cuenta</h2>
+        <p class="mt-2 text-sm text-assist-gray">Completá tus datos para registrarte</p>
+    </div>
+
+    <form method="post" class="space-y-2">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit"
+            class="w-full bg-assist-coral text-white font-semibold py-3 rounded-xl hover:bg-opacity-90 transition mt-2">
+            Registrarse
+        </button>
+    </form>
+
+    <p class="mt-6 text-center text-sm text-assist-gray">
+        ¿Ya tenés cuenta?
+        <a href="{% url 'login' %}" class="text-assist-white font-medium hover:underline">Iniciá sesión</a>
+    </p>
+
+</div>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Assistech{% endblock %}</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'assist-black': '#000000',
+                        'assist-dark': '#111111',
+                        'assist-gray': '#AAAAAA',
+                        'assist-white': '#FFFFFF',
+                        'assist-coral': '#F25C54',
+                    },
+                    boxShadow: {
+                        'assist-glow': '0 0 50px 10px rgba(111, 66, 193, 0.25)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        form p {
+            margin-bottom: 1.5rem;
+        }
+        form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #AAAAAA;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        form input, form select {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: transparent;
+            border: 1px solid #333333;
+            border-radius: 0.75rem;
+            color: #FFFFFF;
+            appearance: none;
+        }
+        form input:focus {
+            outline: none;
+            border-color: #6F42C1;
+            box-shadow: 0 0 10px rgba(111, 66, 193, 0.5);
+        }
+        form select option {
+            background-color: #111827;
+            color: #FFFFFF;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-[#111827] text-assist-white min-h-screen font-sans flex flex-col">
+
+    {% block navbar %}
+    <nav class="border-b border-assist-dark px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            
+            <div class="flex items-center gap-3">
+                <img src="{% static 'usuarios/logo.jpeg' %}" alt="Logo Assistech" class="h-8 w-8 rounded-md bg-assist-coral">
+                <span class="text-xl font-bold tracking-tight">Assistech</span>
+            </div>
+
+            <div class="flex items-center gap-8 text-sm text-assist-gray">
+                <a href="#" class="hover:text-assist-white transition">Producto</a>
+                <a href="#" class="hover:text-assist-white transition">Precios</a>
+                <a href="#" class="hover:text-assist-white transition">Funciones</a>
+            </div>
+
+            <div class="flex items-center gap-6">
+                <a href="{% url 'login' %}" class="text-sm text-assist-gray hover:text-assist-white transition">Login</a>
+                <a href="#" class="bg-assist-coral text-assist-black px-5 py-2.5 text-sm font-semibold rounded-xl hover:bg-opacity-90 transition">
+                    Empieza
+                </a>
+            </div>
+        </div>
+    </nav>
+    {% endblock %}
+
+    <main class="flex-1 flex flex-col justify-center">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+</body>
+</html>
