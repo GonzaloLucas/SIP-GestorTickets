@@ -113,6 +113,9 @@ USE_I18N = True
 
 USE_TZ = True
 
+LANGUAGE_CODE = 'es'
+
+TIME_ZONE = 'America/Argentina/Buenos_Aires'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/

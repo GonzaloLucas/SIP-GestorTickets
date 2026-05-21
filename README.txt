@@ -59,6 +59,11 @@ usuarios_usuario — Tabla principal. Acá se guardan todos los usuarios del sis
 usuarios_usuario_groups — Tabla intermedia que relaciona tus usuarios con los grupos de auth_group.
 usuarios_usuario_user_permissions — Tabla intermedia que relaciona tus usuarios con permisos 
 individuales específicos.
+usuarios_infoticket — Ticket en sí. Guarda el problema del cliente con todos sus datos principales.
+usuarios_tickethistorial — Cada vez que el estado de un ticket cambia, se registra acá. 
+Es el "log" de cambios.
+usuarios_ticketcomentario — Los mensajes entre cliente y soporte dentro de un ticket.
+usuarios_ticketasignacion — Registra qué agente de soporte está atendiendo cada ticket.
 
 Notas extras:
 Casi nunca se tocan: __init__.py, asgi.py, wsgi.py, apps.py, __pycache__/
