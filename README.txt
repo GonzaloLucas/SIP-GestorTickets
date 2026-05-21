@@ -36,6 +36,30 @@ El backend: Donde se encuentra toda la logica detras de la pagina.
 El frontend:
     Donde estan todos los archivo .html del proyecto.
 
+Explicacion de la Base de Datos con Django:
+Tablas de Django (generadas automáticamente)
+auth_group — Grupos de permisos. Permite agrupar usuarios y asignarles permisos en conjunto. 
+Por ejemplo un grupo "Administradores" con ciertos permisos.
+auth_group_permissions — Tabla intermedia que relaciona cada grupo con sus permisos específicos.
+auth_permission — Catálogo de todos los permisos disponibles en el sistema 
+(agregar, editar, eliminar, ver por cada modelo).
+django_admin_log — Historial de acciones realizadas desde el panel de administración (/admin/). 
+Registra quién hizo qué y cuándo.
+django_content_type — Registro interno de todos los modelos del proyecto. Django lo usa para el 
+sistema de permisos y otras funciones internas.
+django_migrations — Historial de todas las migraciones ejecutadas. Django lo consulta para saber 
+qué cambios ya se aplicaron a la base de datos.
+django_session — Almacena las sesiones activas de usuarios logueados. Cuando alguien inicia sesión, 
+acá se guarda su sesión.
+sqlite_sequence — Propia de SQLite, lleva el contador de los IDs autoincrementales de las tablas.
+
+Tablas de la app usuarios
+usuarios_usuario — Tabla principal. Acá se guardan todos los usuarios del sistema 
+(clientes, soporte, jefes) con todos sus datos.
+usuarios_usuario_groups — Tabla intermedia que relaciona tus usuarios con los grupos de auth_group.
+usuarios_usuario_user_permissions — Tabla intermedia que relaciona tus usuarios con permisos 
+individuales específicos.
+
 Notas extras:
 Casi nunca se tocan: __init__.py, asgi.py, wsgi.py, apps.py, __pycache__/
 A veces se tocan: admin.py, tests.py, migrations/
