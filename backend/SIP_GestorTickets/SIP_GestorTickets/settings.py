@@ -50,6 +50,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+AUTH_USER_MODEL = 'usuarios.Usuario'
+
 ROOT_URLCONF = 'SIP_GestorTickets.urls'
 
 TEMPLATES = [

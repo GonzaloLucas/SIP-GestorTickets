@@ -1,7 +1,7 @@
-
 from django.contrib import admin
-from .modelos import Cliente, Soporte, JefeSoporte
+from django.contrib.auth.admin import UserAdmin
 
-admin.site.register(Cliente)
-admin.site.register(Soporte)
-admin.site.register(JefeSoporte)
+from .modelos import Usuario
+
+
+admin.site.register(Usuario, UserAdmin)
