@@ -1,3 +1,6 @@
+EL run.py SIRVE PARA CORRER LA PAGINA WEB DIRECTAMENTE. 
+ES EL UNICO EJECUTABLE QUE SE TIENE QUE EJECTURAR.
+
 Los __init__.py se usan a modo de reconocimiento.
 asgi.py y wsgi.py son Entradas que no se modifican.
 Las __pycache__ son carpetas creadas automáticamente por Python para almacenar versiones 
