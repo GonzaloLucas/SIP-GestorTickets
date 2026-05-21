@@ -1,0 +1,15 @@
+<!-- Pagina de prueba -->
+<!DOCTYPE html>
+<html><head><title>Login</title></head>
+<body>
+  <h2>Iniciar sesión</h2>
+  {% if error %}
+    <p style="color:red">{{ error }}</p>
+  {% endif %}
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Entrar</button>
+  </form>
+  <p>¿No tenés cuenta? <a href="{% url 'register' %}">Registrate</a></p>
+</body></html>

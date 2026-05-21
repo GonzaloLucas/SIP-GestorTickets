@@ -1,0 +1,679 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Assistech — Centraliza tu soporte</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+            rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+          theme: {
+            extend: {
+              fontFamily: {
+                sans: ["Inter", "system-ui", "sans-serif"],
+              },
+              colors: {
+                assist: {
+                  black: "#000000",
+                  charcoal: "#121212",
+                  slate: "#1a1a1a",
+                  accent: "#e63946",
+                  body: "#a0a0a0",
+                  white: "#ffffff",
+                },
+              },
+            },
+          },
+        };
+    </script>
+</head>
+<body class="font-sans bg-assist-black text-assist-white antialiased">
+<!-- Header -->
+<header
+        class="sticky top-0 z-50 border-b border-white/5 bg-assist-black/90 backdrop-blur-md"
+>
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 md:px-6">
+        <a href="#" class="flex items-center gap-2">
+            <img
+                    src="{% static 'accounts/logo.jpeg' %}" 
+                    alt="Assistech Logo" 
+                    class="h-8 w-8 object-contain"
+                />
+            <span class="text-lg font-semibold tracking-tight">Assistech</span>
+        </a>
+        <nav class="hidden items-center gap-8 text-sm text-assist-body md:flex" aria-label="Principal">
+            <a href="#producto" class="transition hover:text-assist-white">Producto</a>
+            <a href="#precios" class="transition hover:text-assist-white">Precios</a>
+            <a href="#funciones" class="transition hover:text-assist-white">Funciones</a>
+
+        </nav>
+        <div class="flex items-center gap-4">
+            <a href="{% url 'login' %}" class="hidden text-sm text-assist-body transition hover:text-assist-white sm:inline">
+                Login
+            </a>
+            <button
+                    type="button"
+                    class="rounded-md bg-assist-accent px-4 py-2 text-sm font-semibold text-assist-white transition hover:brightness-110"
+            >
+                Empieza
+            </button>
+        </div>
+    </div>
+</header>
+
+<main>
+    <!-- Hero -->
+    <section class="border-b border-white/5 bg-assist-black py-16 md:py-24">
+        <div class="mx-auto grid max-w-7xl items-center gap-12 px-4 md:grid-cols-2 md:px-6">
+            <div>
+                <h1 class="text-4xl font-bold leading-tight tracking-tight md:text-5xl lg:text-6xl">
+                    Centraliza tu soporte en un solo lugar
+                </h1>
+                <p class="mt-6 max-w-xl text-lg text-assist-body">
+                    Gestiona tickets, equipos y conversaciones desde una plataforma clara. Menos
+                    herramientas, más claridad para tu equipo y tus clientes.
+                </p>
+                <div class="mt-8 flex flex-wrap items-center gap-4">
+                    <button
+                            type="button"
+                            class="rounded-md bg-assist-accent px-6 py-3 text-sm font-bold text-assist-white transition hover:brightness-110"
+                    >
+                        Empieza
+                    </button>
+                    <button
+                            type="button"
+                            class="rounded-md border border-white/30 px-6 py-3 text-sm font-semibold text-assist-white transition hover:bg-white hover:text-assist-black"
+                    >
+                        Ver demo
+                    </button>
+                </div>
+            </div>
+            <div class="flex justify-center md:justify-end">
+                <div
+                        class="relative aspect-square w-full max-w-md overflow-hidden rounded-full border border-white/10 bg-assist-slate shadow-2xl shadow-indigo-500/20"
+                >
+                    <div
+                            class="absolute inset-0 bg-gradient-to-br from-indigo-600/40 via-purple-900/30 to-assist-black"
+                            aria-hidden="true"
+                    ></div>
+                    <div
+                            class="absolute bottom-0 left-1/2 h-3/5 w-4/5 -translate-x-1/2 rounded-t-lg bg-[#0d1117] ring-1 ring-white/10"
+                            aria-hidden="true"
+                    ></div>
+                    <div
+                            class="absolute bottom-[12%] left-[18%] h-[35%] w-[28%] rounded-sm bg-[#161b22] ring-1 ring-cyan-500/20"
+                            aria-hidden="true"
+                    ></div>
+                    <div
+                            class="absolute bottom-[12%] right-[18%] h-[35%] w-[28%] rounded-sm bg-[#161b22] ring-1 ring-violet-500/20"
+                            aria-hidden="true"
+                    ></div>
+                    <span class="sr-only">Ilustración: espacio de trabajo con monitores</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features (Ventajas) — layout alineado a diseño Figma -->
+    <section id="funciones" class="bg-[#111827] py-20 text-white md:py-24">
+        <div class="mx-auto max-w-7xl px-4 md:px-6">
+            <header class="text-center">
+                <p class="text-sm font-medium tracking-wide text-white">Ventajas</p>
+                <h2 class="mt-3 text-4xl font-bold leading-tight tracking-tight md:text-5xl">
+                    Lo que hace diferente a Assistech
+                </h2>
+                <p class="mx-auto mt-4 max-w-2xl text-base text-gray-400 md:text-lg">
+                    Gestiona todos tus tickets desde una interfaz limpia y sin distracciones.
+                </p>
+            </header>
+
+            <div class="mt-16 grid grid-cols-1 gap-12 md:mt-20 md:grid-cols-3 md:gap-12">
+                <article class="flex flex-col items-center text-center">
+                    <div
+                            class="mb-6 flex h-10 w-10 flex-col justify-center gap-1.5"
+                            aria-hidden="true"
+                    >
+                        <span class="h-0.5 w-full rounded-full bg-white"></span>
+                        <span class="h-0.5 w-full rounded-full bg-white"></span>
+                        <span class="h-0.5 w-full rounded-full bg-white"></span>
+                    </div>
+                    <h3 class="text-lg font-semibold md:text-xl">Tickets centralizados</h3>
+                    <p class="mt-3 max-w-xs text-sm leading-relaxed text-gray-400 md:text-base">
+                        Todos los mensajes en un solo lugar, sin perder nada en el camino.
+                    </p>
+                </article>
+
+                <article class="flex flex-col items-center text-center">
+                    <div
+                            class="mb-6 flex h-10 w-10 items-end justify-center gap-1 rounded-sm border border-white p-1.5"
+                            aria-hidden="true"
+                    >
+                        <span class="h-2 w-1.5 bg-white"></span>
+                        <span class="h-4 w-1.5 bg-white"></span>
+                        <span class="h-3 w-1.5 bg-white"></span>
+                    </div>
+                    <h3 class="text-lg font-semibold md:text-xl">Seguimiento en tiempo real</h3>
+                    <p class="mt-3 max-w-xs text-sm leading-relaxed text-gray-400 md:text-base">
+                        Sabe exactamente dónde está cada solicitud y quién la está atendiendo.
+                    </p>
+                </article>
+
+                <article class="flex flex-col items-center text-center">
+                    <div class="relative mb-6 h-10 w-10 rounded-full border border-white" aria-hidden="true">
+                <span
+                        class="pointer-events-none absolute left-1/2 top-1/2 block h-0.5 w-[140%] -translate-x-1/2 -translate-y-1/2 -rotate-45 bg-white"
+                ></span>
+                    </div>
+                    <h3 class="text-lg font-semibold md:text-xl">Historial completo</h3>
+                    <p class="mt-3 max-w-xs text-sm leading-relaxed text-gray-400 md:text-base">
+                        Accede al contexto total de cada conversación cuando lo necesites.
+                    </p>
+                </article>
+            </div>
+
+            <div class="mt-16 flex flex-col items-center justify-center gap-6 sm:mt-20 sm:flex-row sm:gap-8">
+                <button
+                        type="button"
+                        class="rounded-md border border-white/20 bg-transparent px-6 py-2 text-sm font-medium text-white transition hover:border-white/40 hover:bg-white/5"
+                >
+                    Explorar producto
+                </button>
+                <a
+                        href="#"
+                        class="inline-flex items-center gap-2 text-sm font-medium text-white transition hover:text-gray-300"
+                >
+                    Más
+                    <span class="text-base leading-none" aria-hidden="true">&gt;</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Process (Proceso) — layout alineado a diseño -->
+    <section class="bg-black py-20 text-white md:py-24">
+        <div class="mx-auto max-w-7xl px-4 md:px-6">
+            <header class="text-center">
+                <p class="text-sm font-medium tracking-wide text-white">Proceso</p>
+                <h2 class="mx-auto mt-3 max-w-3xl text-4xl font-bold leading-tight tracking-tight md:text-5xl">
+                    Tres pasos simples para mejorar tu soporte
+                </h2>
+                <p class="mx-auto mt-4 max-w-2xl text-base text-gray-400 md:text-lg">
+                    El flujo es directo y sin complicaciones. Desde la creación del ticket hasta la resolución.
+                </p>
+            </header>
+
+            <div class="mt-16 grid grid-cols-1 gap-12 md:mt-20 md:grid-cols-3 md:gap-12">
+                <article class="flex flex-col items-center text-center">
+                    <!-- Icono ticket (contorno) -->
+                    <div class="relative mb-6 h-12 w-10" aria-hidden="true">
+                        <div class="absolute left-1/2 top-0 flex -translate-x-1/2 gap-0.5">
+                            <span class="h-1 w-1 rounded-full bg-white"></span>
+                            <span class="h-1 w-1 rounded-full bg-white"></span>
+                            <span class="h-1 w-1 rounded-full bg-white"></span>
+                            <span class="h-1 w-1 rounded-full bg-white"></span>
+                        </div>
+                        <div
+                                class="absolute inset-x-0 top-2.5 bottom-0 rounded-md border-2 border-white bg-transparent"
+                        ></div>
+                        <div class="absolute bottom-2 left-1/2 h-px w-5 -translate-x-1/2 bg-white/40"></div>
+                    </div>
+                    <h3 class="text-lg font-bold md:text-xl">El cliente crea un ticket</h3>
+                    <p class="mt-3 max-w-xs text-sm leading-relaxed text-gray-400 md:text-base">
+                        Tu equipo recibe la solicitud al instante en la plataforma.
+                    </p>
+                </article>
+
+                <article class="flex flex-col items-center text-center">
+                    <!-- Icono dos personas -->
+                    <div class="mb-6 flex items-end justify-center gap-1.5" aria-hidden="true">
+                        <div class="flex flex-col items-center">
+                            <div class="h-7 w-7 rounded-full border-2 border-white"></div>
+                            <div class="mt-0.5 h-2 w-9 rounded-t-md border-2 border-b-0 border-white"></div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="h-7 w-7 rounded-full border-2 border-white"></div>
+                            <div class="mt-0.5 h-2 w-9 rounded-t-md border-2 border-b-0 border-white"></div>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-bold md:text-xl">Tu equipo responde</h3>
+                    <p class="mt-3 max-w-xs text-sm leading-relaxed text-gray-400 md:text-base">
+                        La comunicación fluye de forma clara y organizada sin interrupciones.
+                    </p>
+                </article>
+
+                <article class="flex flex-col items-center text-center">
+                    <!-- Icono historial (flecha circular) + engranaje -->
+                    <div class="relative mb-6 h-12 w-12 shrink-0" aria-hidden="true">
+                        <div
+                                class="absolute inset-0 rounded-full border-2 border-white border-r-transparent border-b-transparent"
+                                style="transform: rotate(-35deg)"
+                        ></div>
+                        <div
+                                class="absolute right-0.5 top-[42%] h-0 w-0 border-y-[3px] border-l-[5px] border-y-transparent border-l-white"
+                        ></div>
+                        <div
+                                class="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border border-white bg-black"
+                        >
+                            <span class="h-2 w-2 rotate-45 border border-white"></span>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-bold md:text-xl">Se cierra con historial</h3>
+                    <p class="mt-3 max-w-xs text-sm leading-relaxed text-gray-400 md:text-base">
+                        Todo queda registrado para futuras referencias y mejora continua.
+                    </p>
+                </article>
+            </div>
+
+            <div class="mt-16 flex flex-col items-center justify-center gap-6 sm:mt-20 sm:flex-row sm:gap-8">
+                <button
+                        type="button"
+                        class="rounded-md border border-white/20 bg-black px-6 py-2 text-sm font-medium text-white transition hover:border-white/40 hover:bg-white/5"
+                >
+                    Comenzar ahora
+                </button>
+                <a
+                        href="#"
+                        class="inline-flex items-center gap-2 text-sm font-medium text-white transition hover:text-gray-300"
+                >
+                    Más
+                    <span class="text-base leading-none" aria-hidden="true">&gt;</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing (Planes) — layout alineado a diseño -->
+    <section id="precios" class="bg-[#121212] py-20 text-white md:py-24">
+        <div class="mx-auto max-w-7xl px-4 md:px-6">
+            <header class="text-center">
+                <p class="text-sm font-medium tracking-wide text-white">Planes</p>
+                <h2 class="mt-3 text-4xl font-bold tracking-tight md:text-5xl">Elige tu plan</h2>
+                <p class="mx-auto mt-4 max-w-2xl text-base text-gray-400 md:text-lg">
+                    Selecciona el que mejor se adapte a tu equipo
+                </p>
+            </header>
+
+            <div class="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-6 lg:gap-8">
+                <!-- Plan básico -->
+                <article
+                        class="flex min-h-full flex-col border border-gray-800 bg-black p-6 md:p-8"
+                >
+                    <div class="flex items-start justify-between gap-4">
+                        <h3 class="text-lg font-semibold capitalize">Plan básico</h3>
+                        <div class="relative h-9 w-10 shrink-0" aria-hidden="true">
+                            <div class="absolute bottom-0 left-0 h-[26px] w-[26px] border border-white bg-black"></div>
+                            <div class="absolute bottom-[5px] left-[6px] h-[26px] w-[26px] border border-white bg-black"></div>
+                            <div class="absolute bottom-[10px] left-[12px] h-[26px] w-[26px] border border-white bg-black"></div>
+                        </div>
+                    </div>
+                    <div class="mt-8">
+                        <p class="text-4xl font-bold leading-none tracking-tight md:text-5xl">$0</p>
+                        <p class="mt-3 text-sm text-gray-400">Free to use</p>
+                    </div>
+                    <hr class="my-8 border-gray-800" />
+                    <div class="flex flex-1 flex-col">
+                        <p class="text-xs font-medium text-white">Incluye:</p>
+                        <ul class="mt-4 flex-1 space-y-3 text-sm text-gray-300">
+                            <li class="flex gap-2.5">
+                                <span class="shrink-0 text-white" aria-hidden="true">✓</span>
+                                <span>Hasta 10 usuarios</span>
+                            </li>
+                            <li class="flex gap-2.5">
+                                <span class="shrink-0 text-white" aria-hidden="true">✓</span>
+                                <span>500 tickets mensuales</span>
+                            </li>
+                            <li class="flex gap-2.5">
+                                <span class="shrink-0 text-white" aria-hidden="true">✓</span>
+                                <span>Soporte por email</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <button
+                            type="button"
+                            class="mt-8 w-full bg-[#c2412e] py-3 text-sm font-semibold text-white transition hover:brightness-110"
+                    >
+                        Comenzar
+                    </button>
+                </article>
+
+                <!-- Plan empresarial -->
+                <article
+                        class="flex min-h-full flex-col border border-gray-800 bg-black p-6 md:p-8"
+                >
+                    <div class="flex items-start justify-between gap-4">
+                        <h3 class="text-lg font-semibold capitalize">Plan Estandar</h3>
+                        <div class="relative h-9 w-10 shrink-0" aria-hidden="true">
+                            <div class="absolute bottom-0 left-0 h-[26px] w-[26px] border border-white bg-black"></div>
+                            <div class="absolute bottom-[5px] left-[6px] h-[26px] w-[26px] border border-white bg-black"></div>
+                            <div class="absolute bottom-[10px] left-[12px] h-[26px] w-[26px] border border-white bg-black"></div>
+                        </div>
+                    </div>
+                    <div class="mt-8">
+                        <p class="text-4xl font-bold leading-none tracking-tight md:text-5xl">
+                            $80<span class="text-2xl font-semibold text-white md:text-3xl">/mo</span>
+                        </p>
+                        <p class="mt-3 text-sm text-gray-400">USD</p>
+                    </div>
+                    <hr class="my-8 border-gray-800" />
+                    <div class="flex flex-1 flex-col">
+                        <p class="text-xs font-medium text-white">Incluye:</p>
+                        <ul class="mt-4 flex-1 space-y-3 text-sm text-gray-300">
+                            <li class="flex gap-2.5">
+                                <span class="shrink-0 text-white" aria-hidden="true">✓</span>
+                                <span>Hasta 20 usuarios</span>
+                            </li>
+                            <li class="flex gap-2.5">
+                                <span class="shrink-0 text-white" aria-hidden="true">✓</span>
+                                <span>Tickets ilimitados</span>
+                            </li>
+                            <li class="flex gap-2.5">
+                                <span class="shrink-0 text-white" aria-hidden="true">✓</span>
+                                <span>Reportes avanzados</span>
+                            </li>
+                            <li class="flex gap-2.5">
+                                <span class="shrink-0 text-white" aria-hidden="true">✓</span>
+                                <span>Soporte prioritario</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <button
+                            type="button"
+                            class="mt-8 w-full bg-[#c2412e] py-3 text-sm font-semibold text-white transition hover:brightness-110"
+                    >
+                        Comenzar
+                    </button>
+                </article>
+
+                <!-- Plan profesional -->
+                <article
+                        class="flex min-h-full flex-col border border-gray-800 bg-black p-6 md:p-8"
+                >
+                    <div class="flex items-start justify-between gap-4">
+                        <h3 class="text-lg font-semibold capitalize">Plan Avanzado</h3>
+                        <div class="relative h-9 w-10 shrink-0" aria-hidden="true">
+                            <div class="absolute bottom-0 left-0 h-[26px] w-[26px] border border-white bg-black"></div>
+                            <div class="absolute bottom-[5px] left-[6px] h-[26px] w-[26px] border border-white bg-black"></div>
+                            <div class="absolute bottom-[10px] left-[12px] h-[26px] w-[26px] border border-white bg-black"></div>
+                        </div>
+                    </div>
+                    <div class="mt-8">
+                        <p class="text-4xl font-bold leading-none tracking-tight md:text-5xl">
+                            $150<span class="text-2xl font-semibold text-white md:text-3xl">/mo</span>
+                        </p>
+                        <p class="mt-3 text-sm text-gray-400">USD</p>
+                    </div>
+                    <hr class="my-8 border-gray-800" />
+                    <div class="flex flex-1 flex-col">
+                        <p class="text-xs font-medium text-white">Incluye:</p>
+                        <ul class="mt-4 flex-1 space-y-3 text-sm text-gray-300">
+                            <li class="flex gap-2.5">
+                                <span class="shrink-0 text-white" aria-hidden="true">✓</span>
+                                <span>Usuarios ilimitados</span>
+                            </li>
+                            <li class="flex gap-2.5">
+                                <span class="shrink-0 text-white" aria-hidden="true">✓</span>
+                                <span>Tickets sin límite</span>
+                            </li>
+                            <li class="flex gap-2.5">
+                                <span class="shrink-0 text-white" aria-hidden="true">✓</span>
+                                <span>API personalizada</span>
+                            </li>
+                            <li class="flex gap-2.5">
+                                <span class="shrink-0 text-white" aria-hidden="true">✓</span>
+                                <span>Integraciones custom</span>
+                            </li>
+                            <li class="flex gap-2.5">
+                                <span class="shrink-0 text-white" aria-hidden="true">✓</span>
+                                <span>Gestor de cuenta</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <button
+                            type="button"
+                            class="mt-8 w-full bg-[#c2412e] py-3 text-sm font-semibold text-white transition hover:brightness-110"
+                    >
+                        Comenzar
+                    </button>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="bg-assist-black py-20 md:py-28">
+        <div class="mx-auto max-w-7xl px-4 md:px-6">
+            <h2 class="text-center text-3xl font-bold md:text-4xl">Lo que dicen</h2>
+            <div class="mt-16 grid gap-8 md:grid-cols-3">
+                <figure class="rounded-xl bg-assist-charcoal p-6">
+                    <div class="text-assist-body" aria-hidden="true">𝕏</div>
+                    <blockquote class="mt-4 text-assist-white">
+                        “Reducimos el tiempo de primera respuesta a la mitad en la primera semana.”
+                    </blockquote>
+                    <figcaption class="mt-6 flex items-center gap-3">
+                        <div class="h-10 w-10 rounded-full bg-assist-slate ring-1 ring-white/10" aria-hidden="true"></div>
+                        <div>
+                            <p class="text-sm font-semibold">María López</p>
+                            <p class="text-xs text-assist-body">@maria_ops</p>
+                        </div>
+                    </figcaption>
+                </figure>
+                <figure class="rounded-xl bg-assist-charcoal p-6">
+                    <div class="text-assist-body" aria-hidden="true">𝕏</div>
+                    <blockquote class="mt-4 text-assist-white">
+                        “Por fin el equipo de ventas ve el mismo historial que soporte.”
+                    </blockquote>
+                    <figcaption class="mt-6 flex items-center gap-3">
+                        <div class="h-10 w-10 rounded-full bg-assist-slate ring-1 ring-white/10" aria-hidden="true"></div>
+                        <div>
+                            <p class="text-sm font-semibold">Carlos Ruiz</p>
+                            <p class="text-xs text-assist-body">@carlosCX</p>
+                        </div>
+                    </figcaption>
+                </figure>
+                <figure class="rounded-xl bg-assist-charcoal p-6">
+                    <div class="text-assist-body" aria-hidden="true">𝕏</div>
+                    <blockquote class="mt-4 text-assist-white">
+                        “La curva de aprendizaje fue casi nula para el equipo remoto.”
+                    </blockquote>
+                    <figcaption class="mt-6 flex items-center gap-3">
+                        <div class="h-10 w-10 rounded-full bg-assist-slate ring-1 ring-white/10" aria-hidden="true"></div>
+                        <div>
+                            <p class="text-sm font-semibold">Ana Méndez</p>
+                            <p class="text-xs text-assist-body">@ana_lead</p>
+                        </div>
+                    </figcaption>
+                </figure>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mid CTA -->
+    <section class="border-y border-white/5 bg-assist-charcoal py-20">
+        <div class="mx-auto max-w-3xl px-4 text-center md:px-6">
+            <h2 class="text-3xl font-bold md:text-4xl">Listo para transformar tu soporte</h2>
+            <p class="mt-4 text-assist-body">
+                Crea tu espacio de trabajo en minutos y prueba el flujo completo.
+            </p>
+            <div class="mt-8 flex flex-wrap justify-center gap-4">
+                <button
+                        type="button"
+                        class="rounded-md bg-assist-accent px-6 py-3 text-sm font-bold text-assist-white transition hover:brightness-110"
+                >
+                    Empieza ahora
+                </button>
+                <button
+                        type="button"
+                        class="rounded-md border border-white/30 px-6 py-3 text-sm font-semibold text-assist-white transition hover:bg-white hover:text-assist-black"
+                >
+                    Hablar con ventas
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Illustration: chat bubbles (HTML/CSS, no SVG asset) -->
+    <section
+            class="relative overflow-hidden py-24 md:py-32"
+            style="background: linear-gradient(135deg, #1e3a5f 0%, #2d1b4e 50%, #1a0f2e 100%)"
+            aria-label="Conversación asistida"
+    >
+        <div class="relative mx-auto max-w-5xl px-4 md:px-6">
+            <div class="mb-8 max-w-md rounded-2xl rounded-tl-sm bg-[#2563eb]/90 p-6 shadow-xl">
+                <div class="flex gap-3">
+                    <div class="h-12 w-12 shrink-0 rounded-full bg-assist-slate ring-2 ring-white/20" aria-hidden="true"></div>
+                    <div class="flex-1 space-y-2 pt-1">
+                        <div class="h-2 w-full rounded bg-white/30"></div>
+                        <div class="h-2 w-[92%] rounded bg-white/20"></div>
+                        <div class="h-2 w-4/5 rounded bg-white/15"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="ml-auto max-w-md rounded-2xl rounded-br-sm bg-[#1d4ed8]/90 p-6 shadow-xl">
+                <div class="flex gap-3">
+                    <div class="h-12 w-12 shrink-0 rounded-full bg-assist-charcoal ring-2 ring-white/20" aria-hidden="true"></div>
+                    <div class="flex-1 space-y-2 pt-1">
+                        <div class="h-2 w-full rounded bg-white/30"></div>
+                        <div class="h-2 w-[83%] rounded bg-white/20"></div>
+                        <div class="h-2 w-3/4 rounded bg-white/15"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="bg-assist-black py-20 md:py-28">
+        <div class="mx-auto max-w-3xl px-4 md:px-6">
+            <h2 class="text-center text-3xl font-bold md:text-4xl">Preguntas</h2>
+            <dl class="mt-12 space-y-10">
+                <div>
+                    <dt class="font-semibold text-assist-white">¿Puedo importar tickets desde otra herramienta?</dt>
+                    <dd class="mt-2 text-assist-body">
+                        Sí. Ofrecemos importación asistida y APIs para mantener la continuidad de datos.
+                    </dd>
+                </div>
+                <div>
+                    <dt class="font-semibold text-assist-white">¿Hay período de prueba?</dt>
+                    <dd class="mt-2 text-assist-body">
+                        El plan Básico es gratuito de forma permanente; los planes de pago incluyen prueba guiada.
+                    </dd>
+                </div>
+                <div>
+                    <dt class="font-semibold text-assist-white">¿Dónde se alojan los datos?</dt>
+                    <dd class="mt-2 text-assist-body">
+                        Infraestructura con cifrado en tránsito y en reposo, con opciones de región en planes superiores.
+                    </dd>
+                </div>
+            </dl>
+            <p class="mt-12 text-center text-sm text-assist-body">
+                ¿Necesitas más ayuda?
+                <a href="#" class="font-medium text-assist-white underline-offset-4 hover:text-assist-accent hover:underline">
+                    Habla con nuestro equipo de soporte
+                </a>
+                .
+            </p>
+        </div>
+    </section>
+
+    <!-- Newsletter -->
+    <section class="border-t border-white/5 bg-assist-charcoal py-16">
+        <div class="mx-auto max-w-2xl px-4 text-center md:px-6">
+            <h2 class="text-2xl font-bold md:text-3xl">Mantente actualizado con Assistech</h2>
+            <form class="mt-8 flex max-w-lg flex-col gap-3 sm:mx-auto sm:flex-row" action="#" method="post">
+                <label for="email-news" class="sr-only">Tu correo electrónico</label>
+                <input
+                        id="email-news"
+                        name="email"
+                        type="email"
+                        placeholder="Tu correo electrónico"
+                        class="min-h-[48px] flex-1 rounded-md border border-white/10 bg-assist-slate px-4 text-assist-white placeholder:text-assist-body focus:border-assist-accent focus:outline-none focus:ring-1 focus:ring-assist-accent"
+                />
+                <button
+                        type="submit"
+                        class="min-h-[48px] shrink-0 rounded-md bg-assist-accent px-6 font-bold text-assist-white transition hover:brightness-110"
+                >
+                    Suscribirse
+                </button>
+            </form>
+        </div>
+    </section>
+</main>
+
+<!-- Footer -->
+<footer id="producto" class="border-t border-white/5 bg-assist-black pb-10 pt-16">
+    <div class="mx-auto max-w-7xl px-4 md:px-6">
+        <div class="flex flex-col gap-8 border-b border-white/10 pb-10 md:flex-row md:items-center md:justify-between">
+            <div class="flex items-center gap-2">
+                <img
+                        src="{% static 'accounts/logo.jpeg' %}" 
+                        alt="Assistech Logo" 
+                        class="h-8 w-8 object-contain"
+                />
+                <span class="text-lg font-semibold">Assistech</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-6 text-assist-body">
+                <div class="flex gap-4" aria-label="Redes sociales">
+                    <a href="#" class="hover:text-assist-white">in</a>
+                    <a href="#" class="hover:text-assist-white">𝕏</a>
+                    <a href="#" class="hover:text-assist-white">▶</a>
+                </div>
+                <label class="sr-only" for="lang">Idioma</label>
+                <select
+                        id="lang"
+                        class="rounded border border-white/10 bg-assist-slate px-3 py-2 text-sm text-assist-white"
+                >
+                    <option>Español</option>
+                    <option>English</option>
+                </select>
+            </div>
+        </div>
+        <div id="recursos" class="mt-12 grid grid-cols-2 gap-10 md:grid-cols-5">
+            <div>
+                <p class="text-sm font-semibold text-assist-white">Producto</p>
+                <ul class="mt-4 space-y-2 text-sm text-assist-body">
+                    <li><a href="#" class="hover:text-assist-white">Funciones</a></li>
+                    <li><a href="#" class="hover:text-assist-white">Integraciones</a></li>
+                    <li><a href="#" class="hover:text-assist-white">Precios</a></li>
+                </ul>
+            </div>
+            <div>
+                <p class="text-sm font-semibold text-assist-white">Empresa</p>
+                <ul class="mt-4 space-y-2 text-sm text-assist-body">
+                    <li><a href="#" class="hover:text-assist-white">Sobre nosotros</a></li>
+
+                </ul>
+            </div>
+            <div>
+                <p class="text-sm font-semibold text-assist-white">Recursos</p>
+                <ul class="mt-4 space-y-2 text-sm text-assist-body">
+                    <li><a href="#" class="hover:text-assist-white">Blog</a></li>
+                    <li><a href="#" class="hover:text-assist-white">Guías</a></li>
+                    <li><a href="#" class="hover:text-assist-white">API</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <p class="text-sm font-semibold text-assist-white">Redes Sociales</p>
+                <ul class="mt-4 space-y-2 text-sm text-assist-body">
+                    <li><a href="#" class="hover:text-assist-white">LinkedIn</a></li>
+                    <li><a href="#" class="hover:text-assist-white">Twitter</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="mt-10 flex flex-col gap-4 border-t border-white/10 pt-8 text-xs text-assist-body md:flex-row md:justify-between">
+            <p>© 2026 Assistech. Todos los derechos reservados.</p>
+            <div class="flex gap-6">
+                <a href="#" class="hover:text-assist-white">Aviso legal</a>
+            </div>
+        </div>
+    </div>
+</footer>
+</body>
+</html>
