@@ -1,37 +1,70 @@
 {% extends 'base.html' %}
 
-<h2>Tickets Asignados a Mí</h2>
+{% block title %}Panel Técnico — Assistech{% endblock %}
 
-<table border="1" style="width: 100%; border-collapse: collapse;">
-    <a href="{% url 'logout' %}">Cerrar Sesión</a>
-    <thead>
-        <tr style="background-color: #e3f2fd;">
-            <th>Prioridad</th>
-            <th>ID</th>
-            <th>Cliente</th>
-            <th>Título</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for ticket in tickets %}
-        <tr>
-            <td>{{ ticket.get_prioridad_display }}</td>
-            <td>#{{ ticket.id_ticket }}</td>
-            <td>{{ ticket.solicitante.username }} ({{ ticket.solicitante.empresa }})</td>
-            <td>{{ ticket.titulo }}</td>
-            <td>{{ ticket.get_estado_display }}</td>
-            <td>
-                <a href="{% url 'detalle_ticket' ticket.id_ticket %}" style="color: green; font-weight: bold;">
-                    Gestionar / Responder
-                </a>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="6">No tienes tickets asignados actualmente. ¡Buen trabajo!</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+{% block nav_actions %}
+    <div class="flex items-center gap-4">
+        <span class="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded-full border border-green-500/30">Técnico Online</span>
+        <a href="{% url 'logout' %}" class="text-sm text-assist-coral hover:underline">Salir</a>
+    </div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-6 py-10">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold">Consola de Soporte</h1>
+        <p class="text-assist-gray mt-1">Gestión de incidentes asignados y tareas pendientes.</p>
+        <a href="{% url 'logout' %}" class="self-center text-red-400 hover:underline">Cerrar Sesión</a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div class="bg-assist-dark p-6 rounded-2xl border border-white/5">
+            <p class="text-assist-gray text-sm">Tickets Pendientes</p>
+            <p class="text-4xl font-bold mt-2">12</p>
+        </div>
+        <div class="bg-assist-dark p-6 rounded-2xl border border-white/5">
+            <p class="text-assist-gray text-sm">Urgencia Alta</p>
+            <p class="text-4xl font-bold mt-2 text-assist-coral">3</p>
+        </div>
+        <div class="bg-assist-dark p-6 rounded-2xl border border-white/5">
+            <p class="text-assist-gray text-sm">Resueltos hoy</p>
+            <p class="text-4xl font-bold mt-2">8</p>
+        </div>
+    </div>
+
+    <h2 class="text-xl font-semibold mb-4">Tickets Asignados</h2>
+    <div class="bg-assist-dark border border-white/5 rounded-2xl overflow-hidden">
+        <table class="w-full text-left">
+            <thead>
+                <tr class="bg-white/5 text-assist-gray text-xs uppercase tracking-wider">
+                    <th class="p-4 font-semibold">Prioridad</th>
+                    <th class="p-4 font-semibold">Ticket</th>
+                    <th class="p-4 font-semibold">Usuario</th>
+                    <th class="p-4 font-semibold">Estado</th>
+                    <th class="p-4 font-semibold text-right">Acción</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+                <tr class="hover:bg-white/5 transition">
+                    <td class="p-4">
+                        <span class="text-red-500 font-bold">!!! ALTA</span>
+                    </td>
+                    <td class="p-4">
+                        <p class="text-sm font-bold">Colapso de servidor API</p>
+                        <p class="text-xs text-assist-gray">Reportado hace 15 min</p>
+                    </td>
+                    <td class="p-4 text-sm">Alejandro Vera</td>
+                    <td class="p-4">
+                        <span class="bg-assist-coral/20 text-assist-coral text-xs px-2 py-1 rounded-md">Sin Atender</span>
+                    </td>
+                    <td class="p-4 text-right">
+                        <button class="bg-white text-assist-black px-4 py-2 rounded-lg text-xs font-bold hover:bg-assist-gray transition">
+                            Tomar Ticket
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

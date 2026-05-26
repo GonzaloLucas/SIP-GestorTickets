@@ -1,39 +1,53 @@
 {% extends 'base.html' %}
 
-<h2>Panel de Control - Tickets</h2>
+{% block title %}Dashboard Cliente — Assistech{% endblock %}
 
-{% if request.user.rol == 'cliente' %}
-    <a href="{% url 'crear_ticket' %}" class="btn-nuevo">➕ Crear Nuevo Ticket</a>
-    <a href="{% url 'logout' %}">Cerrar Sesión</a>
-{% endif %}
+{% block nav_actions %}
+    <span class="text-sm text-assist-gray">Bienvenido, {{ request.user.username }}</span>
+    <a href="{% url 'logout' %}" class="text-sm text-assist-coral hover:underline">Cerrar Sesión</a>
+{% endblock %}
 
-<table>
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Título</th>
-            <th>Estado</th>
-            <th>Prioridad</th>
-            <th>Acciones</th> </tr>
-    </thead>
-    <tbody>
-        {% for ticket in tickets %}
-        <tr>
-            <td>#{{ ticket.id_ticket }}</td>
-            <td>{{ ticket.titulo }}</td>
-            <td>
-                <span class="badge {{ ticket.estado|lower }}">{{ ticket.get_estado_display }}</span>
-            </td>
-            <td>{{ ticket.get_prioridad_display }}</td>
-            <td>
-                <a href="{% url 'detalle_ticket' ticket.id_ticket %}">🔍 Ver Detalle</a>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="5">No hay tickets registrados.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-    
-</table>
+{% block content %}
+<div class="max-w-7xl mx-auto px-6 py-10">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold">Mis Tickets</h1>
+            <p class="text-assist-gray mt-1">Hacé el seguimiento de tus solicitudes en tiempo real.</p>
+            <a href="{% url 'logout' %}" class="self-center text-red-400 hover:underline">Cerrar Sesión</a>
+        </div>
+        <a href="#" class="bg-assist-coral text-assist-black px-6 py-3 rounded-xl font-bold hover:brightness-110 transition">
+            + Crear Nuevo Ticket
+        </a>
+    </div>
+
+    <div class="bg-assist-dark border border-white/5 rounded-2xl overflow-hidden">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="border-b border-white/5 bg-white/5">
+                    <th class="p-4 text-sm font-semibold text-assist-gray">ID</th>
+                    <th class="p-4 text-sm font-semibold text-assist-gray">Asunto</th>
+                    <th class="p-4 text-sm font-semibold text-assist-gray">Estado</th>
+                    <th class="p-4 text-sm font-semibold text-assist-gray">Última Actualización</th>
+                    <th class="p-4 text-sm font-semibold text-assist-gray text-right">Acción</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+                <tr class="hover:bg-white/5 transition">
+                    <td class="p-4 text-sm">#1024</td>
+                    <td class="p-4 text-sm font-medium text-white">Error al sincronizar base de datos</td>
+                    <td class="p-4">
+                        <span class="bg-blue-500/20 text-blue-400 text-xs px-2 py-1 rounded-full border border-blue-500/30">En Proceso</span>
+                    </td>
+                    <td class="p-4 text-sm text-assist-gray">Hace 2 horas</td>
+                    <td class="p-4 text-right">
+                        <a href="#" class="text-assist-coral text-sm font-medium hover:underline">Ver detalle</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="5" class="p-12 text-center text-assist-gray">Aún no has creado ningún ticket.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
