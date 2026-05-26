@@ -41,7 +41,7 @@
                     </td>
                     <td class="p-4">{{ ticket.get_estado_display }}</td>
                     <td class="p-4">
-                        {% with asignacion=ticket.asignaciones.filter.first %}
+                        {% with asignacion=ticket.asignaciones.first %}
                             {% if asignacion and asignacion.activo %}
                                 <span class="text-assist-coral">{{ asignacion.soporte.username }}</span>
                             {% else %}
@@ -52,6 +52,10 @@
                     <td class="p-4">
                         <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="text-assist-coral hover:underline">Ver / Reasignar</a>
                     </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="p-12 text-center text-assist-gray">No hay tickets en el sistema.</td>
                 </tr>
                 {% endfor %}
             </tbody>

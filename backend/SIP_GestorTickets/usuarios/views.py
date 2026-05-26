@@ -86,16 +86,23 @@ def logout_view(request):
     return redirect('landing')
 
 def crear_ticket(request):
+    ticket_creado = False
+
     if request.method == 'POST':
         form = TicketForm(request.POST)
         if form.is_valid():
             ticket = form.save(commit=False)
-            ticket.solicitante = request.user  # Asignamos al usuario actual
+            ticket.solicitante = request.user
             ticket.save()
-            return redirect('dashboard')
+            ticket_creado = True
+            form = TicketForm()  # limpia el formulario después de guardar
     else:
         form = TicketForm()
-    return render(request, 'tickets/crear_ticket.html', {'form': form})
+
+    return render(request, 'crear_ticket.html', {
+        'form': form,
+        'ticket_creado': ticket_creado
+    })
 
 def detalle_ticket_view(request, pk):
     ticket = get_object_or_404(InfoTicket, pk=pk)

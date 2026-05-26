@@ -2,9 +2,20 @@
 
 {% block title %}Dashboard Cliente — Assistech{% endblock %}
 
-{% block nav_actions %}
-    <span class="text-sm text-assist-gray">Bienvenido, {{ request.user.username }}</span>
-    <a href="{% url 'logout' %}" class="text-sm text-assist-coral hover:underline">Cerrar Sesión</a>
+{% block navbar %}
+{% load static %}
+<nav class="border-b border-assist-dark px-6 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <a href="{% url 'landing' %}" class="flex items-center gap-3 hover:opacity-80 transition">
+            <img src="{% static 'usuarios/logo.jpeg' %}" alt="Logo Assistech" class="h-8 w-8 rounded-md bg-assist-coral">
+            <span class="text-xl font-bold tracking-tight">Assistech</span>
+        </a>
+        <div class="flex items-center gap-6">
+            <span class="text-sm text-assist-gray">Bienvenido, {{ request.user.username }}</span>
+            <a href="{% url 'logout' %}" class="text-sm text-assist-coral hover:underline">Cerrar Sesión</a>
+        </div>
+    </div>
+</nav>
 {% endblock %}
 
 {% block content %}
@@ -13,9 +24,8 @@
         <div>
             <h1 class="text-3xl font-bold">Mis Tickets</h1>
             <p class="text-assist-gray mt-1">Hacé el seguimiento de tus solicitudes en tiempo real.</p>
-            <a href="{% url 'logout' %}" class="self-center text-red-400 hover:underline">Cerrar Sesión</a>
         </div>
-        <a href="#" class="bg-assist-coral text-assist-black px-6 py-3 rounded-xl font-bold hover:brightness-110 transition">
+        <a href="{% url 'crear_ticket' %}" class="bg-assist-coral text-white px-6 py-3 rounded-xl font-bold hover:brightness-110 transition">
             + Crear Nuevo Ticket
         </a>
     </div>
@@ -25,27 +35,40 @@
             <thead>
                 <tr class="border-b border-white/5 bg-white/5">
                     <th class="p-4 text-sm font-semibold text-assist-gray">ID</th>
-                    <th class="p-4 text-sm font-semibold text-assist-gray">Asunto</th>
+                    <th class="p-4 text-sm font-semibold text-assist-gray">Título</th>
+                    <th class="p-4 text-sm font-semibold text-assist-gray">Categoría</th>
                     <th class="p-4 text-sm font-semibold text-assist-gray">Estado</th>
                     <th class="p-4 text-sm font-semibold text-assist-gray">Última Actualización</th>
                     <th class="p-4 text-sm font-semibold text-assist-gray text-right">Acción</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-white/5">
+                {% for ticket in tickets %}
                 <tr class="hover:bg-white/5 transition">
-                    <td class="p-4 text-sm">#1024</td>
-                    <td class="p-4 text-sm font-medium text-white">Error al sincronizar base de datos</td>
+                    <td class="p-4 text-sm">#{{ ticket.id_ticket }}</td>
+                    <td class="p-4 text-sm font-medium text-white">{{ ticket.titulo }}</td>
+                    <td class="p-4 text-sm text-assist-gray">{{ ticket.categoria }}</td>
                     <td class="p-4">
-                        <span class="bg-blue-500/20 text-blue-400 text-xs px-2 py-1 rounded-full border border-blue-500/30">En Proceso</span>
+                        {% if ticket.estado == 'ABIERTO' %}
+                            <span class="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded-full border border-green-500/30">Abierto</span>
+                        {% elif ticket.estado == 'EN_PROCESO' %}
+                            <span class="bg-blue-500/20 text-blue-400 text-xs px-2 py-1 rounded-full border border-blue-500/30">En Proceso</span>
+                        {% elif ticket.estado == 'RESUELTO' %}
+                            <span class="bg-purple-500/20 text-purple-400 text-xs px-2 py-1 rounded-full border border-purple-500/30">Resuelto</span>
+                        {% elif ticket.estado == 'CERRADO' %}
+                            <span class="bg-white/10 text-assist-gray text-xs px-2 py-1 rounded-full border border-white/10">Cerrado</span>
+                        {% endif %}
                     </td>
-                    <td class="p-4 text-sm text-assist-gray">Hace 2 horas</td>
+                    <td class="p-4 text-sm text-assist-gray">{{ ticket.fecha_actualizacion|date:"d/m/Y H:i" }}</td>
                     <td class="p-4 text-right">
-                        <a href="#" class="text-assist-coral text-sm font-medium hover:underline">Ver detalle</a>
+                        <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="text-assist-coral text-sm font-medium hover:underline">Ver detalle</a>
                     </td>
                 </tr>
+                {% empty %}
                 <tr>
-                    <td colspan="5" class="p-12 text-center text-assist-gray">Aún no has creado ningún ticket.</td>
+                    <td colspan="6" class="p-12 text-center text-assist-gray">Aún no has creado ningún ticket.</td>
                 </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
