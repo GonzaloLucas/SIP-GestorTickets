@@ -64,23 +64,11 @@
     <nav class="border-b border-assist-dark px-6 py-4">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             
-            <div class="flex items-center gap-3">
+            <a href="{% url 'landing' %}" class="flex items-center gap-3 hover:opacity-80 transition">
                 <img src="{% static 'usuarios/logo.jpeg' %}" alt="Logo Assistech" class="h-8 w-8 rounded-md bg-assist-coral">
                 <span class="text-xl font-bold tracking-tight">Assistech</span>
-            </div>
+            </a>
 
-            <div class="flex items-center gap-8 text-sm text-assist-gray">
-                <a href="#" class="hover:text-assist-white transition">Producto</a>
-                <a href="#" class="hover:text-assist-white transition">Precios</a>
-                <a href="#" class="hover:text-assist-white transition">Funciones</a>
-            </div>
-
-            <div class="flex items-center gap-6">
-                <a href="{% url 'login' %}" class="text-sm text-assist-gray hover:text-assist-white transition">Login</a>
-                <a href="#" class="bg-assist-coral text-assist-black px-5 py-2.5 text-sm font-semibold rounded-xl hover:bg-opacity-90 transition">
-                    Empieza
-                </a>
-            </div>
         </div>
     </nav>
     {% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+<h2>Panel de Control - Tickets</h2>
+
+{% if request.user.rol == 'cliente' %}
+    <a href="{% url 'crear_ticket' %}" class="btn-nuevo">➕ Crear Nuevo Ticket</a>
+    <a href="{% url 'logout' %}">Cerrar Sesión</a>
+{% endif %}
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Título</th>
+            <th>Estado</th>
+            <th>Prioridad</th>
+            <th>Acciones</th> </tr>
+    </thead>
+    <tbody>
+        {% for ticket in tickets %}
+        <tr>
+            <td>#{{ ticket.id_ticket }}</td>
+            <td>{{ ticket.titulo }}</td>
+            <td>
+                <span class="badge {{ ticket.estado|lower }}">{{ ticket.get_estado_display }}</span>
+            </td>
+            <td>{{ ticket.get_prioridad_display }}</td>
+            <td>
+                <a href="{% url 'detalle_ticket' ticket.id_ticket %}">🔍 Ver Detalle</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">No hay tickets registrados.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    
+</table>

@@ -1,0 +1,13 @@
+{% if request.user.rol != 'cliente' %}
+<form action="{% url 'actualizar_estado' ticket.id_ticket %}" method="POST">
+    {% csrf_token %}
+    <label>Cambiar estado:</label>
+    <select name="nuevo_estado">
+        <option value="ABIERTO">Abierto</option>
+        <option value="EN_PROCESO">En proceso</option>
+        <option value="RESUELTO">Resuelto</option>
+        <option value="CERRADO">Cerrado</option>
+    </select>
+    <button type="submit">Actualizar</button>
+</form>
+{% endif %}

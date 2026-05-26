@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+<h2>Tickets Asignados a Mí</h2>
+
+<table border="1" style="width: 100%; border-collapse: collapse;">
+    <a href="{% url 'logout' %}">Cerrar Sesión</a>
+    <thead>
+        <tr style="background-color: #e3f2fd;">
+            <th>Prioridad</th>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Título</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for ticket in tickets %}
+        <tr>
+            <td>{{ ticket.get_prioridad_display }}</td>
+            <td>#{{ ticket.id_ticket }}</td>
+            <td>{{ ticket.solicitante.username }} ({{ ticket.solicitante.empresa }})</td>
+            <td>{{ ticket.titulo }}</td>
+            <td>{{ ticket.get_estado_display }}</td>
+            <td>
+                <a href="{% url 'detalle_ticket' ticket.id_ticket %}" style="color: green; font-weight: bold;">
+                    Gestionar / Responder
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">No tienes tickets asignados actualmente. ¡Buen trabajo!</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.password_validation import validate_password
-from .models import Usuario
+from .models import Usuario, InfoTicket
 
 class RegisterForm(forms.ModelForm):
     first_name = forms.CharField(
@@ -65,3 +65,8 @@ class LoginForm(forms.Form):
         widget=forms.PasswordInput,
         label="Contraseña"
     )
+    
+class TicketForm(forms.ModelForm):
+    class Meta:
+        model = InfoTicket
+        fields = ['titulo', 'descripcion', 'categoria', 'prioridad']
