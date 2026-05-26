@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block navbar %}
+{% load static %}
+<nav class="border-b border-assist-dark px-6 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <a href="{% url 'landing' %}" class="flex items-center gap-3 hover:opacity-80 transition">
+            <img src="{% static 'usuarios/logo.jpeg' %}" alt="Logo Assistech" class="h-8 w-8 rounded-md bg-assist-coral">
+            <span class="text-xl font-bold tracking-tight">Assistech</span>
+        </a>
+        <div class="flex items-center gap-6">
+            <span class="text-sm text-assist-gray">{{ request.user.username }}</span>
+            <a href="{% url 'dashboard' %}" class="text-sm text-assist-gray hover:text-assist-white transition">Mis Tickets</a>
+            <a href="{% url 'logout' %}" class="text-sm text-assist-coral hover:underline">Cerrar Sesión</a>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block title %}Crear Ticket — Assistech{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-2xl mx-auto px-6 py-12">
+
+    <div class="mb-8">
+        <h2 class="text-3xl font-bold tracking-tight">Crear nuevo ticket</h2>
+        <p class="mt-2 text-sm text-assist-gray">Completá los datos de tu solicitud y nuestro equipo la atenderá a la brevedad.</p>
+    </div>
+
+    {% if ticket_creado %}
+        <div class="mb-6 px-4 py-4 rounded-xl border border-green-500/30 bg-green-500/10 text-green-400 text-sm">
+            ✅ Tu ticket fue creado correctamente. Podés hacer el seguimiento desde <a href="{% url 'dashboard' %}" class="underline font-medium">Mis Tickets</a>.
+        </div>
+    {% endif %}
+
+    <form method="post" class="space-y-2">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="flex flex-col sm:flex-row gap-3 pt-4">
+            <button type="submit"
+                class="flex-1 bg-assist-coral text-white font-semibold py-3 rounded-xl hover:brightness-110 transition">
+                Cargar Ticket
+            </button>
+            <a href="{% url 'dashboard' %}"
+                class="flex-1 text-center border border-white/20 text-assist-gray font-semibold py-3 rounded-xl hover:bg-white/5 transition">
+                Volver al Dashboard
+            </a>
+        </div>
+    </form>
+
+</div>
+{% endblock %}

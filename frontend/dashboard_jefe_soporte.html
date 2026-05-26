@@ -1,8 +1,26 @@
 {% extends 'base.html' %}
 
+{% block title %}Panel Jefe de Soporte — Assistech{% endblock %}
+
+{% block navbar %}
+{% load static %}
+<nav class="border-b border-assist-dark px-6 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <a href="{% url 'logout' %}" class="flex items-center gap-3 hover:opacity-80 transition">
+            <img src="{% static 'usuarios/logo.jpeg' %}" alt="Logo Assistech" class="h-8 w-8 rounded-md bg-assist-coral">
+            <span class="text-xl font-bold tracking-tight">Assistech</span>
+        </a>
+        <div class="flex items-center gap-6">
+            <span class="text-sm text-assist-gray">Bienvenido, {{ request.user.username }}</span>
+            <a href="{% url 'logout' %}" class="text-sm text-assist-coral hover:underline">Cerrar Sesión</a>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
 {% block content %}
-<div class="container mx-auto pt-24 px-6">
-    
+<div class="container mx-auto px-6 py-10">
+
     <h2 class="text-3xl font-bold mb-6">Panel de Control Global (Jefe de Soporte)</h2>
 
     <div class="flex gap-4 mb-8">
@@ -10,11 +28,10 @@
             <p class="text-assist-gray">Total de Tickets</p>
             <strong class="text-2xl text-white">{{ tickets.count }}</strong>
         </div>
-        <a href="{% url 'logout' %}" class="self-center text-red-400 hover:underline">Cerrar Sesión</a>
     </div>
 
     <h3 class="text-xl font-semibold mb-4 text-assist-gray">Todos los Tickets del Sistema</h3>
-    
+
     <div class="overflow-x-auto rounded-xl border border-zinc-800">
         <table class="w-full text-left border-collapse bg-zinc-900/50">
             <thead>
@@ -28,6 +45,37 @@
                     <th class="p-4">Acciones</th>
                 </tr>
             </thead>
+            <tbody class="text-assist-white">
+                {% for ticket in tickets %}
+                <tr class="border-t border-zinc-800 hover:bg-zinc-800/30 transition">
+                    <td class="p-4">#{{ ticket.id_ticket }}</td>
+                    <td class="p-4">{{ ticket.solicitante.username }}</td>
+                    <td class="p-4">{{ ticket.titulo }}</td>
+                    <td class="p-4">
+                        <span class="text-xs px-2 py-1 rounded bg-zinc-700">
+                            {{ ticket.get_prioridad_display }}
+                        </span>
+                    </td>
+                    <td class="p-4">{{ ticket.get_estado_display }}</td>
+                    <td class="p-4">
+                        {% with asignacion=ticket.asignaciones.first %}
+                            {% if asignacion and asignacion.activo %}
+                                <span class="text-assist-coral">{{ asignacion.soporte.username }}</span>
+                            {% else %}
+                                <span class="text-red-500 font-medium">⚠️ Sin asignar</span>
+                            {% endif %}
+                        {% endwith %}
+                    </td>
+                    <td class="p-4">
+                        <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="text-assist-coral hover:underline">Ver / Reasignar</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="p-12 text-center text-assist-gray">No hay tickets en el sistema.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
         </table>
     </div>
 </div>

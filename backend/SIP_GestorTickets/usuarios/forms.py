@@ -69,4 +69,4 @@ class LoginForm(forms.Form):
 class TicketForm(forms.ModelForm):
     class Meta:
         model = InfoTicket
-        fields = ['titulo', 'descripcion', 'categoria', 'prioridad']
+        fields = ['titulo', 'descripcion', 'categoria','prioridad']
