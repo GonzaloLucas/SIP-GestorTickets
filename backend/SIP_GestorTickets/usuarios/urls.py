@@ -11,4 +11,5 @@ urlpatterns = [
     path('ticket/nuevo/', views.crear_ticket, name='crear_ticket'),
     path('ticket/<int:pk>/', views.detalle_ticket_view, name='detalle_ticket'),
     path('ticket/<int:pk>/estado/', views.actualizar_estado, name='actualizar_estado'),
+    path('ticket/<int:pk>/cambiar-prioridad/', views.cambiar_prioridad, name='cambiar_prioridad'),
 ]
