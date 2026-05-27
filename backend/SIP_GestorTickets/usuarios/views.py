@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import PermissionDenied
+from django.views.decorators.http import require_POST
 from .forms import RegisterForm, LoginForm, TicketForm
 from .models import Usuario, InfoTicket, TicketComentario, TicketHistorial
 
@@ -107,8 +108,14 @@ def crear_ticket(request):
 def detalle_ticket_view(request, pk):
     ticket = get_object_or_404(InfoTicket, pk=pk)
     comentarios = ticket.comentarios.all().order_by('fecha_comentario')
+
+    if request.user.rol == 'cliente' and ticket.solicitante != request.user:
+        raise PermissionDenied
     
     if request.method == 'POST':
+        if request.user.rol == 'cliente':
+            raise PermissionDenied
+
         # Lógica para agregar un comentario rápido
         texto = request.POST.get('comentario')
         if texto:
@@ -121,9 +128,21 @@ def detalle_ticket_view(request, pk):
 
     return render(request, 'detalle_ticket.html', {
         'ticket': ticket,
-        'comentarios': comentarios
+        'comentarios': comentarios,
+        'estados_ticket': InfoTicket.ESTADO
     })
-    
+
+@require_POST
+def eliminar_ticket(request, pk):
+    ticket = get_object_or_404(InfoTicket, pk=pk)
+
+    if request.user.rol != 'cliente' or ticket.solicitante != request.user:
+        raise PermissionDenied
+
+    ticket.delete()
+    return redirect('dashboard')
+
+@require_POST
 def actualizar_estado(request, pk):
     if request.user.rol == 'cliente':
         raise PermissionDenied
@@ -131,6 +150,10 @@ def actualizar_estado(request, pk):
     ticket = get_object_or_404(InfoTicket, pk=pk)
     estado_anterior = ticket.estado
     nuevo_estado = request.POST.get('nuevo_estado')
+    estados_validos = dict(InfoTicket.ESTADO)
+
+    if nuevo_estado not in estados_validos:
+        raise PermissionDenied
 
     if estado_anterior != nuevo_estado:
         ticket.estado = nuevo_estado
