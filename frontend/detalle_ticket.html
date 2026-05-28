@@ -84,15 +84,21 @@
 
             {% if request.user.rol == 'cliente' %}
             <section class="rounded-xl border border-red-500/30 bg-red-500/10 p-6">
-                <h2 class="text-xl font-semibold text-red-200">Eliminar ticket</h2>
+                {% if ticket.estado == 'CERRADO' %}
+                    <h2 class="text-xl font-semibold text-red-200">Ticket cerrado</h2>
+                    <p class="mt-1 text-sm text-red-100/80">Este ticket fue cerrado.</p>
+                {% else %}
+                <h2 class="text-xl font-semibold text-red-200">Cerrar ticket</h2>
                 <p class="mt-1 text-sm text-red-100/80">Esta accion no se puede deshacer.</p>
 
-                <form action="{% url 'eliminar_ticket' ticket.id_ticket %}" method="POST" class="mt-5">
+                <form action="{% url 'actualizar_estado' ticket.id_ticket %}" method="POST" class="mt-5">
                     {% csrf_token %}
-                    <button type="submit" class="w-full rounded-xl bg-red-600 px-4 py-3 font-bold text-white transition hover:bg-red-500" onclick="return confirm('Seguro que queres eliminar este ticket?');">
-                        Eliminar ticket
+                    <input type="hidden" name="nuevo_estado" value="CERRADO">
+                    <button type="submit" class="w-full rounded-xl bg-red-600 px-4 py-3 font-bold text-white transition hover:bg-red-500" onclick="return confirm('Seguro que queres cerrar este ticket?');">
+                        Cerrar ticket
                     </button>
                 </form>
+                {% endif %}
             </section>
             {% endif %}
 

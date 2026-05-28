@@ -144,8 +144,11 @@ def eliminar_ticket(request, pk):
 
 @require_POST
 def actualizar_estado(request, pk):
+    
+    '''
     if request.user.rol == 'cliente':
         raise PermissionDenied
+    '''
 
     ticket = get_object_or_404(InfoTicket, pk=pk)
     estado_anterior = ticket.estado
