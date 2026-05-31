@@ -48,14 +48,12 @@
                 {% for ticket in tickets %}
                 <tr class="hover:bg-white/5 transition">
                     <td class="p-4">
-                        {% if ticket.prioridad == 'CRITICA' %}
-                            <span class="text-red-500 font-bold">CRÍTICA</span>
-                        {% elif ticket.prioridad == 'ALTA' %}
-                            <span class="text-orange-400 font-bold">ALTA</span>
+                        {% if ticket.prioridad == 'ALTA' %}
+                            <span class="text-red-500 font-bold">ALTA</span>
                         {% elif ticket.prioridad == 'MEDIA' %}
-                            <span class="text-yellow-400 font-bold">MEDIA</span>
+                            <span class="text-orange-500 font-bold">MEDIA</span>
                         {% else %}
-                            <span class="text-assist-gray font-bold">BAJA</span>
+                            <span class="text-green-500 font-bold">BAJA</span>
                         {% endif %}
                     </td>
                     <td class="p-4">
