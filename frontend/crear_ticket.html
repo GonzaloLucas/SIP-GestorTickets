@@ -48,5 +48,26 @@
         </div>
     </form>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const categoriaSelect = document.getElementById('id_categoria');
+            const categoriaOtroInput = document.getElementById('id_categoria_otro');
+            if (!categoriaSelect || !categoriaOtroInput) return;
+
+            const categoriaOtroWrapper = categoriaOtroInput.closest('p');
+            function updateCategoriaOtroVisibility() {
+                if (categoriaSelect.value === 'OTRO') {
+                    categoriaOtroWrapper.style.display = 'block';
+                } else {
+                    categoriaOtroWrapper.style.display = 'none';
+                    categoriaOtroInput.value = '';
+                }
+            }
+
+            updateCategoriaOtroVisibility();
+            categoriaSelect.addEventListener('change', updateCategoriaOtroVisibility);
+        });
+    </script>
+
 </div>
 {% endblock %}

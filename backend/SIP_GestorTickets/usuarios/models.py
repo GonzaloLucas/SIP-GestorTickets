@@ -33,6 +33,17 @@ class InfoTicket(models.Model):
         ('CRITICA', 'Crítica'),
     )
 
+    CATEGORIAS = (
+        ('SOFTWARE', 'Software'),
+        ('HARDWARE', 'Hardware'),
+        ('RED', 'Red / Conectividad'),
+        ('ACCESO', 'Acceso / Permisos'),
+        ('SEGURIDAD', 'Seguridad'),
+        ('PERIFERICOS', 'Periféricos'),
+        ('BASE_DATOS', 'Base de datos'),
+        ('OTRO', 'Otro'),
+    )
+
     id_ticket = models.AutoField(primary_key=True)
     titulo = models.CharField(max_length=255)
     descripcion = models.TextField()
