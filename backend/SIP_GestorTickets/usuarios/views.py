@@ -171,3 +171,24 @@ def actualizar_estado(request, pk):
             observacion="Cambio de estado desde el panel de control"
         )
     return redirect('detalle_ticket', pk=pk)
+
+def cambiar_prioridad(request, pk):
+    if request.user.rol == 'cliente':
+        raise PermissionDenied
+    
+    ticket = get_object_or_404(InfoTicket, pk=pk)
+    nueva_prioridad = request.POST.get('prioridad')
+
+    ticket.prioridad = nueva_prioridad
+    ticket.save()
+    
+    # Guardamos quién hizo el cambio y qué pasó
+    #TicketHistorial.objects.create(
+    #    ticket=ticket,
+    #   prioridad_anterior=prioridad_anterior,
+    #    nueva_prioridad=nueva_prioridad,
+    #    realizado_por=request.user,
+    #    observacion="Cambio de prioridad desde el panel de control"
+    #)
+
+    return redirect('dashboard')

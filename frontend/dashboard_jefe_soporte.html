@@ -52,9 +52,21 @@
                     <td class="p-4">{{ ticket.solicitante.username }}</td>
                     <td class="p-4">{{ ticket.titulo }}</td>
                     <td class="p-4">
-                        <span class="text-xs px-2 py-1 rounded bg-zinc-700">
-                            {{ ticket.get_prioridad_display }}
-                        </span>
+                        <form method="POST" action="{% url 'cambiar_prioridad' ticket.pk %}" class="inline">
+                            {% csrf_token %}
+                            <select name="prioridad" 
+                                    onchange="this.form.submit()" 
+                                    class="text-xs px-2.5 py-1.5 pr-8 rounded-full font-medium border cursor-pointer transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-blue-500 appearance-none
+                                    {% if ticket.prioridad == 'alta' %} bg-red-950/40 text-red-400 border-red-800/60 hover:bg-red-950/60
+                                    {% elif ticket.prioridad == 'media' %} bg-amber-950/40 text-amber-400 border-amber-800/60 hover:bg-amber-950/60
+                                    {% else %} bg-emerald-950/40 text-emerald-400 border-emerald-800/60 hover:bg-emerald-950/60 {% endif %}"
+                                    style="background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23a1a1aa%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22></polyline></svg>'); background-size: 12px; background-position: right 10px center; background-repeat: no-repeat;">
+                                
+                                <option value="baja" class="bg-zinc-800 text-zinc-300" {% if ticket.prioridad == 'baja' %}selected{% endif %}>Baja</option>
+                                <option value="media" class="bg-zinc-800 text-zinc-300" {% if ticket.prioridad == 'media' %}selected{% endif %}>Media</option>
+                                <option value="alta" class="bg-zinc-800 text-zinc-300" {% if ticket.prioridad == 'alta' %}selected{% endif %}>Alta</option>
+                            </select>
+                        </form>
                     </td>
                     <td class="p-4">{{ ticket.get_estado_display }}</td>
                     <td class="p-4">

@@ -53,6 +53,36 @@
                     <th class="p-4 font-semibold text-right">Acción</th>
                 </tr>
             </thead>
+            <tbody class="divide-y divide-white/5">
+                {% for ticket in tickets %}
+                <tr class="hover:bg-white/5 transition">
+                    <td class="p-4">
+                        {% if ticket.prioridad == 'ALTA' %}
+                            <span class="text-red-500 font-bold">ALTA</span>
+                        {% elif ticket.prioridad == 'MEDIA' %}
+                            <span class="text-orange-500 font-bold">MEDIA</span>
+                        {% else %}
+                            <span class="text-green-500 font-bold">BAJA</span>
+                        {% endif %}
+                    </td>
+                    <td class="p-4">
+                        <p class="text-sm font-bold">{{ ticket.titulo }}</p>
+                        <p class="text-xs text-assist-gray">{{ ticket.fecha_creacion|date:"d/m/Y H:i" }}</p>
+                    </td>
+                    <td class="p-4 text-sm">{{ ticket.solicitante.username }}</td>
+                    <td class="p-4">{{ ticket.get_estado_display }}</td>
+                    <td class="p-4 text-right">
+                        <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="bg-white text-assist-black px-4 py-2 rounded-lg text-xs font-bold hover:bg-assist-gray transition">
+                            Ver Ticket
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="p-12 text-center text-assist-gray">No tenés tickets asignados.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
         </table>
     </div>
 </div>
