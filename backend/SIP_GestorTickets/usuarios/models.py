@@ -1,6 +1,9 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+# ==========================================
+# MODELO: EMPRESA
+# ==========================================
 class Empresa(models.Model):
     id_empresa = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=255, unique=True)
@@ -9,15 +12,16 @@ class Empresa(models.Model):
     def __str__(self):
         return self.nombre
     
+# ==========================================
+# MODELO: USUARIO
+# ==========================================
 class Usuario(AbstractUser):
-
     ROLES = (
-        ('administrador', 'Administrador de Empresa'),
+        ('admin_cliente', 'Administrador de Empresa'),
         ('cliente', 'Cliente'),
         ('soporte', 'Soporte'),
         ('jefe', 'Jefe de Soporte'),
     )
-
     empresa = models.ForeignKey(
         Empresa, 
         on_delete=models.SET_NULL, 
@@ -30,9 +34,11 @@ class Usuario(AbstractUser):
 
     def __str__(self):
         return f"{self.username} ({self.get_rol_display()})"
-
+    
+# ==========================================
+# MODELO: INFO TICKET
+# ==========================================
 class InfoTicket(models.Model):
-
     ESTADO = (
         ('ABIERTO', 'Abierto'),
         ('EN_PROCESO', 'En proceso'),
@@ -79,49 +85,29 @@ class InfoTicket(models.Model):
     def __str__(self):
         return f"#{self.id_ticket} - {self.titulo}"
 
-
+# ==========================================
+# MODELO: HISTORIAL TICKET
+# ==========================================
 class TicketHistorial(models.Model):
-
-    ESTADO = (
-        ('ABIERTO', 'Abierto'),
-        ('EN_PROCESO', 'En proceso'),
-        ('RESUELTO', 'Resuelto'),
-        ('CERRADO', 'Cerrado'),
-    )
-
     id_historial = models.AutoField(primary_key=True)
-    ticket = models.ForeignKey(
-        InfoTicket,
-        on_delete=models.CASCADE,
-        related_name='historial'
-    )
-    estado_anterior = models.CharField(max_length=20, choices=ESTADO)
-    estado_nuevo = models.CharField(max_length=20, choices=ESTADO)
+    ticket = models.ForeignKey(InfoTicket,on_delete=models.CASCADE,related_name='historial')
+
+    estado_anterior = models.CharField(max_length=20, choices=InfoTicket.ESTADO)
+    estado_nuevo = models.CharField(max_length=20, choices=InfoTicket.ESTADO)
     fecha_cambio = models.DateTimeField(auto_now_add=True)
-    realizado_por = models.ForeignKey(
-        Usuario,
-        on_delete=models.PROTECT,
-        related_name='cambios_realizados'
-    )
+    realizado_por = models.ForeignKey(Usuario,on_delete=models.PROTECT,related_name='cambios_realizados')
     observacion = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"Historial #{self.id_historial} - Ticket #{self.ticket.id_ticket}"
 
-
+# ==========================================
+# MODELO: COMENTARIO TICKET
+# ==========================================
 class TicketComentario(models.Model):
-
     id_comentario = models.AutoField(primary_key=True)
-    ticket = models.ForeignKey(
-        InfoTicket,
-        on_delete=models.CASCADE,
-        related_name='comentarios'
-    )
-    usuario = models.ForeignKey(
-        Usuario,
-        on_delete=models.PROTECT,
-        related_name='comentarios_realizados'
-    )
+    ticket = models.ForeignKey(InfoTicket,on_delete=models.CASCADE,related_name='comentarios')
+    usuario = models.ForeignKey(Usuario,on_delete=models.PROTECT,related_name='comentarios_realizados')
     comentario = models.TextField()
     fecha_comentario = models.DateTimeField(auto_now_add=True)
 
@@ -129,26 +115,15 @@ class TicketComentario(models.Model):
         return f"Comentario #{self.id_comentario} - Ticket #{self.ticket.id_ticket}"
 
 
+# ==========================================
+# MODELO: ASIGNACION TICKET
+# ==========================================
 class TicketAsignacion(models.Model):
-
     id_asignacion = models.AutoField(primary_key=True)
-    ticket = models.ForeignKey(
-        InfoTicket,
-        on_delete=models.CASCADE,
-        related_name='asignaciones'
-    )
-    soporte = models.ForeignKey(
-        Usuario,
-        on_delete=models.PROTECT,
-        related_name='tickets_asignados',
-        limit_choices_to={'rol': 'soporte'}
-    )
+    ticket = models.ForeignKey(InfoTicket,on_delete=models.CASCADE,related_name='asignaciones')
+    soporte = models.ForeignKey(Usuario,on_delete=models.PROTECT,related_name='tickets_asignados',limit_choices_to={'rol': 'soporte'})
     fecha_asignacion = models.DateTimeField(auto_now_add=True)
-    asignado_por = models.ForeignKey(
-        Usuario,
-        on_delete=models.PROTECT,
-        related_name='asignaciones_realizadas'
-    )
+    asignado_por = models.ForeignKey(Usuario,on_delete=models.PROTECT,related_name='asignaciones_realizadas')
     activo = models.BooleanField(default=True)
 
     def __str__(self):
