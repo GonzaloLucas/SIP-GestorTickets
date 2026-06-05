@@ -2,8 +2,8 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import PermissionDenied
 from django.views.decorators.http import require_POST
-from .forms import RegisterForm, LoginForm, TicketForm
 from .models import Usuario, InfoTicket, TicketComentario, TicketHistorial
+from .forms import RegisterForm, LoginForm, TicketForm, EmpresaRegisterForm
 
 def landing_view(request):
     return render(request, 'assistech-landing.html')
@@ -19,8 +19,6 @@ def register_view(request):
     return render(request, 'register.html', {'form': form})
 
 def login_view(request):
-# SIEMPRE deslogueamos al usuario apenas entra a esta URL
-    # Esto garantiza que vea el formulario limpio
     if request.user.is_authenticated:
         logout(request) 
     
@@ -48,39 +46,47 @@ def login_view(request):
 
             # Si encontró el usuario, verificar contraseña
             if usuario is not None:
-                auth_user = authenticate(request, username=usuario.username, password=password)
-                if auth_user is not None:
-                    login(request, auth_user)
-                    return redirect('dashboard')
+                if not usuario.autorizado:
+                    error = "Tu cuenta está pendiente de aprobación por el administrador de tu empresa."
                 else:
-                    error = "La contraseña es incorrecta."
+                    auth_user = authenticate(request, username=usuario.username, password=password)
+                    if auth_user is not None:
+                        login(request, auth_user)
+                        return redirect('dashboard')
+                    else:
+                        error = "La contraseña es incorrecta."
 
     return render(request, 'login.html', {'form': form, 'error': error})
 
 def dashboard_view(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+        
     rol = request.user.rol
     
-    if rol == 'cliente':
-        # El cliente solo ve sus propios tickets
+    if rol == 'admin_cliente':
+        tickets = InfoTicket.objects.filter(solicitante__empresa=request.user.empresa).order_by('-fecha_creacion')
+        empleados_pendientes = Usuario.objects.filter(empresa=request.user.empresa,autorizado=False)
+        empleados_activos = Usuario.objects.filter(empresa=request.user.empresa, autorizado=True).exclude(pk=request.user.pk)
+        
+        return render(request, 'dashboard_admin_cliente.html', {'tickets': tickets,
+        'empleados_pendientes': empleados_pendientes,'empleados_activos': empleados_activos})
+
+    elif rol == 'cliente':
         tickets = InfoTicket.objects.filter(solicitante=request.user).order_by('-fecha_creacion')
         return render(request, 'dashboard_cliente.html', {'tickets': tickets})
 
     elif rol == 'soporte':
-        # El soporte ve lo que tiene asignado
-        tickets = InfoTicket.objects.filter(
-            asignaciones__soporte=request.user, 
-            asignaciones__activo=True
-        ).distinct()
+        tickets = InfoTicket.objects.filter(asignaciones__soporte=request.user, asignaciones__activo=True,solicitante__empresa=request.user.empresa).distinct()
         return render(request, 'dashboard_soporte.html', {'tickets': tickets})
 
     elif rol == 'jefe':
-        # El jefe ve todo el sistema
-        tickets = InfoTicket.objects.all().order_by('-prioridad')
+        tickets = InfoTicket.objects.filter(
+            solicitante__empresa=request.user.empresa # <--- Encierra al jefe en su empresa
+        )        
         return render(request, 'dashboard_jefe_soporte.html', {'tickets': tickets})
     
-    # Si por alguna razón no tiene rol, mandarlo a una página genérica o error
     return redirect('landing')
-
 
 def logout_view(request):
     logout(request)
@@ -192,3 +198,58 @@ def cambiar_prioridad(request, pk):
     #)
 
     return redirect('dashboard')
+
+def registrar_empresa_view(request):
+    if request.method == 'POST':
+        form = EmpresaRegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')
+    else:
+        form = EmpresaRegisterForm()
+    return render(request, 'register_empresa.html', {'form': form})
+
+def aprobar_usuario_view(request, pk):
+    if request.user.rol != 'admin_cliente':
+        raise PermissionDenied
+    
+    # Buscamos al empleado que se quiere registrar
+    empleado = get_object_or_404(Usuario, pk=pk)
+    
+    # Validamos que pertenezca a la MISMA empresa que el admin que está haciendo clic
+    if empleado.empresa == request.user.empresa:
+        empleado.autorizado = True
+        empleado.save()
+        
+    return redirect('dashboard')
+
+def rechazar_usuario_view(request, pk):
+    if request.user.rol != 'admin_cliente':
+        raise PermissionDenied
+    
+    # Buscamos al empleado pendiente
+    empleado = get_object_or_404(Usuario, pk=pk)
+    
+    # Validamos que sea de la misma empresa y que NO esté autorizado todavía
+    if empleado.empresa == request.user.empresa and not empleado.autorizado:
+        empleado.delete()  # Borra el registro de la base de datos
+        
+    return redirect('dashboard')
+
+def quitar_acceso_view(request, pk):
+    if request.user.rol != 'admin_cliente':
+        raise PermissionDenied
+    
+    empleado = get_object_or_404(Usuario, pk=pk)
+    
+    if empleado.empresa == request.user.empresa and empleado.pk != request.user.pk:
+        empleado.autorizado = False
+        empleado.save()
+        
+    return redirect('dashboard')
+
+def confirmar_baja_view(request, pk):
+    if request.user.rol != 'admin_cliente':
+        raise PermissionDenied
+    empleado = get_object_or_404(Usuario, pk=pk)
+    return render(request, 'confirmar_baja.html', {'empleado': empleado})

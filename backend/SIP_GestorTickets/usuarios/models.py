@@ -1,21 +1,35 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+class Empresa(models.Model):
+    id_empresa = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=255, unique=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.nombre
+    
 class Usuario(AbstractUser):
 
     ROLES = (
+        ('administrador', 'Administrador de Empresa'),
         ('cliente', 'Cliente'),
         ('soporte', 'Soporte'),
-        ('jefe', 'JefeSoporte'),
+        ('jefe', 'Jefe de Soporte'),
     )
 
-    empresa = models.CharField(max_length=255, blank=True, null=True)
+    empresa = models.ForeignKey(
+        Empresa, 
+        on_delete=models.SET_NULL, 
+        blank=True, 
+        null=True, 
+        related_name='usuarios'
+    )    
     rol = models.CharField(max_length=20, choices=ROLES)
+    autorizado = models.BooleanField(default=True) 
 
     def __str__(self):
-        return self.username
-
+        return f"{self.username} ({self.get_rol_display()})"
 
 class InfoTicket(models.Model):
 
