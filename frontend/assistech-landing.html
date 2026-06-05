@@ -55,13 +55,17 @@
 
         </nav>
         <div class="flex items-center gap-4">
+            <a href="{% url 'register_empresa' %}" class="hidden text-sm text-assist-body transition hover:text-assist-white sm:inline">
+                Crear Empresa
+            </a>
+            
             <a href="{% url 'login' %}" class="hidden text-sm text-assist-body transition hover:text-assist-white sm:inline">
-                Login
+                Iniciar sesión
             </a>
-           <a href="{% url 'register' %}" class="rounded-md bg-assist-accent px-4 py-2 text-sm font-semibold text-assist-white transition hover:brightness-110">
-                Empieza
+            <a href="{% url 'register' %}" class="hidden text-sm text-assist-body transition hover:text-assist-white sm:inline">
+                Crear cuenta
             </a>
-        </div>
+        </div>    
     </div>
 </header>
 
@@ -79,14 +83,12 @@
                 </p>
                 <div class="mt-8 flex flex-wrap items-center gap-4">
                     <a href="{% url 'register' %}" class="rounded-md bg-assist-accent px-6 py-3 text-sm font-bold text-assist-white transition hover:brightness-110">
-                        Empieza
+                        Empieza como Usuario
                     </a>
-                    <button
-                            type="button"
-                            class="rounded-md border border-white/30 px-6 py-3 text-sm font-semibold text-assist-white transition hover:bg-white hover:text-assist-black"
-                    >
-                        Ver demo
-                    </button>
+                    
+                    <a href="{% url 'register_empresa' %}" class="rounded-md bg-assist-accent px-6 py-3 text-sm font-bold text-assist-white transition hover:brightness-110">
+                        Registrar mi Empresa
+                    </a>
                 </div>
             </div>
             <div class="flex justify-center md:justify-end">

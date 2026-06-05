@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Panel Empresa — Assistech{% endblock %}
+
+{% block navbar %}
+{% load static %}
+<div class="w-full max-w-7xl mx-auto px-4 pt-6">
+    <div class="flex items-center gap-2 px-3 py-1.5 w-fit rounded-lg bg-assist-accent/10 border border-assist-accent/20 text-xs font-medium text-assist-accent">
+        Panel Administrador: <strong class="text-white ml-1">{{ request.user.empresa.nombre }}</strong>
+    </div>
+</div>
+<nav class="border-b border-assist-dark px-6 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <a href="{% url 'landing' %}" class="flex items-center gap-3 hover:opacity-80 transition">
+            <img src="{% static 'usuarios/logo.jpeg' %}" alt="Logo Assistech" class="h-8 w-8 rounded-md bg-assist-coral">
+            <span class="text-xl font-bold tracking-tight">Assistech</span>
+        </a>
+        <div class="flex items-center gap-6">
+            <span class="text-sm text-assist-gray">Bienvenido, {{ request.user.username }}</span>
+            <a href="{% url 'logout' %}" class="text-sm text-assist-coral hover:underline">Cerrar Sesión</a>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-7xl px-4 py-8 md:px-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between border-b border-white/10 pb-6 mb-8">
+        <div>
+            <h1 class="text-3xl font-bold tracking-tight">Panel de {{ request.user.empresa.nombre }}</h1>
+            <p class="mt-2 text-sm text-assist-body">Bienvenido, {{ request.user.first_name }}. Estás viendo todas las solicitudes de tu organización.</p>
+        </div>
+    </div>
+    
+    {% if empleados_pendientes %}
+    <div class="bg-assist-charcoal rounded-xl border border-amber-500/20 overflow-hidden mb-8">
+        <div class="px-6 py-4 border-b border-white/5 bg-amber-500/5">
+            <h3 class="font-semibold text-amber-400">Solicitudes de ingreso pendientes</h3>
+        </div>
+        <div class="divide-y divide-white/5">
+            {% for empleado in empleados_pendientes %}
+                <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-amber-500/[0.01]">
+                    <div>
+                        <p class="text-white font-medium">{{ empleado.get_full_name }} ({{ empleado.username }})</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <a href="{% url 'aprobar_usuario' empleado.pk %}" 
+                           class="bg-amber-500 text-black text-xs font-bold px-4 py-2 rounded-lg hover:bg-opacity-90 transition text-center">
+                            Autorizar Ingreso
+                        </a>
+                        <a href="{% url 'rechazar_usuario' empleado.pk %}" 
+                           class="border border-red-500 text-red-500 text-xs font-bold px-4 py-2 rounded-lg hover:bg-red-500 hover:text-white transition text-center">
+                            Rechazar
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    <div class="bg-assist-charcoal rounded-xl border border-white/5 overflow-hidden mb-8">
+        <div class="px-6 py-4 border-b border-white/5 bg-assist-slate">
+            <h3 class="font-semibold text-white">Personal de la Empresa</h3>
+        </div>
+        <div class="divide-y divide-white/5">
+            {% for empleado in empleados_activos %}
+                <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-white/[0.01] transition">
+                    <div>
+                        <p class="text-white font-medium">{{ empleado.get_full_name }} ({{ empleado.username }})</p>
+                        <p class="text-xs text-assist-body">Rol: {{ empleado.get_rol_display }}</p>
+                    </div>
+                    <div>
+                        <a href="{% url 'confirmar_baja' empleado.pk %}" 
+                        class="text-xs font-semibold text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-1.5 rounded-lg hover:bg-red-500 hover:text-white transition text-center">
+                            Eliminar usuario
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="p-6 text-center text-assist-body text-sm">
+                    No hay otros empleados registrados activos en este momento.
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="bg-assist-charcoal rounded-xl border border-white/5 overflow-hidden">
+        <div class="px-6 py-4 border-b border-white/5 bg-assist-slate">
+            <h3 class="font-semibold text-white">Historial de Tickets de la Empresa</h3>
+        </div>
+        
+        <div class="divide-y divide-white/5">
+            {% for ticket in tickets %}
+                <div class="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-white/[0.02] transition">
+                    <div>
+                        <h4 class="text-lg font-medium text-white mt-1">{{ ticket.titulo }}</h4>
+                        <p class="text-sm text-assist-body mt-1">Por: {{ ticket.solicitante.get_full_name }} ({{ ticket.solicitante.username }})</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold 
+                            {% if ticket.estado == 'ABIERTO' %}bg-green-500/10 text-green-400 border border-green-500/20
+                            {% elif ticket.estado == 'EN_PROCESO' %}bg-blue-500/10 text-blue-400 border border-blue-500/20
+                            {% else %}bg-zinc-500/10 text-zinc-400 border border-zinc-500/20{% endif %}">
+                            {{ ticket.get_estado_display }}
+                        </span>
+                        <a href="{% url 'detalle_ticket' ticket.pk %}" class="text-sm text-white font-medium hover:underline">Ver detalles →</a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="p-12 text-center text-assist-body">
+                    No hay ningún ticket registrado para tu empresa todavía.
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

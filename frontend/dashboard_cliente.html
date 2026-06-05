@@ -1,9 +1,13 @@
 {% extends 'base.html' %}
 
 {% block title %}Dashboard Cliente — Assistech{% endblock %}
-
 {% block navbar %}
 {% load static %}
+<div class="w-full max-w-7xl mx-auto px-4 pt-6">
+    <div class="flex items-center gap-2 px-3 py-1.5 w-fit rounded-lg bg-assist-slate border border-white/5 text-xs font-medium text-assist-body">
+        Panel usuario: <strong class="text-white ml-1">{{ request.user.empresa.nombre }}</strong>
+    </div>
+</div>
 <nav class="border-b border-assist-dark px-6 py-4">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
         <a href="{% url 'logout' %}" class="flex items-center gap-3 hover:opacity-80 transition">
