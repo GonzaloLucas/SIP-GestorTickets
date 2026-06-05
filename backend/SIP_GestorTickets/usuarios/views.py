@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.password_validation import validate_password
 from .models import Usuario, InfoTicket, TicketComentario, TicketHistorial
-from .forms import RegisterForm, LoginForm, TicketForm, EmpresaRegisterForm
+from .forms import LoginForm, TicketForm, EmpresaRegisterForm
 from .forms import limpiar_texto_comun
 from django.contrib.auth import update_session_auth_hash
 from .forms import AdminUsuarioCreateForm
@@ -130,7 +130,7 @@ def login_view(request):
 
             if usuario is not None:
                 if not usuario.autorizado:
-                    error = "Tu cuenta está pendiente de aprobación por el administrador de tu empresa."
+                    error = "Tu cuenta ha sido deshabilitada o suspendida por el administrador de tu empresa."
                 else:
                     auth_user = authenticate(request, username=usuario.username, password=password)
                     if auth_user is not None:
@@ -169,13 +169,11 @@ def dashboard_view(request):
         cant_proceso = tickets.filter(estado='EN_PROCESO').count()
         cant_resueltos = tickets.filter(estado='RESUELTO').count() + tickets.filter(estado='CERRADO').count()
         
-        empleados_pendientes = Usuario.objects.filter(empresa=request.user.empresa,autorizado=False)
-        empleados_activos = Usuario.objects.filter(empresa=request.user.empresa, autorizado=True).exclude(pk=request.user.pk)
+        empleados_empresa = Usuario.objects.filter(empresa=request.user.empresa, is_active=True).exclude(pk=request.user.pk)
                 
         return render(request, 'dashboard_admin_cliente.html', {
             'tickets': tickets,
-            'empleados_pendientes': empleados_pendientes,
-            'empleados_activos': empleados_activos,
+            'empleados_activos': empleados_empresa,
             'cant_abiertos': cant_abiertos,    
             'cant_proceso': cant_proceso,      
             'cant_resueltos': cant_resueltos   
@@ -283,18 +281,6 @@ def cambiar_prioridad(request, pk):
 # ==========================================
 # VISTAS DE ADMINISTRACIÓN DE PERSONAL
 # ==========================================
-def aprobar_usuario_view(request, pk):
-    empleado = _obtener_empleado_controlado(request, pk)    
-    if empleado.empresa == request.user.empresa:
-        empleado.autorizado = True
-        empleado.save()        
-    return redirect('dashboard')
-
-def rechazar_usuario_view(request, pk):
-    empleado = _obtener_empleado_controlado(request, pk)    
-    if empleado.empresa == request.user.empresa and not empleado.autorizado:
-        empleado.delete()   
-    return redirect('dashboard')
 
 def quitar_acceso_view(request, pk):
     empleado = _obtener_empleado_controlado(request, pk)    
@@ -303,10 +289,27 @@ def quitar_acceso_view(request, pk):
         empleado.save()        
     return redirect('dashboard')
 
+def eliminar_usuario_definitivo_view(request, pk):
+    empleado = _obtener_empleado_controlado(request, pk)
+    if empleado.empresa == request.user.empresa and empleado.pk != request.user.pk:
+        
+        empleado.is_active = False  
+        empleado.autorizado = False # Por las dudas, también le quitamos la autorización
+        empleado.save()
+        
+    return redirect('dashboard')
+
 def confirmar_baja_view(request, pk):
     empleado = _obtener_empleado_controlado(request, pk)
     
     return render(request, 'confirmar_baja.html', {'empleado': empleado})
+
+def aprobar_usuario_view(request, pk):
+    empleado = _obtener_empleado_controlado(request, pk)    
+    if empleado.empresa == request.user.empresa:
+        empleado.autorizado = True  # 👈 Esto es lo que saca la suspensión
+        empleado.save()        
+    return redirect('dashboard')
 
 # ==========================================
 # FUNCIONES AUXILIARES (HELPERS)
