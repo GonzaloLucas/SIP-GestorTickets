@@ -9,23 +9,23 @@
     </div>
 </div>
 <nav class="border-b border-assist-dark px-6 py-4">
-    <div class="max-w-7xl mx-auto flex items-center justify-between">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-y-3">
         <a href="{% url 'logout' %}" class="flex items-center gap-3 hover:opacity-80 transition">
             <img src="{% static 'usuarios/logo.jpeg' %}" alt="Logo Assistech" class="h-8 w-8 rounded-md bg-assist-coral">
             <span class="text-xl font-bold tracking-tight">Assistech</span>
         </a>
-        <div class="flex items-center gap-6">
-            <span class="text-sm text-assist-gray">Bienvenido, {{ request.user.username }}</span>
-            <a href="{% url 'logout' %}" class="text-sm text-assist-coral hover:underline">Cerrar Sesión</a>
+        <div class="flex flex-wrap items-center gap-3 sm:gap-6">
+            <span class="text-xs sm:text-sm text-assist-gray"><span class="hidden sm:inline">Bienvenido, </span>{{ request.user.username }}</span>
+            <a href="{% url 'logout' %}" class="text-xs sm:text-sm text-assist-coral hover:underline">Cerrar Sesión</a>
         </div>
     </div>
 </nav>
 {% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-6 py-10">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full">
 
-    <h2 class="text-3xl font-bold mb-6">Panel de Control Global (Jefe de Soporte)</h2>
+    <h2 class="text-2xl sm:text-3xl font-bold mb-6">Panel de Control Global (Jefe de Soporte)</h2>
 
     <div class="flex gap-4 mb-8">
         <div class="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
@@ -36,7 +36,7 @@
 
     <h3 class="text-xl font-semibold mb-4 text-assist-gray">Todos los Tickets del Sistema</h3>
 
-    <div class="overflow-x-auto rounded-xl border border-zinc-800">
+    <div class="overflow-x-auto rounded-xl border border-zinc-800 w-full">
         <table class="w-full text-left border-collapse bg-zinc-900/50">
             <thead>
                 <tr class="bg-zinc-800/50 text-assist-gray text-sm">
@@ -60,7 +60,7 @@
                             {% csrf_token %}
                             <select name="prioridad" 
                                     onchange="this.form.submit()" 
-                                    class="text-xs px-2.5 py-1.5 pr-8 rounded-full font-medium border cursor-pointer transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-blue-500 appearance-none
+                                class="!w-auto !mt-0 text-xs px-2.5 py-1.5 pr-8 rounded-full font-medium border cursor-pointer transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-blue-500 appearance-none
                                     {% if ticket.prioridad == 'alta' %} bg-red-950/40 text-red-400 border-red-800/60 hover:bg-red-950/60
                                     {% elif ticket.prioridad == 'media' %} bg-amber-950/40 text-amber-400 border-amber-800/60 hover:bg-amber-950/60
                                     {% else %} bg-emerald-950/40 text-emerald-400 border-emerald-800/60 hover:bg-emerald-950/60 {% endif %}"

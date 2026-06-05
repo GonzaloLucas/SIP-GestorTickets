@@ -3,15 +3,15 @@
 {% block navbar %}
 {% load static %}
 <nav class="border-b border-assist-dark px-6 py-4">
-    <div class="max-w-7xl mx-auto flex items-center justify-between">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-y-3">
         <a href="{% url 'landing' %}" class="flex items-center gap-3 hover:opacity-80 transition">
             <img src="{% static 'usuarios/logo.jpeg' %}" alt="Logo Assistech" class="h-8 w-8 rounded-md bg-assist-coral">
             <span class="text-xl font-bold tracking-tight">Assistech</span>
         </a>
-        <div class="flex items-center gap-6">
-            <span class="text-sm text-assist-gray">{{ request.user.username }}</span>
-            <a href="{% url 'dashboard' %}" class="text-sm text-assist-gray hover:text-assist-white transition">Mis Tickets</a>
-            <a href="{% url 'logout' %}" class="text-sm text-assist-coral hover:underline">Cerrar Sesión</a>
+        <div class="flex flex-wrap items-center gap-3 sm:gap-6">
+            <span class="text-xs sm:text-sm text-assist-gray">{{ request.user.username }}</span>
+            <a href="{% url 'dashboard' %}" class="text-xs sm:text-sm text-assist-gray hover:text-assist-white transition">Mis Tickets</a>
+            <a href="{% url 'logout' %}" class="text-xs sm:text-sm text-assist-coral hover:underline">Cerrar Sesión</a>
         </div>
     </div>
 </nav>
@@ -20,9 +20,9 @@
 {% block title %}Crear Ticket — Assistech{% endblock %}
 
 {% block content %}
-<div class="w-full max-w-2xl mx-auto px-6 py-12">
+<div class="w-full max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
 
-    <div class="mb-8">
+    <div class="mb-6 sm:mb-8">
         <h2 class="text-3xl font-bold tracking-tight">Crear nuevo ticket</h2>
         <p class="mt-2 text-sm text-assist-gray">Completá los datos de tu solicitud y nuestro equipo la atenderá a la brevedad.</p>
     </div>

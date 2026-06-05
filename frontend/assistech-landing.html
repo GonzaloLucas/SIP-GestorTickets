@@ -39,7 +39,7 @@
 <header
         class="sticky top-0 z-50 border-b border-white/5 bg-assist-black/90 backdrop-blur-md"
 >
-    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 md:px-6">
+    <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-y-4 px-4 py-4 md:px-6">
         <a href="#" class="flex items-center gap-2">
             <img
                     src="{% static 'usuarios/logo.jpeg' %}" 
@@ -48,20 +48,19 @@
                 />
             <span class="text-lg font-semibold tracking-tight">Assistech</span>
         </a>
-        <nav class="hidden items-center gap-8 text-sm text-assist-body md:flex" aria-label="Principal">
+        <nav class="order-3 flex w-full justify-center gap-6 text-xs text-assist-body md:order-none md:w-auto md:justify-start md:gap-8 md:text-sm" aria-label="Principal">
             <a href="#producto" class="transition hover:text-assist-white">Producto</a>
             <a href="#precios" class="transition hover:text-assist-white">Precios</a>
             <a href="#funciones" class="transition hover:text-assist-white">Funciones</a>
 
         </nav>
-        <div class="flex items-center gap-4">
-            <a href="{% url 'register_empresa' %}" class="hidden text-sm text-assist-body transition hover:text-assist-white sm:inline">
+        <div class="flex items-center gap-3 sm:gap-4">
+            <a href="{% url 'register_empresa' %}" class="text-xs sm:text-sm text-assist-body transition hover:text-assist-white">
                 Registrar Empresa
             </a>            
-            <a href="{% url 'login' %}" class="hidden text-sm text-assist-body transition hover:text-assist-white sm:inline">
+            <a href="{% url 'login' %}" class="text-xs sm:text-sm font-semibold text-assist-coral transition hover:text-assist-white">
                 Iniciar sesión
             </a>
-
         </div>    
     </div>
 </header>
