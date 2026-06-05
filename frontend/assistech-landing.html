@@ -56,11 +56,8 @@
         </nav>
         <div class="flex items-center gap-4">
             <a href="{% url 'register_empresa' %}" class="hidden text-sm text-assist-body transition hover:text-assist-white sm:inline">
-                Crear Empresa
+                Registrar Empresa
             </a>            
-            <a href="{% url 'register' %}" class="hidden text-sm text-assist-body transition hover:text-assist-white sm:inline">
-                Crear Usuario
-            </a>
             <a href="{% url 'login' %}" class="hidden text-sm text-assist-body transition hover:text-assist-white sm:inline">
                 Iniciar sesión
             </a>
@@ -82,12 +79,12 @@
                     herramientas, más claridad para tu equipo y tus clientes.
                 </p>
                 <div class="mt-8 flex flex-wrap items-center gap-4">
-                    <a href="{% url 'register' %}" class="rounded-md bg-assist-accent px-6 py-3 text-sm font-bold text-assist-white transition hover:brightness-110">
-                        Crear Usuario de Empresa
-                    </a>
-                    
                     <a href="{% url 'register_empresa' %}" class="rounded-md bg-assist-accent px-6 py-3 text-sm font-bold text-assist-white transition hover:brightness-110">
                         Registrar Empresa
+                    </a>
+                    
+                    <a href="{% url 'login' %}" class="rounded-md bg-assist-accent px-6 py-3 text-sm font-bold text-assist-white transition hover:brightness-110">
+                        Iniciar sesión
                     </a>
                 </div>
             </div>
@@ -498,7 +495,7 @@
                 Crea tu espacio de trabajo en minutos y prueba el flujo completo.
             </p>
             <div class="mt-8 flex flex-wrap justify-center gap-4">
-            <a href="{% url 'register' %}" class="rounded-md bg-assist-accent px-6 py-3 text-sm font-bold text-assist-white transition hover:brightness-110">
+            <a href="{% url 'register_empresa' %}" class="rounded-md bg-assist-accent px-6 py-3 text-sm font-bold text-assist-white transition hover:brightness-110">
                 Empieza ahora
             </a>                
             <button
@@ -511,7 +508,6 @@
         </div>
     </section>
 
-    <!-- Illustration: chat bubbles (HTML/CSS, no SVG asset) -->
     <section
             class="relative overflow-hidden py-24 md:py-32"
             style="background: linear-gradient(135deg, #1e3a5f 0%, #2d1b4e 50%, #1a0f2e 100%)"

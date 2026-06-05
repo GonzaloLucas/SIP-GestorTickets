@@ -1,25 +1,99 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import PermissionDenied
-from django.views.decorators.http import require_POST
+from django.contrib.auth.password_validation import validate_password
 from .models import Usuario, InfoTicket, TicketComentario, TicketHistorial
 from .forms import RegisterForm, LoginForm, TicketForm, EmpresaRegisterForm
+from .forms import limpiar_texto_comun
+from django.contrib.auth import update_session_auth_hash
+from .forms import AdminUsuarioCreateForm
 
 # ==========================================
 # VISTAS DE AUTENTICACIÓN Y REGISTRO
 # ==========================================
+def crear_usuario_admin_view(request):
+    if not request.user.is_authenticated or request.user.rol != 'admin_cliente':
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        form = AdminUsuarioCreateForm(request.POST)
+        if form.is_valid():
+            first_name = form.cleaned_data['first_name']
+            last_name = form.cleaned_data['last_name']
+            rol = form.cleaned_data['rol']
+
+            # Lógica: inicial del nombre + apellido completo (limpios)
+            fn_limpio = limpiar_texto_comun(first_name)
+            ln_limpio = limpiar_texto_comun(last_name)
+            base_username = f"{fn_limpio[0]}{ln_limpio}"
+
+            # Anti-duplicados por si tenés dos empleados llamados igual (ej: jgomez, jgomez1)
+            username = base_username
+            contador = 1
+            while Usuario.objects.filter(username=username).exists():
+                username = f"{base_username}{contador}"
+                contador += 1
+
+            # Email: username @ empresa_del_admin .com
+            dominio_empresa = limpiar_texto_comun(request.user.empresa.nombre)
+            email_completo = f"{username}@{dominio_empresa}.com"
+
+            # Creamos el usuario en la base con la clave genérica
+            nuevo_user = Usuario.objects.create_user(
+                username=username,
+                email=email_completo,
+                password="12345678", # Contraseña genérica pedida
+                first_name=first_name,
+                last_name=last_name,
+                empresa=request.user.empresa,
+                rol=rol,
+                autorizado=True # Ya nace autorizado porque lo crea su propio jefe
+            )
+            nuevo_user.require_password_change = True # Obligatorio cambiar clave
+            nuevo_user.save()
+
+            return redirect('dashboard')
+    else:
+        form = AdminUsuarioCreateForm()
+    
+    return render(request, 'crear_usuario_admin.html', {'form': form})
+
 def landing_view(request):
     return render(request, 'assistech-landing.html')
 
-def register_view(request):
+def cambiar_contrasenia_obligatorio_view(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    if not request.user.require_password_change:
+        return redirect('dashboard')
+
+    error = None
     if request.method == 'POST':
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('login')
-    else:
-        form = RegisterForm()
-    return render(request, 'register.html', {'form': form})
+        nueva_pass = request.POST.get('nueva_password')
+        confirmar_pass = request.POST.get('confirmar_password')
+
+        if not nueva_pass:
+            error = "La contraseña no puede estar vacía."
+        elif nueva_pass == "12345678":
+            error = "No podés usar la misma contraseña genérica, poné una tuya."
+        elif nueva_pass != confirmar_pass:
+            error = "Las contraseñas no coinciden."
+        else:
+            try:
+                # Validamos que cumpla las reglas de Django
+                validate_password(nueva_pass, user=request.user)
+                request.user.set_password(nueva_pass)
+                request.user.require_password_change = False
+                request.user.save()
+                # Esto es clave para que Django no lo desloguee al cambiar la contraseña
+                update_session_auth_hash(request, request.user)
+                return redirect('dashboard')
+            except Exception as e:
+                # Si viene en formato de lista de errores, agarramos el primero
+                error = e.messages[0] if hasattr(e, 'messages') else str(e)
+
+    return render(request, 'cambiar_contrasenia_obligatorio.html', {'error': error})
 
 def registrar_empresa_view(request):
     if request.method == 'POST':
@@ -61,6 +135,11 @@ def login_view(request):
                     auth_user = authenticate(request, username=usuario.username, password=password)
                     if auth_user is not None:
                         login(request, auth_user)
+                        
+                        # 🚨 INTERCEPCIÓN AQUÍ: Si debe cambiar la clave, lo desviamos de una
+                        if auth_user.require_password_change:
+                            return redirect('cambiar_contrasenia_obligatorio')
+                            
                         return redirect('dashboard')
                     else:
                         error = "La contraseña es incorrecta."
@@ -77,7 +156,10 @@ def logout_view(request):
 def dashboard_view(request):
     if not request.user.is_authenticated:
         return redirect('login')
-        
+    
+    if request.user.require_password_change:
+        return redirect('cambiar_contrasenia_obligatorio')
+    
     rol = request.user.rol
     
     if rol == 'admin_cliente':

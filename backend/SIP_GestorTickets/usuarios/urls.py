@@ -3,11 +3,13 @@ from . import views
 
 urlpatterns = [
     path('', views.landing_view, name='landing'),
-    path('register/', views.register_view, name='register'),
     path('register_empresa/', views.registrar_empresa_view, name='register_empresa'),
     path('login/', views.login_view, name='login'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('logout/', views.logout_view, name='logout'),
+    
+    path('usuario/nuevo-admin/', views.crear_usuario_admin_view, name='crear_usuario_admin'),
+    path('cambiar-contrasenia-obligatorio/', views.cambiar_contrasenia_obligatorio_view, name='cambiar_contrasenia_obligatorio'),
     
     path('ticket/nuevo/', views.crear_ticket, name='crear_ticket'),
     path('ticket/<int:pk>/', views.detalle_ticket_view, name='detalle_ticket'),

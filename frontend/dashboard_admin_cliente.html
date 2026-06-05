@@ -56,6 +56,10 @@
 
     </div>
     
+    <a href="{% url 'crear_usuario_admin' %}" class="bg-assist-accent text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-opacity-90 transition">
+    + Crear Nuevo Usuario
+    </a>
+    
     {% if empleados_pendientes %}
     <div class="bg-assist-charcoal rounded-xl border border-amber-500/20 overflow-hidden mb-8">
         <div class="px-6 py-4 border-b border-white/5 bg-amber-500/5">
@@ -66,6 +70,7 @@
                 <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-amber-500/[0.01]">
                     <div>
                         <p class="text-white font-medium">{{ empleado.get_full_name }} ({{ empleado.username }})</p>
+                        <p class="text-xs text-assist-body">Rol: {{ empleado.get_rol_display }}</p>
                     </div>
                     <div class="flex items-center gap-2">
                         <a href="{% url 'aprobar_usuario' empleado.pk %}" 
@@ -74,7 +79,7 @@
                         </a>
                         <a href="{% url 'rechazar_usuario' empleado.pk %}" 
                            class="border border-red-500 text-red-500 text-xs font-bold px-4 py-2 rounded-lg hover:bg-red-500 hover:text-white transition text-center">
-                            Rechazar
+                            Rechazar ingreso y eliminar usuario
                         </a>
                     </div>
                 </div>

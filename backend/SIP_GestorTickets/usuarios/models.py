@@ -23,8 +23,7 @@ class Usuario(AbstractUser):
         ('jefe', 'Jefe de Soporte'),
     )
     empresa = models.ForeignKey(
-        Empresa, 
-        on_delete=models.SET_NULL, 
+        Empresa, on_delete=models.SET_NULL, 
         blank=True, 
         null=True, 
         related_name='usuarios'
@@ -32,6 +31,7 @@ class Usuario(AbstractUser):
     rol = models.CharField(max_length=20, choices=ROLES)
     autorizado = models.BooleanField(default=True) 
 
+    require_password_change = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.username} ({self.get_rol_display()})"
     

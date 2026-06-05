@@ -3,6 +3,7 @@ import re
 from django import forms
 from django.contrib.auth.password_validation import validate_password
 from .models import Usuario, InfoTicket, Empresa
+import unicodedata
 
 # ==========================================
 # 🛠️ FUNCIONES DE AYUDA
@@ -11,6 +12,13 @@ def validar_nombre_usuario(username):
     if Usuario.objects.filter(username=username).exists():
         raise forms.ValidationError("Este nombre de usuario ya está en uso.")
     return username
+
+def limpiar_texto_comun(texto):
+    if not texto:
+        return ""
+    texto_normalizado = unicodedata.normalize('NFD', texto)
+    texto_sin_tildes = "".join([c for c in texto_normalizado if unicodedata.category(c) != 'Mn'])
+    return texto_sin_tildes.lower().strip().replace(" ", "")
 
 def validar_contrasenia_segura(password):
     validate_password(password)
@@ -78,7 +86,16 @@ class EmpresaRegisterForm(forms.Form):
 # ==========================================
 # FORMULARIO: REGISTRO DE EMPLEADOS
 # ==========================================
-
+class AdminUsuarioCreateForm(forms.Form):
+    ROLES_PERMITIDOS = [
+        ('cliente', 'Cliente'),
+        ('soporte', 'Soporte'),
+        ('jefe', 'Jefe de Soporte'),
+    ]
+    first_name = forms.CharField(max_length=150, label="Nombre/s")
+    last_name = forms.CharField(max_length=150, label="Apellido/s")
+    rol = forms.ChoiceField(choices=ROLES_PERMITIDOS, label="Rol del nuevo usuario")
+    
 class RegisterForm(forms.ModelForm):
     rol = forms.ChoiceField(
         choices=[
