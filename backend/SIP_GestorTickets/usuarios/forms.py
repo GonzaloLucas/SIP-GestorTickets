@@ -39,10 +39,6 @@ class EmpresaRegisterForm(forms.Form):
     nombre_empresa = forms.CharField(max_length=255,label="Nombre de la Empresa",help_text="Este nombre definirá tu dominio de email corporativo.")
     first_name = forms.CharField(max_length=150, label="Tu Nombre")
     last_name = forms.CharField(max_length=150, label="Tu Apellido")
-    username = forms.CharField(max_length=150, label="Nombre de usuario")
-    
-    email_usuario = forms.CharField(max_length=100, label="Usuario de Email",help_text="Solo ingresá lo que va antes del @")
-    password = forms.CharField(widget=forms.PasswordInput, label="Contraseña")
 
     def clean_nombre_empresa(self):
         nombre = self.cleaned_data.get('nombre_empresa')
@@ -50,37 +46,40 @@ class EmpresaRegisterForm(forms.Form):
             raise forms.ValidationError("Ya existe una empresa registrada con ese nombre.")
         return nombre
 
-    def clean_username(self):
-        return validar_nombre_usuario(self.cleaned_data.get("username"))
-
-    def clean_password(self):
-        return validar_contrasenia_segura(self.cleaned_data.get('password'))
-
-    def clean(self):
-        cleaned_data = super().clean()
-        nombre_empresa = cleaned_data.get('nombre_empresa')
-        email_usuario = cleaned_data.get('email_usuario')
-
-        if nombre_empresa and email_usuario:
-            try:
-                cleaned_data['email_completo'] = generar_y_validar_email(nombre_empresa, email_usuario)
-            except forms.ValidationError as e:
-                self.add_error('email_usuario', e)
-        return cleaned_data
-
     def save(self):
         from django.db import transaction
         with transaction.atomic():
             nueva_empresa = Empresa.objects.create(nombre=self.cleaned_data['nombre_empresa'])
+
+            first_name = self.cleaned_data['first_name']
+            last_name = self.cleaned_data['last_name']
+            
+            fn_limpio = limpiar_texto_comun(first_name)
+            ln_limpio = limpiar_texto_comun(last_name)
+            base_username = f"{fn_limpio[0]}{ln_limpio}"
+            
+            username = base_username
+            contador = 1
+            while Usuario.objects.filter(username=username).exists():
+                username = f"{base_username}{contador}"
+                contador += 1
+            
+            dominio_empresa = limpiar_texto_comun(nueva_empresa.nombre)
+            email_completo = f"{username}@{dominio_empresa}.com"
+            
             user = Usuario.objects.create_user(
                 username=self.cleaned_data['username'],
                 email=self.cleaned_data['email_completo'], 
-                password=self.cleaned_data['password'],
+                password="12345678",
                 first_name=self.cleaned_data['first_name'],
                 last_name=self.cleaned_data['last_name'],
                 empresa=nueva_empresa,
-                rol='admin_cliente'
+                rol='admin_cliente',
+                autorizado=True
             )
+            user.require_password_change = True
+            user.save()
+            
         return user
 
 # ==========================================
@@ -115,7 +114,7 @@ class TicketForm(forms.ModelForm):
 
     class Meta:
         model = InfoTicket
-        fields = ['titulo', 'descripcion', 'categoria', 'categoria_otro', 'prioridad']
+        fields = ['titulo', 'descripcion', 'categoria', 'categoria_otro']
 
     def _validate_text_field(self, value, field_name):
         allowed_re = re.compile(

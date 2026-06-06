@@ -69,7 +69,7 @@ class InfoTicket(models.Model):
     descripcion = models.TextField()
     categoria = models.CharField(max_length=255)
     estado = models.CharField(max_length=20, choices=ESTADO, default='ABIERTO')
-    prioridad = models.CharField(max_length=20, choices=PRIORIDAD, default='BAJA')
+    prioridad = models.CharField(max_length=20, choices=PRIORIDAD, null=True, blank=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
     fecha_resolucion = models.DateTimeField(blank=True, null=True)

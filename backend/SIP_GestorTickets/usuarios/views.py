@@ -7,6 +7,7 @@ from .forms import LoginForm, TicketForm, EmpresaRegisterForm
 from .forms import limpiar_texto_comun
 from django.contrib.auth import update_session_auth_hash
 from .forms import AdminUsuarioCreateForm
+from django.contrib import messages
 
 # ==========================================
 # VISTAS DE AUTENTICACIÓN Y REGISTRO
@@ -99,7 +100,14 @@ def registrar_empresa_view(request):
     if request.method == 'POST':
         form = EmpresaRegisterForm(request.POST)
         if form.is_valid():
-            form.save()
+            user=form.save()
+            messages.success(
+                request, 
+                f"🚀 <strong>¡Empresa y Administrador creados!</strong><br>"
+                f"Tu nombre de usuario corporativo es: <strong class='text-white underline'>{user.username}</strong><br>"
+                f"Tu contraseña provisoria es: <strong class='text-white'>12345678</strong>.<br>"
+                f"Ingresalos abajo para configurar tu cuenta."
+            )
             return redirect('login')
     else:
         form = EmpresaRegisterForm()
@@ -294,7 +302,7 @@ def eliminar_usuario_definitivo_view(request, pk):
     if empleado.empresa == request.user.empresa and empleado.pk != request.user.pk:
         
         empleado.is_active = False  
-        empleado.autorizado = False # Por las dudas, también le quitamos la autorización
+        empleado.autorizado = False 
         empleado.save()
         
     return redirect('dashboard')
