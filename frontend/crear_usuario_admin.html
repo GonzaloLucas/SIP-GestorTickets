@@ -1,18 +1,32 @@
 {% extends 'base.html' %}
+
 {% block title %}Crear Empleado — Assistech{% endblock %}
+
 {% block content %}
-<div class="w-full max-w-md mx-auto px-4 sm:px-6 py-8 sm:py-12 bg-assist-charcoal border border-white/5 rounded-2xl mx-4 sm:mt-10">
-    <div class="mb-6 text-center">
-        <h2 class="text-2xl font-bold tracking-tight">Alta de Nuevo Usuario</h2>
-        <p class="mt-2 text-sm text-assist-body">El sistema generará automáticamente el usuario, mail corporativo (primer letra del nombre + apellido) y la contraseña provisoria (12345678).</p>
+<div class="w-full max-w-md mx-auto px-4 sm:px-6 py-8 sm:py-12 bg-assist-charcoal border border-white/5 rounded-2xl sm:mt-10 shadow-xl">
+    
+    <div class="mb-8 text-center">
+        <h2 class="text-2xl font-bold tracking-tight text-white">Alta de Nuevo Usuario</h2>
+        <p class="mt-2 text-sm text-assist-body leading-relaxed">
+            El sistema generará automáticamente el usuario, mail corporativo (primer letra del nombre + apellido) y la contraseña provisoria (12345678).
+        </p>
     </div>
+
     <form method="post" class="space-y-4">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="w-full bg-assist-accent text-white font-bold py-3 rounded-xl hover:brightness-110 transition mt-4">
+        
+        <div class="space-y-2">
+            {{ form.as_p }}
+        </div>
+
+        <button type="submit" class="w-full bg-assist-coral text-white font-bold py-4 rounded-2xl hover:brightness-110 transition mt-6 shadow-lg block text-center text-base">
             Generar Usuario
         </button>
     </form>
-    <a href="{% url 'dashboard' %}" class="block text-center text-xs text-assist-body mt-4 hover:underline">Volver al panel</a>
+
+    <p class="mt-6 text-center text-sm text-assist-body">
+        <a href="{% url 'dashboard' %}" class="text-assist-white font-medium hover:underline">Volver al panel</a>
+    </p>
+
 </div>
 {% endblock %}

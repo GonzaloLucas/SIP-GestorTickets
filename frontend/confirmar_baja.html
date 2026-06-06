@@ -5,25 +5,24 @@
 {% block content %}
 <div class="w-full max-w-md mx-auto px-4 sm:px-6 py-8 sm:py-10 bg-assist-charcoal border border-white/10 rounded-2xl text-center shadow-2xl mx-4 mt-8 sm:mt-20">
     
-    <span class="text-4xl">⚠️</span>
+    <span class="text-4xl"></span>
     
-    <h2 class="text-2xl font-bold text-white mt-4">¿Quitar acceso al usuario?</h2>
+    <h2 class="text-2xl font-bold text-white mt-4">¿Qué desea realizar con <strong class="text-white">{{ empleado.get_full_name }}?</strong></h2>
     
-    <p class="text-sm text-assist-body mt-2">
-        Estás por suspender a <strong class="text-white">{{ empleado.get_full_name }}</strong>. El usuario no podrá ingresar al sistema hasta que lo vuelvas a autorizar.
-    </p>
-
     <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mt-8">
-        <!-- BOTÓN RECHAZAR: Vuelve al panel sin hacer nada -->
-        <a href="{% url 'dashboard' %}" 
-           class="w-full sm:flex-1 bg-white/5 border border-white/10 text-white font-medium py-2.5 rounded-xl hover:bg-white/10 transition text-sm text-center">
-            Rechazar
+       <a href="{% url 'dashboard' %}" 
+           class="flex-1 bg-white/5 border border-white/10 text-white font-medium py-2.5 rounded-xl hover:bg-white/10 transition text-sm text-center">
+            Cancelar
+        </a>
+
+        <a href="{% url 'quitar_acceso' empleado.pk %}" 
+           class="flex-1 bg-orange-500 text-white font-bold py-2.5 rounded-xl hover:bg-orange-600 transition text-sm text-center">
+            Suspender
         </a>
         
-        <!-- BOTÓN CONFIRMAR: Ejecuta la baja real -->
-        <a href="{% url 'quitar_acceso' empleado.pk %}" 
-           class="w-full sm:flex-1 bg-red-500 text-white font-bold py-2.5 rounded-xl hover:bg-red-600 transition text-sm text-center">
-            Confirmar
+        <a href="{% url 'eliminar_usuario_definitivo' empleado.pk %}" 
+           class="flex-1 bg-red-500 text-white font-bold py-2.5 rounded-xl hover:bg-red-600 transition text-sm text-center">
+            Eliminar Definitivamente
         </a>
     </div>
 
