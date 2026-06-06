@@ -68,11 +68,11 @@ class EmpresaRegisterForm(forms.Form):
             email_completo = f"{username}@{dominio_empresa}.com"
             
             user = Usuario.objects.create_user(
-                username=self.cleaned_data['username'],
-                email=self.cleaned_data['email_completo'], 
+                username=username,
+                email=email_completo, 
                 password="12345678",
-                first_name=self.cleaned_data['first_name'],
-                last_name=self.cleaned_data['last_name'],
+                first_name=first_name,
+                last_name=last_name,
                 empresa=nueva_empresa,
                 rol='admin_cliente',
                 autorizado=True

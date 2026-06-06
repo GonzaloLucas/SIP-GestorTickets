@@ -87,7 +87,7 @@ class InfoTicket(models.Model):
     solucion_resumen = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"#{self.id_ticket} - {self.titulo}"
+        return f"#{self.numero_ticket_empresa} - {self.titulo}"
     
     def save(self, *args, **kwargs):
         if not self.pk: # Solo si el ticket es NUEVO

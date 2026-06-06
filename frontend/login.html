@@ -9,6 +9,18 @@
         <h2 class="text-3xl font-bold tracking-tight">Iniciar sesión</h2>
         <p class="mt-2 text-sm text-assist-gray">Accedé a tu cuenta de Assistech</p>
     </div>
+    <div class="mb-6 p-4 rounded-xl border border-assist-coral/20 bg-assist-coral/5 text-sm text-white leading-relaxed text-left shadow-lg">
+        <p class="font-semibold text-[#F25C54] flex items-center gap-1.5 mb-1.5 text-xs uppercase tracking-wider">
+            ¿Es tu primer ingreso?
+        </p>
+        <p class="text-xs text-assist-gray">
+            Si un administrador generó tu cuenta, tus credenciales son:
+        </p>
+        <ul class="mt-2 space-y-1 text-xs text-zinc-300 list-disc list-inside bg-black/20 p-2 rounded-lg font-mono">
+            <li>Usuario: <span class="text-white"> Inicial de tu Nombre + apellido</span> (Ej: jperez)</li>
+            <li>Contraseña provisoria: <span class="text-white">12345678</span></li>
+        </ul>
+    </div>
 
     {% if messages %}
         {% for message in messages %}

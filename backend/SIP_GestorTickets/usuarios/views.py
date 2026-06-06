@@ -106,7 +106,7 @@ def registrar_empresa_view(request):
                 f"🚀 <strong>¡Empresa y Administrador creados!</strong><br>"
                 f"Tu nombre de usuario corporativo es: <strong class='text-white underline'>{user.username}</strong><br>"
                 f"Tu contraseña provisoria es: <strong class='text-white'>12345678</strong>.<br>"
-                f"Ingresalos abajo para configurar tu cuenta."
+                f"Ingresalos abajo para ingresar tu cuenta."
             )
             return redirect('login')
     else:
