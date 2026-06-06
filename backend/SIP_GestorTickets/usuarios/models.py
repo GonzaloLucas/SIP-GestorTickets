@@ -65,15 +65,19 @@ class InfoTicket(models.Model):
     )
 
     id_ticket = models.AutoField(primary_key=True)
+    numero_ticket_empresa = models.PositiveIntegerField(null=True, blank=True)
+    
     titulo = models.CharField(max_length=255)
     descripcion = models.TextField()
     categoria = models.CharField(max_length=255)
     estado = models.CharField(max_length=20, choices=ESTADO, default='ABIERTO')
     prioridad = models.CharField(max_length=20, choices=PRIORIDAD, null=True, blank=True)
+    
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
     fecha_resolucion = models.DateTimeField(blank=True, null=True)
     fecha_cierre = models.DateTimeField(blank=True, null=True)
+    
     solicitante = models.ForeignKey(
         Usuario,
         on_delete=models.PROTECT,
@@ -84,6 +88,20 @@ class InfoTicket(models.Model):
 
     def __str__(self):
         return f"#{self.id_ticket} - {self.titulo}"
+    
+    def save(self, *args, **kwargs):
+        if not self.pk: # Solo si el ticket es NUEVO
+            # Buscamos el número más alto de ticket que tenga la empresa de este solicitante
+            ultimo_numero = InfoTicket.objects.filter(
+                solicitante__empresa=self.solicitante.empresa
+            ).aggregate(models.Max('numero_ticket_empresa'))['numero_ticket_empresa__max']
+            
+            if ultimo_numero is not None:
+                self.numero_ticket_empresa = ultimo_numero + 1
+            else:
+                self.numero_ticket_empresa = 1 # Si es el primero de la empresa, arranca en 1
+                
+        super().save(*args, **kwargs)
 
 # ==========================================
 # MODELO: HISTORIAL TICKET

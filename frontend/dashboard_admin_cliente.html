@@ -114,18 +114,28 @@
         <div class="divide-y divide-white/5">
             {% for ticket in tickets %}
                 <div class="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-white/[0.02] transition">
+                    <!-- Bloque Izquierdo: Datos del Ticket (Se mantiene fluido y responsivo) -->
                     <div>
-                        <h4 class="text-lg font-medium text-white mt-1">{{ ticket.titulo }}</h4>
-                        <p class="text-sm text-assist-body mt-1">Por: {{ ticket.solicitante.get_full_name }} ({{ ticket.solicitante.username }})</p>
+                        <h4 class="text-lg font-medium text-white mt-1">
+                            <!-- 🆔 El ID por empresa resaltado con tu color coral -->
+                            <span class="text-assist-coral font-mono mr-1">#{{ ticket.numero_ticket_empresa }}</span> 
+                            — {{ ticket.titulo }}
+                        </h4>
+                        <!-- 👤 Creado por -->
+                        <p class="text-sm text-assist-body mt-1">
+                            Creado por: <span class="text-zinc-300">{{ ticket.solicitante.get_full_name }}</span> ({{ ticket.solicitante.username }})
+                        </p>
                     </div>
-                    <div class="flex items-center gap-3">
+                    
+                    <!-- Bloque Derecho: Estado y Acción -->
+                    <div class="flex items-center gap-3 self-start sm:self-center">
                         <span class="px-3 py-1 rounded-full text-xs font-semibold 
                             {% if ticket.estado == 'ABIERTO' %}bg-green-500/10 text-green-400 border border-green-500/20
                             {% elif ticket.estado == 'EN_PROCESO' %}bg-blue-500/10 text-blue-400 border border-blue-500/20
                             {% else %}bg-zinc-500/10 text-zinc-400 border border-zinc-500/20{% endif %}">
                             {{ ticket.get_estado_display }}
                         </span>
-                        <a href="{% url 'detalle_ticket' ticket.pk %}" class="text-sm text-white font-medium hover:underline">Ver detalles →</a>
+                        <a href="{% url 'detalle_ticket' ticket.pk %}" class="text-sm text-white font-medium hover:underline whitespace-nowrap">Ver detalles →</a>
                     </div>
                 </div>
             {% empty %}

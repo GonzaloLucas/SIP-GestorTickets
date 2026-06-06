@@ -15,7 +15,7 @@
             <span class="text-xl font-bold tracking-tight">Assistech</span>
         </a>
         <div class="flex flex-wrap items-center gap-3 sm:gap-6">
-            <span class="text-xs sm:text-sm text-assist-gray"><span class="hidden sm:inline">Bienvenido, </span>{{ request.user.username }}</span>
+            <span class="text-xs sm:text-sm text-assist-gray"><span class="hidden sm:inline">Hola, </span>{{ request.user.username }}</span>
             <a href="{% url 'logout' %}" class="text-xs sm:text-sm text-assist-coral hover:underline">Cerrar Sesión</a>
         </div>
     </div>
@@ -52,7 +52,7 @@
             <tbody class="text-assist-white">
                 {% for ticket in tickets %}
                 <tr class="border-t border-zinc-800 hover:bg-zinc-800/30 transition">
-                    <td class="p-4">#{{ ticket.id_ticket }}</td>
+                    <td class="p-4">#{{ ticket.numero_ticket_empresa}}</td>
                     <td class="p-4">{{ ticket.solicitante.username }}</td>
                     <td class="p-4">{{ ticket.titulo }}</td>
                     <td class="p-4">
@@ -82,7 +82,7 @@
                             {% if asignacion and asignacion.activo %}
                                 <span class="text-assist-coral">{{ asignacion.soporte.username }}</span>
                             {% else %}
-                                <span class="text-red-500 font-medium">⚠️ Sin asignar</span>
+                                <span class="text-red-500 font-medium">Sin asignar</span>
                             {% endif %}
                         {% endwith %}
                     </td>

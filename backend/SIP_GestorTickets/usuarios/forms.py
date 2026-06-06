@@ -107,6 +107,8 @@ class LoginForm(forms.Form):
 # ==========================================
 
 class TicketForm(forms.ModelForm):
+    titulo = forms.CharField(max_length=25, label="Título", widget=forms.TextInput(attrs={'placeholder': 'Máximo 25 caracteres'}))
+    
     categoria = forms.ChoiceField(choices=InfoTicket.CATEGORIAS,label='Categoría')
     categoria_otro = forms.CharField(
         required=False,label='Otra categoría',
@@ -127,6 +129,10 @@ class TicketForm(forms.ModelForm):
 
     def clean_titulo(self):
         titulo = self.cleaned_data.get('titulo', '')
+        
+        if len(titulo) > 25:
+            raise forms.ValidationError('El título debe contener un máximo de 25 caracteres.')
+        
         return self._validate_text_field(titulo, 'título')
 
     def clean_descripcion(self):
