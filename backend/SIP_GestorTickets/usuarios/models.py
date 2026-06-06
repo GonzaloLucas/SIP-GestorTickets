@@ -5,12 +5,20 @@ from django.db import models
 # MODELO: EMPRESA
 # ==========================================
 class Empresa(models.Model):
+    PLANES = (
+        ('BASICO', 'Básico'),
+        ('ESTANDAR', 'Estándar'),
+        ('PREMIUM', 'Premium'),
+    )
     id_empresa = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=255, unique=True)
+    
+    cuil = models.CharField(max_length=11, unique=True, null=True, blank=True) 
+    plan = models.CharField(max_length=20, choices=PLANES, default='BASICO')
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.nombre
+        return f"{self.nombre} (Plan: {self.get_plan_display()})"
     
 # ==========================================
 # MODELO: USUARIO
@@ -30,6 +38,7 @@ class Usuario(AbstractUser):
     )    
     rol = models.CharField(max_length=20, choices=ROLES)
     autorizado = models.BooleanField(default=True) 
+    telefono = models.CharField(max_length=20, blank=True, null=True)
 
     require_password_change = models.BooleanField(default=False)
     def __str__(self):

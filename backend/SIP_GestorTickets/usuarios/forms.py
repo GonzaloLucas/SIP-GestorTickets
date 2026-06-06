@@ -3,6 +3,7 @@ import re
 from django import forms
 from django.contrib.auth.password_validation import validate_password
 from .models import Usuario, InfoTicket, Empresa
+from django.core.mail import send_mail
 import unicodedata
 
 # ==========================================
@@ -37,48 +38,79 @@ def generar_y_validar_email(nombre_empresa, email_usuario):
 # ==========================================
 class EmpresaRegisterForm(forms.Form):
     nombre_empresa = forms.CharField(max_length=255,label="Nombre de la Empresa",help_text="Este nombre definirá tu dominio de email corporativo.")
+    cuil = forms.CharField(max_length=11, min_length=11, label="CUIL de la Empresa", help_text="Ingresar los 11 dígitos sin guiones.")
+
+    opciones_plan = [('', 'Seleccionar opción')] + list(Empresa.PLANES)
+    plan = forms.ChoiceField(choices=opciones_plan, label="Selecciona tu Plan")    
+    
     first_name = forms.CharField(max_length=150, label="Tu Nombre")
     last_name = forms.CharField(max_length=150, label="Tu Apellido")
-
+    email_real = forms.EmailField(label="Tu Email Real")
+    telefono = forms.CharField(max_length=20, label="Tu Número de Teléfono")
+    
     def clean_nombre_empresa(self):
         nombre = self.cleaned_data.get('nombre_empresa')
         if Empresa.objects.filter(nombre__iexact=nombre).exists():
             raise forms.ValidationError("Ya existe una empresa registrada con ese nombre.")
         return nombre
+    
+    def clean_cuil(self):
+        cuil = self.cleaned_data.get('cuil')
+        if not cuil.isdigit():
+            raise forms.ValidationError("El CUIL solo debe contener números.")
+        if Empresa.objects.filter(cuil=cuil).exists():
+            raise forms.ValidationError("Este CUIL ya está registrado en el sistema.")
+        return cuil
+    
+    def clean_email_real(self):
+        email = self.cleaned_data.get('email_real').lower().strip()
+        if Usuario.objects.filter(email=email).exists():
+            raise forms.ValidationError("Este email ya está registrado con otro usuario.")
+        return email
 
     def save(self):
         from django.db import transaction
         with transaction.atomic():
-            nueva_empresa = Empresa.objects.create(nombre=self.cleaned_data['nombre_empresa'])
+            nueva_empresa = Empresa.objects.create(nombre=self.cleaned_data['nombre_empresa'],cuil=self.cleaned_data['cuil'],plan=self.cleaned_data['plan'])
 
+            email = self.cleaned_data['email_real']
             first_name = self.cleaned_data['first_name']
-            last_name = self.cleaned_data['last_name']
-            
-            fn_limpio = limpiar_texto_comun(first_name)
-            ln_limpio = limpiar_texto_comun(last_name)
-            base_username = f"{fn_limpio[0]}{ln_limpio}"
-            
-            username = base_username
-            contador = 1
-            while Usuario.objects.filter(username=username).exists():
-                username = f"{base_username}{contador}"
-                contador += 1
-            
-            dominio_empresa = limpiar_texto_comun(nueva_empresa.nombre)
-            email_completo = f"{username}@{dominio_empresa}.com"
-            
+
             user = Usuario.objects.create_user(
-                username=username,
-                email=email_completo, 
+                username=email,
+                email=email, 
                 password="12345678",
                 first_name=first_name,
-                last_name=last_name,
+                last_name=self.cleaned_data['last_name'],
+                telefono=self.cleaned_data['telefono'],
                 empresa=nueva_empresa,
                 rol='admin_cliente',
                 autorizado=True
             )
             user.require_password_change = True
             user.save()
+            
+            asunto = f"¡Bienvenido a Assistech, {first_name}!"
+            mensaje_cuerpo = f"""
+            Hola {first_name}, tu empresa '{nueva_empresa.nombre}' se registró correctamente.
+
+            Acá tenés tus datos de acceso al sistema:
+            - Sitio web:https://assistech.pythonanywhere.com/login/
+            - Tu Usuario (Email): {email}
+            - Tu Contraseña provisoria: 12345678
+
+            ⚠️ Por motivos de seguridad, el sistema te pedirá cambiar esta contraseña en tu primer ingreso.
+
+            ¡Gracias por confiar en Assistech!
+            """
+            
+            send_mail(
+                subject=asunto,
+                message=mensaje_cuerpo,
+                from_email='assistech.soporte@gmail.com',
+                recipient_list=[email],
+                fail_silently=False,
+            )
             
         return user
 
@@ -93,7 +125,15 @@ class AdminUsuarioCreateForm(forms.Form):
     ]
     first_name = forms.CharField(max_length=150, label="Nombre/s")
     last_name = forms.CharField(max_length=150, label="Apellido/s")
+    email_real = forms.EmailField(label="Email Real")
+    telefono = forms.CharField(max_length=20, label="Número de Teléfono")
     rol = forms.ChoiceField(choices=ROLES_PERMITIDOS, label="Rol del nuevo usuario")
+    
+    def clean_email_real(self):
+        email = self.cleaned_data.get('email_real').lower().strip()
+        if Usuario.objects.filter(email=email).exists():
+            raise forms.ValidationError("Este email ya está registrado en el sistema.")
+        return email
     
 # ==========================================
 # FORMULARIO: LOGIN

@@ -122,3 +122,20 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# ==========================================
+# 📧 CONFIGURACIÓN DE EMAIL REAL (SMTP GMAIL)
+# ==========================================
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+# 🔴 TU NUEVA CUENTA DE ASSISTECH
+EMAIL_HOST_USER = 'assistech.soporte@gmail.com' 
+
+# 🔴 PEGÁ ACÁ LAS 16 LETRAS QUE TE DIO GOOGLE (Todo junto, sin los espacios)
+EMAIL_HOST_PASSWORD = 'eetn oicn exly amul' 
+
+# Esto es lo que va a figurar como remitente en la bandeja de entrada de los clientes
+DEFAULT_FROM_EMAIL = 'Assistech Soporte <assistech.soporte@gmail.com>'

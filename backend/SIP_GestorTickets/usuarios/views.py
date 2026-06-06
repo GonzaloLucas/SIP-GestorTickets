@@ -4,7 +4,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.password_validation import validate_password
 from .models import Usuario, InfoTicket, TicketComentario, TicketHistorial
 from .forms import LoginForm, TicketForm, EmpresaRegisterForm
-from .forms import limpiar_texto_comun
+from django.core.mail import send_mail
 from django.contrib.auth import update_session_auth_hash
 from .forms import AdminUsuarioCreateForm
 from django.contrib import messages
@@ -19,40 +19,46 @@ def crear_usuario_admin_view(request):
     if request.method == 'POST':
         form = AdminUsuarioCreateForm(request.POST)
         if form.is_valid():
+            email = form.cleaned_data['email_real']
             first_name = form.cleaned_data['first_name']
-            last_name = form.cleaned_data['last_name']
-            rol = form.cleaned_data['rol']
-
-            # Lógica: inicial del nombre + apellido completo (limpios)
-            fn_limpio = limpiar_texto_comun(first_name)
-            ln_limpio = limpiar_texto_comun(last_name)
-            base_username = f"{fn_limpio[0]}{ln_limpio}"
-
-            # Anti-duplicados por si tenés dos empleados llamados igual (ej: jgomez, jgomez1)
-            username = base_username
-            contador = 1
-            while Usuario.objects.filter(username=username).exists():
-                username = f"{base_username}{contador}"
-                contador += 1
-
-            # Email: username @ empresa_del_admin .com
-            dominio_empresa = limpiar_texto_comun(request.user.empresa.nombre)
-            email_completo = f"{username}@{dominio_empresa}.com"
 
             # Creamos el usuario en la base con la clave genérica
             nuevo_user = Usuario.objects.create_user(
-                username=username,
-                email=email_completo,
+                username=email,
+                email=email,
                 password="12345678", # Contraseña genérica pedida
                 first_name=first_name,
-                last_name=last_name,
+                last_name=form.cleaned_data['last_name'],
+                telefono=form.cleaned_data['telefono'],
                 empresa=request.user.empresa,
-                rol=rol,
+                rol=form.cleaned_data['rol'],
                 autorizado=True # Ya nace autorizado porque lo crea su propio jefe
             )
             nuevo_user.require_password_change = True # Obligatorio cambiar clave
             nuevo_user.save()
 
+            asunto_empleado = "Te crearon una cuenta en Assistech"
+            mensaje_empleado = f"""
+            Hola {first_name},
+
+            El administrador de {request.user.empresa.nombre} te ha generado un usuario con el rol de '{nuevo_user.get_rol_display()}'.
+
+            Tus datos para loguearte son:
+            - Link de acceso: http://127.0.0.1:8000/login/
+            - Usuario: {email}
+            - Contraseña provisoria: 12345678
+
+            Recordá que vas a tener que cambiar esta contraseña genérica apenas ingreses por primera vez.
+            """
+            
+            send_mail(
+                subject=asunto_empleado,
+                message=mensaje_empleado,
+                from_email='assistech.soporte@gmail.com',
+                recipient_list=[email],
+                fail_silently=False,
+            )
+            
             return redirect('dashboard')
     else:
         form = AdminUsuarioCreateForm()
@@ -103,10 +109,10 @@ def registrar_empresa_view(request):
             user=form.save()
             messages.success(
                 request, 
-                f"🚀 <strong>¡Empresa y Administrador creados!</strong><br>"
-                f"Tu nombre de usuario corporativo es: <strong class='text-white underline'>{user.username}</strong><br>"
+                f"<strong>¡Empresa y Administrador creados con éxito!</strong><br>"
+                f"Tu usuario para ingresar es tu email: <strong class='text-white underline'>{user.email}</strong><br>"
                 f"Tu contraseña provisoria es: <strong class='text-white'>12345678</strong>.<br>"
-                f"Ingresalos abajo para ingresar tu cuenta."
+                f"Ingresalos abajo para acceder a tu panel."
             )
             return redirect('login')
     else:
