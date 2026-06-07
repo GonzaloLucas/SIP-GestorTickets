@@ -139,3 +139,5 @@ EMAIL_HOST_PASSWORD = 'eetn oicn exly amul'
 
 # Esto es lo que va a figurar como remitente en la bandeja de entrada de los clientes
 DEFAULT_FROM_EMAIL = 'Assistech Soporte <assistech.soporte@gmail.com>'
+
+CSRF_TRUSTED_ORIGINS = ['https://assistech.pythonanywhere.com']
