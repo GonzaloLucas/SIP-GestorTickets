@@ -46,49 +46,156 @@
         </div>
     </div>
 
-    <h2 class="text-xl font-semibold mb-4">Tickets Asignados</h2>
-    <div class="bg-assist-dark border border-white/5 rounded-2xl overflow-x-auto w-full">
-        <table class="w-full text-left">
-            <thead>
-                <tr class="bg-white/5 text-assist-gray text-xs uppercase tracking-wider">
-                    <th class="p-4 font-semibold">Prioridad</th>
-                    <th class="p-4 font-semibold">Ticket</th>
-                    <th class="p-4 font-semibold">Usuario</th>
-                    <th class="p-4 font-semibold">Estado</th>
-                    <th class="p-4 font-semibold text-right">Acción</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-white/5">
-                {% for ticket in tickets %}
-                <tr class="hover:bg-white/5 transition">
-                    <td class="p-4">
-                        {% if ticket.prioridad == 'ALTA' %}
-                            <span class="text-red-500 font-bold">ALTA</span>
-                        {% elif ticket.prioridad == 'MEDIA' %}
-                            <span class="text-orange-500 font-bold">MEDIA</span>
-                        {% else %}
-                            <span class="text-green-500 font-bold">BAJA</span>
+    <div class="flex space-x-2 border-b border-white/10 mb-6">
+        <button id="btn-asignados" onclick="switchTab('asignados')" class="px-6 py-3 text-sm font-bold border-b-2 border-assist-coral text-white transition-all duration-300">
+            Tickets Asignados
+        </button>
+        <button id="btn-completados" onclick="switchTab('completados')" class="px-6 py-3 text-sm font-bold border-b-2 border-transparent text-assist-gray hover:text-white transition-all duration-300">
+            Tickets Completados
+        </button>
+    </div>
+
+    <div id="tab-asignados" class="block animate-[fadeIn_0.3s_ease-in-out]">
+        <div class="bg-assist-dark border border-white/5 rounded-2xl overflow-x-auto w-full">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-white/5 text-assist-gray text-xs uppercase tracking-wider">
+                        <th class="p-4 font-semibold">Prioridad</th>
+                        <th class="p-4 font-semibold">Ticket</th>
+                        <th class="p-4 font-semibold">Usuario</th>
+                        <th class="p-4 font-semibold">Estado</th>
+                        <th class="p-4 font-semibold text-right">Acción</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    {% for ticket in tickets %}
+                        {% if ticket.estado == 'ABIERTO' or ticket.estado == 'EN_PROCESO' %}
+                        <tr class="hover:bg-white/5 transition">
+                            <td class="p-4">
+                                {% if ticket.prioridad == 'ALTA' %}
+                                    <span class="text-red-500 font-bold">ALTA</span>
+                                {% elif ticket.prioridad == 'MEDIA' %}
+                                    <span class="text-orange-500 font-bold">MEDIA</span>
+                                {% else %}
+                                    <span class="text-green-500 font-bold">BAJA</span>
+                                {% endif %}
+                            </td>
+                            <td class="p-4">
+                                <p class="text-sm font-bold">{{ ticket.titulo }}</p>
+                                <p class="text-xs text-assist-gray">{{ ticket.fecha_creacion|date:"d/m/Y H:i" }}</p>
+                            </td>
+                            <td class="p-4 text-sm">{{ ticket.solicitante.username }}</td>
+                            <td class="p-4">{{ ticket.get_estado_display }}</td>
+                            <td class="p-4 text-right">
+                                <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="bg-white text-assist-black px-4 py-2 rounded-lg text-xs font-bold hover:bg-assist-gray transition">
+                                    Ver Ticket
+                                </a>
+                            </td>
+                        </tr>
                         {% endif %}
-                    </td>
-                    <td class="p-4">
-                        <p class="text-sm font-bold">{{ ticket.titulo }}</p>
-                        <p class="text-xs text-assist-gray">{{ ticket.fecha_creacion|date:"d/m/Y H:i" }}</p>
-                    </td>
-                    <td class="p-4 text-sm">{{ ticket.solicitante.username }}</td>
-                    <td class="p-4">{{ ticket.get_estado_display }}</td>
-                    <td class="p-4 text-right">
-                        <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="bg-white text-assist-black px-4 py-2 rounded-lg text-xs font-bold hover:bg-assist-gray transition">
-                            Ver Ticket
-                        </a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="p-12 text-center text-assist-gray">No tenés tickets asignados.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="p-12 text-center text-assist-gray">No tenés tickets asignados.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="tab-completados" class="hidden animate-[fadeIn_0.3s_ease-in-out]">
+        <div class="bg-assist-dark border border-white/5 rounded-2xl overflow-x-auto w-full">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-white/5 text-assist-gray text-xs uppercase tracking-wider">
+                        <th class="p-4 font-semibold">Prioridad</th>
+                        <th class="p-4 font-semibold">Ticket</th>
+                        <th class="p-4 font-semibold">Usuario</th>
+                        <th class="p-4 font-semibold">Estado</th>
+                        <th class="p-4 font-semibold text-right">Acción</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    {% for ticket in tickets %}
+                        {% if ticket.estado == 'RESUELTO' or ticket.estado == 'CERRADO' %}
+                        <tr class="hover:bg-white/5 transition">
+                            <td class="p-4">
+                                {% if ticket.prioridad == 'ALTA' %}
+                                    <span class="text-red-500 font-bold">ALTA</span>
+                                {% elif ticket.prioridad == 'MEDIA' %}
+                                    <span class="text-orange-500 font-bold">MEDIA</span>
+                                {% else %}
+                                    <span class="text-green-500 font-bold">BAJA</span>
+                                {% endif %}
+                            </td>
+                            <td class="p-4">
+                                <p class="text-sm font-bold">{{ ticket.titulo }}</p>
+                                <p class="text-xs text-assist-gray">{{ ticket.fecha_creacion|date:"d/m/Y H:i" }}</p>
+                            </td>
+                            <td class="p-4 text-sm">{{ ticket.solicitante.username }}</td>
+                            <td class="p-4">{{ ticket.get_estado_display }}</td>
+                            <td class="p-4 text-right">
+                                <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="bg-white text-assist-black px-4 py-2 rounded-lg text-xs font-bold hover:bg-assist-gray transition">
+                                    Ver Ticket
+                                </a>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="p-12 text-center text-assist-gray">No tenés tickets asignados.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
+
+<script>
+    function switchTab(tab) {
+        const tabAsignados = document.getElementById('tab-asignados');
+        const tabCompletados = document.getElementById('tab-completados');
+        const btnAsignados = document.getElementById('btn-asignados');
+        const btnCompletados = document.getElementById('btn-completados');
+
+        if (tab === 'asignados') {
+            // Mostrar Asignados
+            tabAsignados.classList.remove('hidden');
+            tabAsignados.classList.add('block');
+            tabCompletados.classList.remove('block');
+            tabCompletados.classList.add('hidden');
+
+            // Estilos del botón Asignados (Activo)
+            btnAsignados.classList.replace('border-transparent', 'border-assist-coral');
+            btnAsignados.classList.replace('text-assist-gray', 'text-white');
+
+            // Estilos del botón Completados (Inactivo)
+            btnCompletados.classList.replace('border-assist-coral', 'border-transparent');
+            btnCompletados.classList.replace('text-white', 'text-assist-gray');
+
+        } else if (tab === 'completados') {
+            // Mostrar Completados
+            tabCompletados.classList.remove('hidden');
+            tabCompletados.classList.add('block');
+            tabAsignados.classList.remove('block');
+            tabAsignados.classList.add('hidden');
+
+            // Estilos del botón Completados (Activo)
+            btnCompletados.classList.replace('border-transparent', 'border-assist-coral');
+            btnCompletados.classList.replace('text-assist-gray', 'text-white');
+
+            // Estilos del botón Asignados (Inactivo)
+            btnAsignados.classList.replace('border-assist-coral', 'border-transparent');
+            btnAsignados.classList.replace('text-white', 'text-assist-gray');
+        }
+    }
+</script>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
 {% endblock %}
