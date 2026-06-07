@@ -1,7 +1,6 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import PermissionDenied
-from django.contrib import messages
 from django.contrib.auth.password_validation import validate_password
 from .models import Usuario, InfoTicket, TicketComentario, TicketHistorial
 from .forms import LoginForm, TicketForm, EmpresaRegisterForm
@@ -31,7 +30,7 @@ def crear_usuario_admin_view(request):
             nuevo_user = Usuario.objects.create_user(
                 username=email,
                 email=email,
-                password=password_aleatoria, # Contraseña genérica pedida
+                password=password_aleatoria, # Contraseña genérica 
                 first_name=first_name,
                 last_name=form.cleaned_data['last_name'],
                 telefono=form.cleaned_data['telefono'],
@@ -65,13 +64,7 @@ def crear_usuario_admin_view(request):
                 recipient_list=[email],
                 fail_silently=False,
             )
-            
-            messages.success(
-                request, 
-                f"¡Usuario <strong>{email}</strong> creado correctamente! "
-                f"Le enviamos un correo electrónico de acceso con sus credenciales provisorias."
-            )
-            
+                        
             return redirect('dashboard')
     else:
         form = AdminUsuarioCreateForm()
@@ -122,8 +115,8 @@ def registrar_empresa_view(request):
             messages.success(
                 request, 
                 f"¡Empresa registrada con éxito! Generamos tus credenciales de administrador de forma segura. "
-                f"Te enviamos un correo electrónico a <strong>{user.email}</strong> con tu contraseña provisoria aleatoria. "
-                f"Revisá tu bandeja de entrada (o Spam) para poder ingresar."
+                f"<br>Te enviamos un correo electrónico a <strong>{user.email}</strong> con tu contraseña provisoria aleatoria. "
+                f" <br><br>Revisá tu bandeja de entrada (o Spam) para poder ingresar."
             )
             
             return redirect('login')
