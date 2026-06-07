@@ -15,7 +15,7 @@
             <span class="text-xl font-bold tracking-tight">Assistech</span>
         </a>
         <div class="flex flex-wrap items-center gap-3 sm:gap-6">
-            <span class="text-xs sm:text-sm text-assist-gray"><span class="hidden sm:inline">Bienvenido, </span>{{ request.user.username }}</span>
+            <span class="text-xs sm:text-sm text-assist-gray"><span class="hidden sm:inline">Hola, </span>{{ request.user.username }}</span>
             <a href="{% url 'logout' %}" class="text-xs sm:text-sm text-assist-coral hover:underline">Cerrar Sesión</a>
         </div>
     </div>
@@ -31,7 +31,6 @@
             </div>
             <div class="flex flex-col sm:flex-row justify-end mb-8">
             <a href="{% url 'crear_ticket' %}" class="group relative inline-flex items-center justify-center gap-4 bg-gradient-to-r from-assist-accent to-assist-coral text-white text-base sm:text-lg font-bold px-8 py-4 rounded-2xl border border-white/20 transition-all duration-300 hover:brightness-110 hover:-translate-y-1 shadow-[0_0_20px_rgba(242,92,84,0.4)] hover:shadow-[0_0_35px_rgba(242,92,84,0.6)] active:translate-y-0 w-full sm:w-auto">
-                <!-- Cajita semi-transparente para el ícono -->
                 <span class="bg-white/20 p-1.5 rounded-lg transition-transform duration-300 group-hover:rotate-180">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -39,50 +38,149 @@
                 </span>
                 <span class="tracking-wide">Crear Nuevo Ticket</span>
             </a>
+            </div>
+        </div>
+
+        <div class="flex space-x-2 border-b border-white/10 mb-6">
+            <button id="btn-completados" onclick="switchTab('completados')" class="px-6 py-3 text-sm font-bold border-b-2 border-assist-coral text-white transition-all duration-300">
+                Tickets Completados
+            </button>
+            <button id="btn-encurso" onclick="switchTab('encurso')" class="px-6 py-3 text-sm font-bold border-b-2 border-transparent text-assist-gray hover:text-white transition-all duration-300">
+                Tickets en Curso
+            </button>
+        </div>
+
+        <div id="tab-completados" class="block animate-[fadeIn_0.3s_ease-in-out]">
+            <div class="bg-assist-dark border border-white/5 rounded-2xl overflow-x-auto w-full">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-white/5 bg-white/5">
+                            <th class="p-4 text-sm font-semibold text-assist-gray">ID</th>
+                            <th class="p-4 text-sm font-semibold text-assist-gray">Título</th>
+                            <th class="p-4 text-sm font-semibold text-assist-gray">Categoría</th>
+                            <th class="p-4 text-sm font-semibold text-assist-gray">Estado</th>
+                            <th class="p-4 text-sm font-semibold text-assist-gray">Última Actualización</th>
+                            <th class="p-4 text-sm font-semibold text-assist-gray text-right">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        {% for ticket in tickets %}
+                            {% if ticket.estado == 'RESUELTO' or ticket.estado == 'CERRADO' %}
+                            <tr class="hover:bg-white/5 transition">
+                                <td class="p-4 text-sm">#{{ ticket.numero_ticket_empresa }}</td>
+                                <td class="p-4 text-sm font-medium text-white">{{ ticket.titulo }}</td>
+                                <td class="p-4 text-sm text-assist-gray">{{ ticket.categoria }}</td>
+                                <td class="p-4">
+                                    {% if ticket.estado == 'RESUELTO' %}
+                                        <span class="bg-purple-500/20 text-purple-400 text-xs px-2 py-1 rounded-full border border-purple-500/30">Resuelto</span>
+                                    {% elif ticket.estado == 'CERRADO' %}
+                                        <span class="bg-white/10 text-assist-gray text-xs px-2 py-1 rounded-full border border-white/10">Cerrado</span>
+                                    {% endif %}
+                                </td>
+                                <td class="p-4 text-sm text-assist-gray">{{ ticket.fecha_actualizacion|date:"d/m/Y H:i" }}</td>
+                                <td class="p-4 text-right">
+                                    <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="text-assist-coral text-sm font-medium hover:underline">Ver detalle</a>
+                                </td>
+                            </tr>
+                            {% endif %}
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="p-12 text-center text-assist-gray">Aún no has creado ningún ticket.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-encurso" class="hidden animate-[fadeIn_0.3s_ease-in-out]">
+            <div class="bg-assist-dark border border-white/5 rounded-2xl overflow-x-auto w-full">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-white/5 bg-white/5">
+                            <th class="p-4 text-sm font-semibold text-assist-gray">ID</th>
+                            <th class="p-4 text-sm font-semibold text-assist-gray">Título</th>
+                            <th class="p-4 text-sm font-semibold text-assist-gray">Categoría</th>
+                            <th class="p-4 text-sm font-semibold text-assist-gray">Estado</th>
+                            <th class="p-4 text-sm font-semibold text-assist-gray">Última Actualización</th>
+                            <th class="p-4 text-sm font-semibold text-assist-gray text-right">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        {% for ticket in tickets %}
+                            {% if ticket.estado == 'ABIERTO' or ticket.estado == 'EN_PROCESO' %}
+                            <tr class="hover:bg-white/5 transition">
+                                <td class="p-4 text-sm">#{{ ticket.numero_ticket_empresa }}</td>
+                                <td class="p-4 text-sm font-medium text-white">{{ ticket.titulo }}</td>
+                                <td class="p-4 text-sm text-assist-gray">{{ ticket.categoria }}</td>
+                                <td class="p-4">
+                                    {% if ticket.estado == 'ABIERTO' %}
+                                        <span class="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded-full border border-green-500/30">Abierto</span>
+                                    {% elif ticket.estado == 'EN_PROCESO' %}
+                                        <span class="bg-blue-500/20 text-blue-400 text-xs px-2 py-1 rounded-full border border-blue-500/30">En Proceso</span>
+                                    {% endif %}
+                                </td>
+                                <td class="p-4 text-sm text-assist-gray">{{ ticket.fecha_actualizacion|date:"d/m/Y H:i" }}</td>
+                                <td class="p-4 text-right">
+                                    <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="text-assist-coral text-sm font-medium hover:underline">Ver detalle</a>
+                                </td>
+                            </tr>
+                            {% endif %}
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="p-12 text-center text-assist-gray">Aún no has creado ningún ticket.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <div class="bg-assist-dark border border-white/5 rounded-2xl overflow-x-auto w-full">
-        <table class="w-full text-left border-collapse">
-            <thead>
-                <tr class="border-b border-white/5 bg-white/5">
-                    <th class="p-4 text-sm font-semibold text-assist-gray">ID</th>
-                    <th class="p-4 text-sm font-semibold text-assist-gray">Título</th>
-                    <th class="p-4 text-sm font-semibold text-assist-gray">Categoría</th>
-                    <th class="p-4 text-sm font-semibold text-assist-gray">Estado</th>
-                    <th class="p-4 text-sm font-semibold text-assist-gray">Última Actualización</th>
-                    <th class="p-4 text-sm font-semibold text-assist-gray text-right">Acción</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-white/5">
-                {% for ticket in tickets %}
-                <tr class="hover:bg-white/5 transition">
-                    <td class="p-4 text-sm">#{{ ticket.numero_ticket_empresa }}</td>
-                    <td class="p-4 text-sm font-medium text-white">{{ ticket.titulo }}</td>
-                    <td class="p-4 text-sm text-assist-gray">{{ ticket.categoria }}</td>
-                    <td class="p-4">
-                        {% if ticket.estado == 'ABIERTO' %}
-                            <span class="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded-full border border-green-500/30">Abierto</span>
-                        {% elif ticket.estado == 'EN_PROCESO' %}
-                            <span class="bg-blue-500/20 text-blue-400 text-xs px-2 py-1 rounded-full border border-blue-500/30">En Proceso</span>
-                        {% elif ticket.estado == 'RESUELTO' %}
-                            <span class="bg-purple-500/20 text-purple-400 text-xs px-2 py-1 rounded-full border border-purple-500/30">Resuelto</span>
-                        {% elif ticket.estado == 'CERRADO' %}
-                            <span class="bg-white/10 text-assist-gray text-xs px-2 py-1 rounded-full border border-white/10">Cerrado</span>
-                        {% endif %}
-                    </td>
-                    <td class="p-4 text-sm text-assist-gray">{{ ticket.fecha_actualizacion|date:"d/m/Y H:i" }}</td>
-                    <td class="p-4 text-right">
-                        <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="text-assist-coral text-sm font-medium hover:underline">Ver detalle</a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" class="p-12 text-center text-assist-gray">Aún no has creado ningún ticket.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
+    <script>
+        function switchTab(tab) {
+            const tabCompletados = document.getElementById('tab-completados');
+            const tabEncurso = document.getElementById('tab-encurso');
+            const btnCompletados = document.getElementById('btn-completados');
+            const btnEncurso = document.getElementById('btn-encurso');
+
+            if (tab === 'completados') {
+                // Mostrar Completados
+                tabCompletados.classList.remove('hidden');
+                tabCompletados.classList.add('block');
+                tabEncurso.classList.remove('block');
+                tabEncurso.classList.add('hidden');
+
+                // Estilos del botón Completados (Activo)
+                btnCompletados.classList.replace('border-transparent', 'border-assist-coral');
+                btnCompletados.classList.replace('text-assist-gray', 'text-white');
+
+                // Estilos del botón En Curso (Inactivo)
+                btnEncurso.classList.replace('border-assist-coral', 'border-transparent');
+                btnEncurso.classList.replace('text-white', 'text-assist-gray');
+
+            } else if (tab === 'encurso') {
+                // Mostrar En Curso
+                tabEncurso.classList.remove('hidden');
+                tabEncurso.classList.add('block');
+                tabCompletados.classList.remove('block');
+                tabCompletados.classList.add('hidden');
+
+                // Estilos del botón En Curso (Activo)
+                btnEncurso.classList.replace('border-transparent', 'border-assist-coral');
+                btnEncurso.classList.replace('text-assist-gray', 'text-white');
+
+                // Estilos del botón Completados (Inactivo)
+                btnCompletados.classList.replace('border-assist-coral', 'border-transparent');
+                btnCompletados.classList.replace('text-white', 'text-assist-gray');
+            }
+        }
+    </script>
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 {% endblock %}

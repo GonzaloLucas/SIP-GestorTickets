@@ -9,21 +9,21 @@
         <h2 class="text-3xl font-bold tracking-tight">Iniciar sesión</h2>
         <p class="mt-2 text-sm text-assist-gray">Accedé a tu cuenta de Assistech</p>
     </div>
-
+    
     {% if messages %}
         {% for message in messages %}
-            <div class="mb-6 px-4 py-4 rounded-xl border border-green-500/30 bg-green-500/10 text-green-400 text-sm leading-relaxed shadow-lg">
+            <div class="mb-6 px-4 py-3 rounded-xl border border-green-500/30 bg-green-500/10 text-green-400 text-sm text-left leading-relaxed">
                 {{ message|safe }}
             </div>
         {% endfor %}
     {% endif %}
-    
+
     {% if error %}
         <div class="mb-6 px-4 py-3 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 text-sm">
             {{ error }}
         </div>
     {% endif %}
-
+    
     <form method="post" class="space-y-2">
         {% csrf_token %}
         {{ form.as_p }}
@@ -31,7 +31,11 @@
             class="w-full bg-assist-coral text-white font-semibold py-3 rounded-xl hover:bg-opacity-90 transition mt-2">
             Entrar
         </button>
+        <div class="text-right pb-2">
+            <a href="{% url 'password_reset' %}" class="text-xs text-assist-gray hover:text-assist-coral transition hover:underline">
+                ¿Olvidaste tu contraseña?
+            </a>
+        </div>
     </form>
-
 </div>
 {% endblock %}

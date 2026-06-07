@@ -1,9 +1,8 @@
 {% extends 'base.html' %}
-
 {% block title %}Registrar Empresa — Assistech{% endblock %}
 
 {% block content %}
-<div class="w-full max-w-md mx-auto px-4 sm:px-6 py-8 sm:py-12">
+<div class="w-full max-w-xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
 
     <div class="mb-6 sm:mb-8 text-center">
         <h2 class="text-3xl font-bold tracking-tight">Registrar tu Empresa</h2>
@@ -13,20 +12,96 @@
     <form method="post" class="space-y-4">
         {% csrf_token %}
         
-        <div class="space-y-2">
-            {{ form.as_p }}
+        <div>
+            <label  class="text-lg font-bold text-white block mb-1">Nombre de la Empresa</label>
+            <input type="text" name="nombre_empresa" value="{{ form.nombre_empresa.value|default:'' }}" class="w-full rounded-xl border border-white/10 bg-assist-slate px-3 py-2 text-white focus:outline-none">
+            {% if form.nombre_empresa.errors %}
+                <p class="text-red-500 text-xs mt-1 font-semibold">{{ form.nombre_empresa.errors.as_text }}</p>
+            {% endif %}
         </div>
 
-        <button type="submit"
-            class="w-full bg-assist-coral text-white font-bold py-4 rounded-2xl hover:brightness-110 transition mt-6 shadow-lg block text-center text-base">
+        <div>
+            <label class="text-lg font-bold text-white block mb-1">CUIL de la Empresa </label>
+            <input type="text" name="cuil" value="{{ form.cuil.value|default:'' }}" maxlength="11" minlength="11"
+            class="w-full rounded-xl border border-white/10 bg-assist-slate px-3 py-2 text-white focus:outline-none">
+            {% if form.cuil.errors %}
+                <p class="text-red-500 text-xs mt-1 font-bold">{{ form.cuil.errors.as_text }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label  class="text-lg font-bold text-white block mb-1">Domicilio</label>
+            <input type="text" name="domicilio" value="{{ form.domicilio.value|default:'' }}" class="w-full rounded-xl border border-white/10 bg-assist-slate px-3 py-2 text-white focus:outline-none">
+            {% if form.domicilio.errors %}
+                <p class="text-red-500 text-xs mt-1 font-semibold">{{ form.domicilio.errors.as_text }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label  class="text-lg font-bold text-white block mb-1">País</label>
+            <select name="pais" class="w-full rounded-xl border border-white/10 bg-assist-slate px-3 py-2 text-white focus:outline-none">
+                {% for value, text in form.fields.pais.choices %}
+                    <option value="{{ value }}" {% if form.pais.value == value %}selected{% endif %}>{{ text }}</option>
+                {% endfor %}
+            </select>
+            {% if form.pais.errors %}
+                <p class="text-red-500 text-xs mt-1 font-semibold">{{ form.pais.errors.as_text }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label class="text-lg font-bold text-white block mb-1">Selecciona tu Plan</label>
+            <select name="plan" class="w-full rounded-xl border border-white/10 bg-assist-slate px-3 py-2 text-white focus:outline-none">
+                {% for value, text in form.fields.plan.choices %}
+                    <option value="{{ value }}" {% if form.plan.value == value %}selected{% endif %}>{{ text }}</option>
+                {% endfor %}
+            </select>
+            {% if form.plan.errors %}
+                <p class="text-red-500 text-xs mt-1 font-semibold">{{ form.plan.errors.as_text }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label  class="text-lg font-bold text-white block mb-1">Nombre</label>
+            <input type="text" name="first_name" value="{{ form.first_name.value|default:'' }}" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+" required 
+            class="w-full rounded-xl border border-white/10 bg-assist-slate px-3 py-2 text-white focus:outline-none">
+            {% if form.first_name.errors %}
+                <p class="text-red-500 text-xs mt-1 font-bold">{{ form.first_name.errors.as_text }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label class="text-lg font-bold text-white block mb-1">Apellido</label>
+            <input type="text" name="last_name" value="{{ form.last_name.value|default:'' }}" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+" required  
+            class="w-full rounded-xl border border-white/10 bg-assist-slate px-3 py-2 text-white focus:outline-none">
+            {% if form.last_name.errors %}
+                <p class="text-red-500 text-xs mt-1 font-bold">{{ form.last_name.errors.as_text }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label class="text-lg font-bold text-white block mb-1">Email</label>
+            <input type="email" name="email_real" value="{{ form.email_real.value|default:'' }}" class="w-full rounded-xl border border-white/10 bg-assist-slate px-3 py-2 text-white focus:outline-none">
+            {% if form.email_real.errors %}
+                <p class="text-red-500 text-xs mt-1 font-bold">{{ form.email_real.errors.as_text }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label class="text-lg font-bold text-white block mb-1">Teléfono (opcional)</label>
+            <input type="text" name="telefono" value="{{ form.telefono.value|default:'' }}" class="w-full rounded-xl border border-white/10 bg-assist-slate px-3 py-2 text-white focus:outline-none">
+            {% if form.telefono.errors %}
+                <p class="text-red-500 text-xs mt-1 font-semibold">{{ form.telefono.errors.as_text }}</p>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="w-full bg-assist-coral text-white font-bold py-4 rounded-2xl hover:brightness-110 transition mt-6 shadow-lg block text-center text-base">
             Crear Empresa y Administrador
         </button>
     </form>
 
     <p class="mt-6 text-center text-sm text-assist-body">
-        ¿Ya tenés empresa?
-        <a href="{% url 'login' %}" class="text-assist-white font-medium hover:underline">Iniciá sesión</a>
+        ¿Ya tenés empresa? <a href="{% url 'login' %}" class="text-assist-white font-medium hover:underline">Iniciá sesión</a>
     </p>
-
 </div>
 {% endblock %}
