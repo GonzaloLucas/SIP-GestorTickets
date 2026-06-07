@@ -3,16 +3,16 @@ from django.contrib.auth.admin import UserAdmin
 
 from .models import Usuario, Empresa
 
-
 admin.site.register(Usuario, UserAdmin)
 
 @admin.register(Empresa)
 class EmpresaAdmin(admin.ModelAdmin):
-    # Esto define las columnas que se van a ver en el listado web
     list_display = ('id_empresa', 'nombre', 'cuil', 'plan', 'fecha_creacion')
-    # Esto te agrega una barra de búsqueda por nombre o CUIL
     search_fields = ('nombre', 'cuil')
-
+    try:
+        admin.site.unregister(Usuario)
+    except admin.sites.NotRegistered:
+        pass
 
 @admin.register(Usuario)
 class UsuarioAdmin(admin.ModelAdmin):
