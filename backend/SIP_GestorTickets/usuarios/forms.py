@@ -4,6 +4,7 @@ from django import forms
 from django.contrib.auth.password_validation import validate_password
 from .models import Usuario, InfoTicket, Empresa
 from django.core.mail import send_mail
+from django.utils.crypto import get_random_string
 import unicodedata
 
 # ==========================================
@@ -37,16 +38,16 @@ def generar_y_validar_email(nombre_empresa, email_usuario):
 # FORMULARIO: REGISTRO DE EMPRESA
 # ==========================================
 class EmpresaRegisterForm(forms.Form):
-    nombre_empresa = forms.CharField(max_length=255,label="Nombre de la Empresa",help_text="Este nombre definirá tu dominio de email corporativo.")
+    nombre_empresa = forms.CharField(max_length=255,label="Nombre de la Empresa")
     cuil = forms.CharField(max_length=11, min_length=11, label="CUIL de la Empresa", help_text="Ingresar los 11 dígitos sin guiones.")
 
     opciones_plan = [('', 'Seleccionar opción')] + list(Empresa.PLANES)
     plan = forms.ChoiceField(choices=opciones_plan, label="Selecciona tu Plan")    
     
-    first_name = forms.CharField(max_length=150, label="Tu Nombre")
-    last_name = forms.CharField(max_length=150, label="Tu Apellido")
-    email_real = forms.EmailField(label="Tu Email Real")
-    telefono = forms.CharField(max_length=20, label="Tu Número de Teléfono")
+    first_name = forms.CharField(max_length=150, label="Nombre")
+    last_name = forms.CharField(max_length=150, label="Apellido")
+    email_real = forms.EmailField(label="Email")
+    telefono = forms.CharField(max_length=20, label="Número de Teléfono")
     
     def clean_nombre_empresa(self):
         nombre = self.cleaned_data.get('nombre_empresa')
@@ -68,7 +69,7 @@ class EmpresaRegisterForm(forms.Form):
             raise forms.ValidationError("Este email ya está registrado con otro usuario.")
         return email
 
-    def save(self):
+    def save(self, request=None):
         from django.db import transaction
         with transaction.atomic():
             nueva_empresa = Empresa.objects.create(nombre=self.cleaned_data['nombre_empresa'],cuil=self.cleaned_data['cuil'],plan=self.cleaned_data['plan'])
@@ -76,10 +77,12 @@ class EmpresaRegisterForm(forms.Form):
             email = self.cleaned_data['email_real']
             first_name = self.cleaned_data['first_name']
 
+            password_aleatoria = get_random_string(length=8)
+            
             user = Usuario.objects.create_user(
                 username=email,
                 email=email, 
-                password="12345678",
+                password=password_aleatoria,
                 first_name=first_name,
                 last_name=self.cleaned_data['last_name'],
                 telefono=self.cleaned_data['telefono'],
@@ -90,16 +93,21 @@ class EmpresaRegisterForm(forms.Form):
             user.require_password_change = True
             user.save()
             
+            if request:
+                link_acceso = request.build_absolute_uri('/login/')
+            else:
+                link_acceso = "http://127.0.0.1:8000/login/"
+                
             asunto = f"¡Bienvenido a Assistech, {first_name}!"
             mensaje_cuerpo = f"""
             Hola {first_name}, tu empresa '{nueva_empresa.nombre}' se registró correctamente.
 
             Acá tenés tus datos de acceso al sistema:
-            - Sitio web:https://assistech.pythonanywhere.com/login/
+            - Sitio web:{link_acceso}
             - Tu Usuario (Email): {email}
-            - Tu Contraseña provisoria: 12345678
+            - Tu Contraseña provisoria: {password_aleatoria}
 
-            ⚠️ Por motivos de seguridad, el sistema te pedirá cambiar esta contraseña en tu primer ingreso.
+            Por motivos de seguridad, el sistema te pedirá cambiar esta contraseña en tu primer ingreso.
 
             ¡Gracias por confiar en Assistech!
             """
@@ -125,7 +133,7 @@ class AdminUsuarioCreateForm(forms.Form):
     ]
     first_name = forms.CharField(max_length=150, label="Nombre/s")
     last_name = forms.CharField(max_length=150, label="Apellido/s")
-    email_real = forms.EmailField(label="Email Real")
+    email_real = forms.EmailField(label="Email")
     telefono = forms.CharField(max_length=20, label="Número de Teléfono")
     rol = forms.ChoiceField(choices=ROLES_PERMITIDOS, label="Rol del nuevo usuario")
     

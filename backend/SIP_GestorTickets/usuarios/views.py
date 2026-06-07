@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import PermissionDenied
+from django.contrib import messages
 from django.contrib.auth.password_validation import validate_password
 from .models import Usuario, InfoTicket, TicketComentario, TicketHistorial
 from .forms import LoginForm, TicketForm, EmpresaRegisterForm
@@ -8,6 +9,8 @@ from django.core.mail import send_mail
 from django.contrib.auth import update_session_auth_hash
 from .forms import AdminUsuarioCreateForm
 from django.contrib import messages
+from django.utils.crypto import get_random_string
+
 
 # ==========================================
 # VISTAS DE AUTENTICACIÓN Y REGISTRO
@@ -22,11 +25,13 @@ def crear_usuario_admin_view(request):
             email = form.cleaned_data['email_real']
             first_name = form.cleaned_data['first_name']
 
+            password_aleatoria = get_random_string(length=8)
+            
             # Creamos el usuario en la base con la clave genérica
             nuevo_user = Usuario.objects.create_user(
                 username=email,
                 email=email,
-                password="12345678", # Contraseña genérica pedida
+                password=password_aleatoria, # Contraseña genérica pedida
                 first_name=first_name,
                 last_name=form.cleaned_data['last_name'],
                 telefono=form.cleaned_data['telefono'],
@@ -37,6 +42,8 @@ def crear_usuario_admin_view(request):
             nuevo_user.require_password_change = True # Obligatorio cambiar clave
             nuevo_user.save()
 
+            link_acceso = request.build_absolute_uri('/login/')
+            
             asunto_empleado = "Te crearon una cuenta en Assistech"
             mensaje_empleado = f"""
             Hola {first_name},
@@ -44,9 +51,9 @@ def crear_usuario_admin_view(request):
             El administrador de {request.user.empresa.nombre} te ha generado un usuario con el rol de '{nuevo_user.get_rol_display()}'.
 
             Tus datos para loguearte son:
-            - Link de acceso: http://127.0.0.1:8000/login/
+            - Link de acceso: {link_acceso}
             - Usuario: {email}
-            - Contraseña provisoria: 12345678
+            - Contraseña provisoria: {password_aleatoria}
 
             Recordá que vas a tener que cambiar esta contraseña genérica apenas ingreses por primera vez.
             """
@@ -57,6 +64,12 @@ def crear_usuario_admin_view(request):
                 from_email='assistech.soporte@gmail.com',
                 recipient_list=[email],
                 fail_silently=False,
+            )
+            
+            messages.success(
+                request, 
+                f"¡Usuario <strong>{email}</strong> creado correctamente! "
+                f"Le enviamos un correo electrónico de acceso con sus credenciales provisorias."
             )
             
             return redirect('dashboard')
@@ -82,8 +95,6 @@ def cambiar_contrasenia_obligatorio_view(request):
 
         if not nueva_pass:
             error = "La contraseña no puede estar vacía."
-        elif nueva_pass == "12345678":
-            error = "No podés usar la misma contraseña genérica, poné una tuya."
         elif nueva_pass != confirmar_pass:
             error = "Las contraseñas no coinciden."
         else:
@@ -106,14 +117,15 @@ def registrar_empresa_view(request):
     if request.method == 'POST':
         form = EmpresaRegisterForm(request.POST)
         if form.is_valid():
-            user=form.save()
+            user = form.save(request=request)
+            
             messages.success(
                 request, 
-                f"<strong>¡Empresa y Administrador creados con éxito!</strong><br>"
-                f"Tu usuario para ingresar es tu email: <strong class='text-white underline'>{user.email}</strong><br>"
-                f"Tu contraseña provisoria es: <strong class='text-white'>12345678</strong>.<br>"
-                f"Ingresalos abajo para acceder a tu panel."
+                f"¡Empresa registrada con éxito! Generamos tus credenciales de administrador de forma segura. "
+                f"Te enviamos un correo electrónico a <strong>{user.email}</strong> con tu contraseña provisoria aleatoria. "
+                f"Revisá tu bandeja de entrada (o Spam) para poder ingresar."
             )
+            
             return redirect('login')
     else:
         form = EmpresaRegisterForm()
@@ -150,7 +162,6 @@ def login_view(request):
                     if auth_user is not None:
                         login(request, auth_user)
                         
-                        # 🚨 INTERCEPCIÓN AQUÍ: Si debe cambiar la clave, lo desviamos de una
                         if auth_user.require_password_change:
                             return redirect('cambiar_contrasenia_obligatorio')
                             
