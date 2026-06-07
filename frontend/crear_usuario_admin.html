@@ -1,21 +1,58 @@
 {% extends 'base.html' %}
-
 {% block title %}Crear Empleado — Assistech{% endblock %}
 
 {% block content %}
-<div class="w-full max-w-md mx-auto px-4 sm:px-6 py-8 sm:py-12 bg-assist-charcoal border border-white/5 rounded-2xl sm:mt-10 shadow-xl">
+<div class="w-full max-w-xl mx-auto px-4 sm:px-6 py-8 sm:py-12 bg-assist-charcoal border border-white/5 rounded-2xl sm:mt-10 shadow-xl">
     
     <div class="mb-8 text-center">
         <h2 class="text-2xl font-bold tracking-tight text-white">Alta de Nuevo Usuario</h2>
-        <p class="mt-2 text-sm text-assist-body leading-relaxed">
-        </p>
     </div>
 
     <form method="post" class="space-y-4">
         {% csrf_token %}
         
-        <div class="space-y-2">
-            {{ form.as_p }}
+        <div>
+            <label class="text-lg font-bold text-white block mb-1">Nombre</label>
+            <input type="text" name="first_name" value="{{ form.first_name.value|default:'' }}" class="w-full rounded-xl border border-white/10 bg-assist-slate px-3 py-2 text-white focus:outline-none">
+            {% if form.first_name.errors %}
+                <p class="text-red-500 text-xs mt-1 font-bold">{{ form.first_name.errors.as_text }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label class="text-lg font-bold text-white block mb-1">Apellido</label>
+            <input type="text" name="last_name" value="{{ form.last_name.value|default:'' }}" class="w-full rounded-xl border border-white/10 bg-assist-slate px-3 py-2 text-white focus:outline-none">
+            {% if form.last_name.errors %}
+                <p class="text-red-500 text-xs mt-1 font-bold">{{ form.last_name.errors.as_text }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label class="text-lg font-bold text-white block mb-1">Email</label>
+            <input type="email" name="email_real" value="{{ form.email_real.value|default:'' }}" class="w-full rounded-xl border border-white/10 bg-assist-slate px-3 py-2 text-white focus:outline-none">
+            {% if form.email_real.errors %}
+                <p class="text-red-500 text-xs mt-1 font-bold">{{ form.email_real.errors.as_text }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label class="text-lg font-bold text-white block mb-1">Teléfono (opcional)</label>
+            <input type="text" name="telefono" value="{{ form.telefono.value|default:'' }}" class="w-full rounded-xl border border-white/10 bg-assist-slate px-3 py-2 text-white focus:outline-none">
+            {% if form.telefono.errors %}
+                <p class="text-red-500 text-xs mt-1 font-semibold">{{ form.telefono.errors.as_text }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label class="text-lg font-bold text-white block mb-1">Rol</label>
+            <select name="rol" class="w-full rounded-xl border border-white/10 bg-assist-slate px-3 py-2 text-white focus:outline-none">
+                {% for value, text in form.fields.rol.choices %}
+                    <option value="{{ value }}" {% if form.rol.value == value %}selected{% endif %}>{{ text }}</option>
+                {% endfor %}
+            </select>
+            {% if form.rol.errors %}
+                <p class="text-red-500 text-xs mt-1 font-semibold">{{ form.rol.errors.as_text }}</p>
+            {% endif %}
         </div>
 
         <button type="submit" class="w-full bg-assist-coral text-white font-bold py-4 rounded-2xl hover:brightness-110 transition mt-6 shadow-lg block text-center text-base">
@@ -26,6 +63,5 @@
     <p class="mt-6 text-center text-sm text-assist-body">
         <a href="{% url 'dashboard' %}" class="text-assist-white font-medium hover:underline">Volver al panel</a>
     </p>
-
 </div>
 {% endblock %}

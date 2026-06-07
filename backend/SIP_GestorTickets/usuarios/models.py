@@ -6,12 +6,14 @@ from django.db import models
 # ==========================================
 class Empresa(models.Model):
     PLANES = (
-        ('BASICO', 'Básico'),
+        ('BASICO', 'Básico (Gratis)'),
         ('ESTANDAR', 'Estándar'),
         ('PREMIUM', 'Premium'),
     )
     id_empresa = models.AutoField(primary_key=True)
-    nombre = models.CharField(max_length=255, unique=True)
+    nombre = models.CharField(max_length=255)
+    domicilio = models.CharField(max_length=255, blank=True, null=True)
+    pais = models.CharField(max_length=100, blank=True, null=True)
     
     cuil = models.CharField(max_length=11, unique=True, null=True, blank=True) 
     plan = models.CharField(max_length=20, choices=PLANES, default='BASICO')

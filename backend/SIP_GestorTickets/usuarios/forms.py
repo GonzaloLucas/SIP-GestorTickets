@@ -1,6 +1,7 @@
 import re
 
 from django import forms
+from django_countries import countries
 from django.contrib.auth.password_validation import validate_password
 from .models import Usuario, InfoTicket, Empresa
 from django.core.mail import send_mail
@@ -39,7 +40,9 @@ def generar_y_validar_email(nombre_empresa, email_usuario):
 # ==========================================
 class EmpresaRegisterForm(forms.Form):
     nombre_empresa = forms.CharField(max_length=255,label="Nombre de la Empresa")
-    cuil = forms.CharField(max_length=11, min_length=11, label="CUIL de la Empresa", help_text="Ingresar los 11 dígitos sin guiones.")
+    cuil = forms.CharField(max_length=11, min_length=11, label="CUIT de la Empresa", help_text="Ingresar los 11 dígitos sin guiones.")
+    domicilio = forms.CharField(label="Domicilio")
+    pais = forms.ChoiceField(choices=[('', 'Seleccioná el País')] + list(countries), label="País") 
 
     opciones_plan = [('', 'Seleccionar opción')] + list(Empresa.PLANES)
     plan = forms.ChoiceField(choices=opciones_plan, label="Selecciona tu Plan")    
@@ -47,14 +50,8 @@ class EmpresaRegisterForm(forms.Form):
     first_name = forms.CharField(max_length=150, label="Nombre")
     last_name = forms.CharField(max_length=150, label="Apellido")
     email_real = forms.EmailField(label="Email")
-    telefono = forms.CharField(max_length=20, label="Número de Teléfono")
-    
-    def clean_nombre_empresa(self):
-        nombre = self.cleaned_data.get('nombre_empresa')
-        if Empresa.objects.filter(nombre__iexact=nombre).exists():
-            raise forms.ValidationError("Ya existe una empresa registrada con ese nombre.")
-        return nombre
-    
+    telefono = forms.CharField(max_length=20, label="Teléfono", required=False)
+        
     def clean_cuil(self):
         cuil = self.cleaned_data.get('cuil')
         if not cuil.isdigit():
@@ -62,6 +59,27 @@ class EmpresaRegisterForm(forms.Form):
         if Empresa.objects.filter(cuil=cuil).exists():
             raise forms.ValidationError("Este CUIL ya está registrado en el sistema.")
         return cuil
+    
+    def clean_telefono(self):
+        tel = self.cleaned_data.get('telefono')
+        if not tel: 
+            return tel
+            
+        if not re.match(r'^\+?[\d\s\-]+$', tel):
+            raise forms.ValidationError("Teléfono inválido. Solo números, espacios, guiones o '+'.")
+        return tel
+
+    def clean_first_name(self):
+        nombre = self.cleaned_data.get('first_name')
+        if any(char.isdigit() for char in nombre):
+            raise forms.ValidationError("El nombre no puede contener números.")
+        return nombre
+
+    def clean_last_name(self):
+        apellido = self.cleaned_data.get('last_name')
+        if any(char.isdigit() for char in apellido):
+            raise forms.ValidationError("El apellido no puede contener números.")
+        return apellido
     
     def clean_email_real(self):
         email = self.cleaned_data.get('email_real').lower().strip()
@@ -72,11 +90,16 @@ class EmpresaRegisterForm(forms.Form):
     def save(self, request=None):
         from django.db import transaction
         with transaction.atomic():
-            nueva_empresa = Empresa.objects.create(nombre=self.cleaned_data['nombre_empresa'],cuil=self.cleaned_data['cuil'],plan=self.cleaned_data['plan'])
-
+            nueva_empresa = Empresa.objects.create(
+                nombre=self.cleaned_data['nombre_empresa'],
+                cuil=self.cleaned_data['cuil'],
+                plan=self.cleaned_data['plan'],
+                domicilio=self.cleaned_data['domicilio'],
+                pais=self.cleaned_data['pais']
+            )
+            
             email = self.cleaned_data['email_real']
             first_name = self.cleaned_data['first_name']
-
             password_aleatoria = get_random_string(length=8)
             
             user = Usuario.objects.create_user(
@@ -127,15 +150,36 @@ class EmpresaRegisterForm(forms.Form):
 # ==========================================
 class AdminUsuarioCreateForm(forms.Form):
     ROLES_PERMITIDOS = [
+        ('', 'Seleccionar Rol'),
         ('cliente', 'Cliente'),
         ('soporte', 'Soporte'),
         ('jefe', 'Jefe de Soporte'),
     ]
-    first_name = forms.CharField(max_length=150, label="Nombre/s")
-    last_name = forms.CharField(max_length=150, label="Apellido/s")
+    first_name = forms.CharField(max_length=150, label="Nombre")
+    last_name = forms.CharField(max_length=150, label="Apellido")
     email_real = forms.EmailField(label="Email")
-    telefono = forms.CharField(max_length=20, label="Número de Teléfono")
-    rol = forms.ChoiceField(choices=ROLES_PERMITIDOS, label="Rol del nuevo usuario")
+    telefono = forms.CharField(max_length=20, label="Teléfono",required=False)
+    rol = forms.ChoiceField(choices=ROLES_PERMITIDOS, label="Rol")
+        
+    def clean_telefono(self):
+        tel = self.cleaned_data.get('telefono')
+        if not tel: 
+            return tel
+        if not re.match(r'^\+?[\d\s\-]+$', tel):
+            raise forms.ValidationError("Teléfono inválido. Solo números, espacios, guiones o '+'.")
+        return tel
+
+    def clean_first_name(self):
+        nombre = self.cleaned_data.get('first_name')
+        if any(char.isdigit() for char in nombre):
+            raise forms.ValidationError("El nombre no puede contener números.")
+        return nombre
+
+    def clean_last_name(self):
+        apellido = self.cleaned_data.get('last_name')
+        if any(char.isdigit() for char in apellido):
+            raise forms.ValidationError("El apellido no puede contener números.")
+        return apellido
     
     def clean_email_real(self):
         email = self.cleaned_data.get('email_real').lower().strip()
