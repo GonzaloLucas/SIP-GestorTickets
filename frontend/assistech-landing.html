@@ -295,7 +295,7 @@
 
             <div class="mt-16 flex flex-col items-center justify-center gap-6 sm:mt-20 sm:flex-row sm:gap-8">
                     <a href="{% url 'register_empresa' %}"
-                     class="flex items-center justify-center mt-8 px-6 py-3 text-sm font-semibold text-white bg-[#c2412e] transition hover:brightness-110 mx-auto"
+                     class="flex items-center justify-center mt-8 px-6 py-3 text-sm font-semibold text-white bg-[#ff6b35] transition hover:brightness-110 mx-auto"
                     >
                     Comenzar ahora
                 </a>
@@ -454,7 +454,7 @@
                     </div>
                     
                     <a href="{% url 'register_empresa' %}"
-                    class="flex items-center justify-center mt-8 w-full bg-[#ff6b35] py-3 text-sm font-semibold text-white rounded-xl transition-all duration-300 hover:brightness-110 hover:shadow-[0_0_20px_rgba(194,65,46,0.3)] text-center">
+                    class="flex items-center justify-center mt-8 px-6 py-3 bg-[#ff6b35] py-3 text-sm font-semibold text-white rounded-xl transition-all duration-300 hover:brightness-110 hover:shadow-[0_0_20px_rgba(194,65,46,0.3)] text-center">
                         Comenzar
                     </a>
                 </div>
@@ -519,16 +519,18 @@
                 Crea tu espacio de trabajo en minutos y prueba el flujo completo.
             </p>
             <div class="mt-8 flex flex-wrap justify-center gap-4">
-            <a href="{% url 'register_empresa' %}" class="rounded-md bg-assist-accent px-6 py-3 text-sm font-bold text-assist-white transition hover:brightness-110">
-                Empieza ahora
-            </a> 
+           <a href="{% url 'register_empresa' %}"
+                    class="flex items-center justify-center mt-3 w-full bg-[#ff6b35] py-3 text-sm font-semibold text-white rounded-xl transition-all duration-300 hover:brightness-110 hover:shadow-[0_0_20px_rgba(194,65,46,0.3)] text-center">
+                        Comenzar
+                    </a>
             </div>
         </div>
     </section>
 
 
     <!-- FAQ -->
-    <section class="bg-assist-black py-20 md:py-28">
+    <section class="bg-assist-black py-20 md:py-28"
+    style="background: linear-gradient(135deg, #2d1b4e 0%, #1e3a5f 50%, #1a0f2e 100%)">
         <div class="mx-auto max-w-3xl px-4 md:px-6">
             <h2 class="text-center text-3xl font-bold md:text-4xl">Preguntas</h2>
             <dl class="mt-12 space-y-10">
