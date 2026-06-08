@@ -36,25 +36,53 @@
 
     <h3 class="text-xl font-semibold mb-4 text-assist-gray">Todos los Tickets del Sistema</h3>
 
+    <!-- Filtros de Búsqueda (Responsive) -->
+    <div class="flex flex-col md:flex-row gap-4 mb-6 bg-zinc-900 p-4 rounded-xl border border-zinc-800 shadow-lg">
+        <div class="flex-1">
+            <label for="searchInput" class="block text-xs font-medium text-assist-gray mb-1">Buscar</label>
+            <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Buscar por título, ID o solicitante..." class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral transition">
+        </div>
+        <div class="w-full md:w-48">
+            <label for="estadoFilter" class="block text-xs font-medium text-assist-gray mb-1">Estado</label>
+            <select id="estadoFilter" onchange="filterTable()" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral transition cursor-pointer">
+                <option value="">Todos</option>
+                <option value="abierto">Abierto</option>
+                <option value="en proceso">En proceso</option>
+                <option value="resuelto">Resuelto</option>
+                <option value="cerrado">Cerrado</option>
+            </select>
+        </div>
+        <div class="w-full md:w-48">
+            <label for="prioridadFilter" class="block text-xs font-medium text-assist-gray mb-1">Prioridad</label>
+            <select id="prioridadFilter" onchange="filterTable()" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral transition cursor-pointer">
+                <option value="">Todas</option>
+                <option value="alta">Alta</option>
+                <option value="media">Media</option>
+                <option value="baja">Baja</option>
+                <option value="sin asignar">Sin asignar</option>
+            </select>
+        </div>
+    </div>
+
     <div class="overflow-x-auto rounded-xl border border-zinc-800 w-full">
-        <table class="w-full text-left border-collapse bg-zinc-900/50">
+        <table class="w-full text-left border-collapse bg-zinc-900/50" id="ticketsTable">
             <thead>
                 <tr class="bg-zinc-800/50 text-assist-gray text-sm">
-                    <th class="p-4">ID</th>
-                    <th class="p-4">Solicitante</th>
-                    <th class="p-4">Título</th>
-                    <th class="p-4">Prioridad</th>
-                    <th class="p-4">Estado</th>
+                    <th class="p-4 cursor-pointer hover:text-white select-none transition" onclick="sortTable(0)" title="Ordenar por ID">ID <span class="text-xs opacity-50 ml-1">↕</span></th>
+                    <th class="p-4 cursor-pointer hover:text-white select-none transition" onclick="sortTable(1)" title="Ordenar por Solicitante">Solicitante <span class="text-xs opacity-50 ml-1">↕</span></th>
+                    <th class="p-4 cursor-pointer hover:text-white select-none transition" onclick="sortTable(2)" title="Ordenar por Título">Título <span class="text-xs opacity-50 ml-1">↕</span></th>
+                    <th class="p-4 cursor-pointer hover:text-white select-none transition" onclick="sortTable(3)" title="Ordenar por Prioridad">Prioridad <span class="text-xs opacity-50 ml-1">↕</span></th>
+                    <th class="p-4 cursor-pointer hover:text-white select-none transition" onclick="sortTable(4)" title="Ordenar por Estado">Estado <span class="text-xs opacity-50 ml-1">↕</span></th>
                     <th class="p-4">Asignado a</th>
                     <th class="p-4">Acciones</th>
                 </tr>
             </thead>
             <tbody class="text-assist-white">
                 {% for ticket in tickets %}
-                <tr class="border-t border-zinc-800 hover:bg-zinc-800/30 transition">
-                    <td class="p-4">#{{ ticket.numero_ticket_empresa}}</td>
-                    <td class="p-4">{{ ticket.solicitante.username }}</td>
-                    <td class="p-4">{{ ticket.titulo }}</td>
+                <tr class="border-t border-zinc-800 hover:bg-zinc-800/30 transition ticket-row" data-estado="{{ ticket.get_estado_display|default:'' }}" data-prioridad="{{ ticket.prioridad|default:'Sin asignar'|title }}">
+                    <td class="p-4 ticket-id">#{{ ticket.numero_ticket_empresa}}</td>
+                    <td class="p-4 ticket-solicitante">{{ ticket.solicitante.username }}</td>
+                    <td class="p-4 ticket-titulo">{{ ticket.titulo }}</td>
                     <td class="p-4">
                         <form method="POST" action="{% url 'cambiar_prioridad' ticket.pk %}" class="inline">
                             {% csrf_token %}
@@ -99,4 +127,62 @@
         </table>
     </div>
 </div>
+
+<script>
+    // --- FILTRADO DE TICKETS ---
+    function filterTable() {
+        const searchInput = document.getElementById('searchInput').value.toLowerCase();
+        const estadoFilter = document.getElementById('estadoFilter').value.toLowerCase();
+        const prioridadFilter = document.getElementById('prioridadFilter').value.toLowerCase();
+        
+        const rows = document.querySelectorAll('.ticket-row');
+        
+        rows.forEach(row => {
+            const id = row.querySelector('.ticket-id').innerText.toLowerCase();
+            const titulo = row.querySelector('.ticket-titulo').innerText.toLowerCase();
+            const solicitante = row.querySelector('.ticket-solicitante').innerText.toLowerCase();
+            const estado = row.getAttribute('data-estado').toLowerCase();
+            const prioridad = row.getAttribute('data-prioridad').toLowerCase();
+            
+            const matchesSearch = titulo.includes(searchInput) || solicitante.includes(searchInput) || id.includes(searchInput);
+            const matchesEstado = estadoFilter === '' || estado === estadoFilter;
+            const matchesPrioridad = prioridadFilter === '' || prioridad === prioridadFilter;
+            
+            if (matchesSearch && matchesEstado && matchesPrioridad) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    let sortAsc = true;
+    let lastCol = -1;
+
+    // Ordenamiento
+
+    function sortTable(colIndex) {
+        const table = document.getElementById("ticketsTable");
+        const tbody = table.querySelector("tbody");
+        const rows = Array.from(tbody.querySelectorAll("tr.ticket-row"));
+        
+        if (lastCol === colIndex) {
+            sortAsc = !sortAsc; // Cambiar orden si es la misma columna
+        } else {
+            sortAsc = true;     // Orden ascendente por defecto
+            lastCol = colIndex;
+        }
+        
+        rows.sort((a, b) => {
+            let valA = colIndex === 3 ? a.getAttribute('data-prioridad') : colIndex === 4 ? a.getAttribute('data-estado') : a.cells[colIndex].innerText.trim();
+            let valB = colIndex === 3 ? b.getAttribute('data-prioridad') : colIndex === 4 ? b.getAttribute('data-estado') : b.cells[colIndex].innerText.trim();
+            
+            if (colIndex === 0) return sortAsc ? (parseInt(valA.replace('#', '')) || 0) - (parseInt(valB.replace('#', '')) || 0) : (parseInt(valB.replace('#', '')) || 0) - (parseInt(valA.replace('#', '')) || 0);
+
+            return sortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        });
+        
+        rows.forEach(row => tbody.appendChild(row));
+    }
+</script>
 {% endblock %}
