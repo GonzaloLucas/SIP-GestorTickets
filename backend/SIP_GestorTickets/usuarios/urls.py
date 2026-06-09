@@ -43,4 +43,5 @@ urlpatterns = [
     path('ticket/<int:pk>/cambiar-prioridad/', views.cambiar_prioridad, name='cambiar_prioridad'),
     path('usuario/<int:pk>/quitar-acceso/', views.quitar_acceso_view, name='quitar_acceso'),
     path('usuario/<int:pk>/confirmar-baja/', views.confirmar_baja_view, name='confirmar_baja'),
+    path('ticket/<int:pk>/asignar/', views.asignar_ticket_view, name='asignar_ticket'),
 ]

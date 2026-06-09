@@ -46,6 +46,62 @@
         </div>
     </div>
 
+    <section class="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 mb-8">
+        <h3 class="text-xl font-semibold mb-4 text-assist-gray">Equipo de Soporte</h3>
+        <div class="overflow-x-auto rounded-xl border border-zinc-800">
+            <table class="w-full text-left text-sm border-collapse">
+                <thead class="bg-zinc-800/50 text-assist-gray">
+                    <tr>
+                        <th class="p-4 font-medium border-b border-zinc-800">Técnico</th>
+                        <th class="p-4 font-medium border-b border-zinc-800">Estado</th>
+                        <th class="p-4 font-medium border-b border-zinc-800">Horario y Días</th>
+                        <th class="p-4 font-medium border-b border-zinc-800 text-center">Activos</th>
+                        <th class="p-4 font-medium border-b border-zinc-800 text-center">Resueltos</th>
+                        <th class="p-4 font-medium border-b border-zinc-800 text-center">Calificación</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-zinc-800 text-white bg-zinc-900/30">
+                    {% for stats in soportes_stats %}
+                    <tr class="hover:bg-zinc-800/50 transition">
+                        <td class="p-4">
+                            <div class="font-bold text-white">{{ stats.soporte.first_name }} {{ stats.soporte.last_name }}</div>
+                            <div class="text-xs text-assist-gray mt-0.5">{{ stats.soporte.email }}</div>
+                        </td>
+                        <td class="p-4">
+                            {% if stats.soporte.autorizado %}
+                                <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Activo</span>
+                            {% else %}
+                                <span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Suspendido</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4">
+                            {% if stats.soporte.horario_ingreso and stats.soporte.horario_egreso %}
+                                <div class="text-assist-coral font-medium">{{ stats.soporte.horario_ingreso }} a {{ stats.soporte.horario_egreso }}</div>
+                                <div class="text-xs text-zinc-400 mt-1">{{ stats.dias_formateados }}</div>
+                            {% else %}
+                                <span class="text-zinc-500 italic">No definido</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4 text-center">
+                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-zinc-800 text-white font-bold text-xs">{{ stats.tickets_activos }}</span>
+                        </td>
+                        <td class="p-4 text-center text-zinc-300 font-medium">{{ stats.tickets_resueltos }}</td>
+                        <td class="p-4 text-center">
+                            <span class="font-bold {% if stats.rating_avg and stats.rating_avg >= 4 %}text-emerald-400{% elif stats.rating_avg and stats.rating_avg >= 3 %}text-amber-400{% elif stats.rating_avg %}text-red-400{% else %}text-zinc-500{% endif %}">
+                                {% if stats.rating_avg %}{{ stats.rating_avg|floatformat:1 }}{% else %}-{% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="p-8 text-center text-assist-gray">No hay técnicos de soporte registrados.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <section class="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
             <h3 class="text-xl font-semibold mb-4 text-assist-gray">Metricas por tecnico</h3>
@@ -190,7 +246,7 @@
                     <th class="p-4 cursor-pointer hover:text-white select-none transition" onclick="sortTable(2)" title="Ordenar por Título">Título <span class="text-xs opacity-50 ml-1">↕</span></th>
                     <th class="p-4 cursor-pointer hover:text-white select-none transition" onclick="sortTable(3)" title="Ordenar por Prioridad">Prioridad <span class="text-xs opacity-50 ml-1">↕</span></th>
                     <th class="p-4 cursor-pointer hover:text-white select-none transition" onclick="sortTable(4)" title="Ordenar por Estado">Estado <span class="text-xs opacity-50 ml-1">↕</span></th>
-                    <th class="p-4">Asignado a</th>
+                    <th class="p-4 cursor-pointer hover:text-white select-none transition" onclick="sortTable(5)" title="Ordenar por Asignado">Asignado a <span class="text-xs opacity-50 ml-1">↕</span></th>
                     <th class="p-4">Acciones</th>
                 </tr>
             </thead>
@@ -225,9 +281,9 @@
                     <td class="p-4">
                         {% with asignacion=ticket.asignaciones.first %}
                             {% if asignacion and asignacion.activo %}
-                                <span class="text-assist-coral">{{ asignacion.soporte.username }}</span>
+                                <a href="{% url 'asignar_ticket' ticket.id_ticket %}" class="text-assist-coral hover:underline font-medium" title="Reasignar soporte">{{ asignacion.soporte.first_name }} {{ asignacion.soporte.last_name }}</a>
                             {% else %}
-                                <span class="text-red-500 font-medium">Sin asignar</span>
+                                <a href="{% url 'asignar_ticket' ticket.id_ticket %}" class="text-red-500 font-medium hover:underline" title="Asignar soporte">Sin asignar</a>
                             {% endif %}
                         {% endwith %}
                     </td>

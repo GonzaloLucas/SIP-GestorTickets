@@ -42,6 +42,9 @@ class Usuario(AbstractUser):
     rol = models.CharField(max_length=20, choices=ROLES)
     autorizado = models.BooleanField(default=True) 
     telefono = models.CharField(max_length=20, blank=True, null=True)
+    horario_ingreso = models.CharField(max_length=5, blank=True, null=True)
+    horario_egreso = models.CharField(max_length=5, blank=True, null=True)
+    dias_laborales = models.CharField(max_length=50, blank=True, null=True)
 
     require_password_change = models.BooleanField(default=False)
     def __str__(self):

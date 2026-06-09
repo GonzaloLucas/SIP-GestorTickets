@@ -155,11 +155,27 @@ class AdminUsuarioCreateForm(forms.Form):
         ('soporte', 'Soporte'),
         ('jefe', 'Jefe de Soporte'),
     ]
+    HORARIOS_PERMITIDOS = [('', 'Seleccionar horario')] + [
+        (f"{h:02d}:{m:02d}", f"{h:02d}:{m:02d}")
+        for h in range(24) for m in (0, 30)
+    ]
+    DIAS_SEMANA = [
+        ('0', 'Lunes'),
+        ('1', 'Martes'),
+        ('2', 'Miércoles'),
+        ('3', 'Jueves'),
+        ('4', 'Viernes'),
+        ('5', 'Sábado'),
+        ('6', 'Domingo'),
+    ]
     first_name = forms.CharField(max_length=150, label="Nombre")
     last_name = forms.CharField(max_length=150, label="Apellido")
     email_real = forms.EmailField(label="Email")
     telefono = forms.CharField(max_length=20, label="Teléfono",required=False)
     rol = forms.ChoiceField(choices=ROLES_PERMITIDOS, label="Rol")
+    horario_ingreso = forms.ChoiceField(choices=HORARIOS_PERMITIDOS, required=False, label="Horario Ingreso")
+    horario_egreso = forms.ChoiceField(choices=HORARIOS_PERMITIDOS, required=False, label="Horario Egreso")
+    dias_laborales = forms.MultipleChoiceField(choices=DIAS_SEMANA, widget=forms.CheckboxSelectMultiple, required=False, label="Días Laborales")
         
     def clean_telefono(self):
         tel = self.cleaned_data.get('telefono')
@@ -186,6 +202,18 @@ class AdminUsuarioCreateForm(forms.Form):
         if Usuario.objects.filter(email=email).exists():
             raise forms.ValidationError("Este email ya está registrado en el sistema.")
         return email
+
+    def clean(self):
+        cleaned_data = super().clean()
+        rol = cleaned_data.get('rol')
+        if rol == 'soporte':
+            if not cleaned_data.get('horario_ingreso'):
+                self.add_error('horario_ingreso', 'El horario de ingreso es obligatorio para el rol Soporte.')
+            if not cleaned_data.get('horario_egreso'):
+                self.add_error('horario_egreso', 'El horario de egreso es obligatorio para el rol Soporte.')
+            if not cleaned_data.get('dias_laborales'):
+                self.add_error('dias_laborales', 'Debes seleccionar al menos un día laboral para el rol Soporte.')
+        return cleaned_data
     
 
 

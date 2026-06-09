@@ -14,6 +14,7 @@ from .models import (
     InfoTicket,
     TicketComentario,
     TicketHistorial,
+    TicketAsignacion,
 )
 from .forms import (
     LoginForm,
@@ -58,6 +59,12 @@ def crear_usuario_admin_view(request):
                         rol=form.cleaned_data['rol'],
                         autorizado=True
                     )
+                    
+                    if form.cleaned_data.get('rol') == 'soporte':
+                        nuevo_user.horario_ingreso = form.cleaned_data.get('horario_ingreso')
+                        nuevo_user.horario_egreso = form.cleaned_data.get('horario_egreso')
+                        nuevo_user.dias_laborales = ",".join(form.cleaned_data.get('dias_laborales', []))
+                        
                     nuevo_user.require_password_change = True
                     nuevo_user.save()
 
@@ -84,7 +91,6 @@ def crear_usuario_admin_view(request):
                         fail_silently=False,
                     )
 
-                messages.success(request, f"Usuario {email} creado correctamente. Se enviaron las credenciales por correo.")
                 return redirect('dashboard')
             except Exception:
                 messages.error(
@@ -347,6 +353,25 @@ def dashboard_view(request):
             promedio=Avg('rating'),
             cantidad=Count('id')
         ).order_by('technician__username')
+        
+        soportes = Usuario.objects.filter(empresa=request.user.empresa, rol='soporte', is_active=True)
+        soportes_stats = []
+        for soporte in soportes:
+            tickets_activos = TicketAsignacion.objects.filter(soporte=soporte, activo=True).count()
+            tickets_resueltos = InfoTicket.objects.filter(
+                asignaciones__soporte=soporte,
+                estado__in=['RESUELTO', 'CERRADO']
+            ).distinct().count()
+            
+            feedback_avg = feedback_servicio.filter(technician=soporte).aggregate(Avg('rating'))['rating__avg']
+
+            soportes_stats.append({
+                'soporte': soporte,
+                'tickets_activos': tickets_activos,
+                'tickets_resueltos': tickets_resueltos,
+                'rating_avg': feedback_avg,
+                'dias_formateados': _formatear_dias(soporte.dias_laborales),
+            })
 
         return render(request, 'dashboard_jefe_soporte.html', {
             'tickets': tickets,
@@ -355,6 +380,7 @@ def dashboard_view(request):
             'promedio_soporte': feedback_servicio.aggregate(promedio=Avg('rating'))['promedio'],
             'metricas_tecnico': metricas_tecnico,
             'feedback_bajo': feedback_servicio.filter(is_critical=True),
+            'soportes_stats': soportes_stats,
         })
 
     elif rol == 'platform_admin':
@@ -550,6 +576,68 @@ def guardar_feedback_tecnico(request, pk):
 
     return redirect('detalle_ticket', pk=pk)
 
+def asignar_ticket_view(request, pk):
+    if not request.user.is_authenticated or request.user.rol != 'jefe':
+        raise PermissionDenied
+
+    ticket = get_object_or_404(InfoTicket, pk=pk)
+    
+    if ticket.solicitante.empresa != request.user.empresa:
+        raise PermissionDenied
+
+    soportes = Usuario.objects.filter(empresa=request.user.empresa, rol='soporte', is_active=True, autorizado=True)
+
+    hora_actual = timezone.now().strftime("%H:%M")
+    dia_actual = str(timezone.now().weekday())
+
+    soportes_info = []
+    for soporte in soportes:
+        tickets_activos = TicketAsignacion.objects.filter(soporte=soporte, activo=True).count()
+        
+        esta_trabajando = False
+        dias_soporte = soporte.dias_laborales.split(',') if soporte.dias_laborales else []
+        if soporte.horario_ingreso and soporte.horario_egreso and dia_actual in dias_soporte:
+            if soporte.horario_ingreso <= soporte.horario_egreso:
+                esta_trabajando = soporte.horario_ingreso <= hora_actual <= soporte.horario_egreso
+            else:
+                esta_trabajando = hora_actual >= soporte.horario_ingreso or hora_actual <= soporte.horario_egreso
+                
+        puede_asignar = tickets_activos < 3 and esta_trabajando
+        es_asignado_actual = ticket.asignaciones.filter(soporte=soporte, activo=True).exists()
+
+        soportes_info.append({
+            'soporte': soporte,
+            'tickets_activos': tickets_activos,
+            'puede_asignar': puede_asignar,
+            'es_asignado_actual': es_asignado_actual,
+            'esta_trabajando': esta_trabajando,
+            'dias_formateados': _formatear_dias(soporte.dias_laborales),
+        })
+
+    if request.method == 'POST':
+        soporte_id = request.POST.get('soporte_id')
+        if soporte_id:
+            soporte_seleccionado = get_object_or_404(Usuario, pk=soporte_id, empresa=request.user.empresa, rol='soporte')
+            
+            trabaja_ahora = False
+            dias_soporte_sel = soporte_seleccionado.dias_laborales.split(',') if soporte_seleccionado.dias_laborales else []
+            if soporte_seleccionado.horario_ingreso and soporte_seleccionado.horario_egreso and dia_actual in dias_soporte_sel:
+                if soporte_seleccionado.horario_ingreso <= soporte_seleccionado.horario_egreso:
+                    trabaja_ahora = soporte_seleccionado.horario_ingreso <= hora_actual <= soporte_seleccionado.horario_egreso
+                else:
+                    trabaja_ahora = hora_actual >= soporte_seleccionado.horario_ingreso or hora_actual <= soporte_seleccionado.horario_egreso
+
+            if not trabaja_ahora:
+                messages.error(request, 'No se pudo asignar. El técnico seleccionado se encuentra fuera de su horario laboral.')
+            elif TicketAsignacion.objects.filter(soporte=soporte_seleccionado, activo=True).count() < 3:
+                TicketAsignacion.objects.filter(ticket=ticket, activo=True).update(activo=False)
+                TicketAsignacion.objects.create(ticket=ticket, soporte=soporte_seleccionado, asignado_por=request.user, activo=True)
+                return redirect('dashboard')
+            else:
+                messages.error(request, 'No se pudo asignar. El técnico seleccionado ya alcanzó el máximo de 3 tickets permitidos.')
+
+    return render(request, 'asignar_ticket.html', {'ticket': ticket, 'soportes_info': soportes_info})
+
 # ==========================================
 # VISTAS DE ADMINISTRACIÃ“N DE PERSONAL
 # ==========================================
@@ -574,7 +662,23 @@ def eliminar_usuario_definitivo_view(request, pk):
 def confirmar_baja_view(request, pk):
     empleado = _obtener_empleado_controlado(request, pk)
     
-    return render(request, 'confirmar_baja.html', {'empleado': empleado})
+    horarios = [f"{h:02d}:{m:02d}" for h in range(24) for m in (0, 30)]
+    dias_semana = [('0', 'Lunes'), ('1', 'Martes'), ('2', 'Miércoles'), ('3', 'Jueves'), ('4', 'Viernes'), ('5', 'Sábado'), ('6', 'Domingo')]
+    dias_actuales = empleado.dias_laborales.split(',') if empleado.dias_laborales else []
+    
+    if request.method == 'POST' and empleado.rol == 'soporte':
+        ingreso = request.POST.get('horario_ingreso')
+        egreso = request.POST.get('horario_egreso')
+        dias_nuevos = request.POST.getlist('dias_laborales')
+        if ingreso in horarios and egreso in horarios:
+            empleado.horario_ingreso = ingreso
+            empleado.horario_egreso = egreso
+            empleado.dias_laborales = ",".join(dias_nuevos)
+            empleado.save()
+            messages.success(request, f'Horarios de {empleado.first_name} actualizados correctamente.')
+            return redirect('dashboard')
+            
+    return render(request, 'confirmar_baja.html', {'empleado': empleado, 'horarios': horarios, 'dias_semana': dias_semana, 'dias_actuales': dias_actuales})
 
 def aprobar_usuario_view(request, pk):
     empleado = _obtener_empleado_controlado(request, pk)    
@@ -590,3 +694,8 @@ def _obtener_empleado_controlado(request, pk):
     if request.user.rol != 'admin_cliente':
         raise PermissionDenied
     return get_object_or_404(Usuario, pk=pk)
+
+def _formatear_dias(dias_str):
+    if not dias_str: return "Sin definir"
+    mapa = {'0': 'Lu', '1': 'Ma', '2': 'Mi', '3': 'Ju', '4': 'Vi', '5': 'Sá', '6': 'Do'}
+    return " ".join([mapa.get(d, '') for d in dias_str.split(',')])

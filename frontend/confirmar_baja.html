@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Confirmar Baja — Assistech{% endblock %}
+{% block title %}Administrar Usuario — Assistech{% endblock %}
 
 {% block content %}
 <div class="w-full max-w-md mx-auto px-4 sm:px-6 py-8 sm:py-10 bg-assist-charcoal border border-white/10 rounded-2xl text-center shadow-2xl mx-4 mt-8 sm:mt-20">
@@ -26,5 +26,48 @@
         </a>
     </div>
 
+    {% if empleado.rol == 'soporte' %}
+    <hr class="border-white/10 my-6">
+    <div class="text-left">
+        <h3 class="text-lg font-bold text-white mb-4 text-center">Modificar Horario</h3>
+        <form method="post" action="{% url 'confirmar_baja' empleado.pk %}" class="space-y-4">
+            {% csrf_token %}
+            <div class="flex gap-4">
+                <div class="flex-1">
+                    <label class="text-sm font-bold text-assist-gray block mb-1">Horario Ingreso</label>
+                    <select name="horario_ingreso" class="w-full rounded-xl border border-white/10 bg-assist-slate px-3 py-2 text-white focus:outline-none">
+                        {% for horario in horarios %}
+                            <option value="{{ horario }}" {% if empleado.horario_ingreso == horario %}selected{% endif %}>{{ horario }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="flex-1">
+                    <label class="text-sm font-bold text-assist-gray block mb-1">Horario Egreso</label>
+                    <select name="horario_egreso" class="w-full rounded-xl border border-white/10 bg-assist-slate px-3 py-2 text-white focus:outline-none">
+                        {% for horario in horarios %}
+                            <option value="{{ horario }}" {% if empleado.horario_egreso == horario %}selected{% endif %}>{{ horario }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="mt-4">
+                <label class="text-sm font-bold text-assist-gray block mb-2">Días Laborales</label>
+                <div class="flex flex-wrap gap-2">
+                    {% for val, text in dias_semana %}
+                    <label class="flex items-center gap-1.5 text-white text-sm cursor-pointer select-none">
+                        <input type="checkbox" name="dias_laborales" value="{{ val }}"
+                            class="w-4 h-4 cursor-pointer accent-blue-500"
+                            {% if val in dias_actuales %}checked{% endif %}>
+                        {{ text|slice:":3" }}
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            <button type="submit" class="w-full bg-blue-500 text-white font-bold py-2.5 rounded-xl hover:bg-blue-600 transition text-sm text-center mt-4">
+                Guardar Horario
+            </button>
+        </form>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
