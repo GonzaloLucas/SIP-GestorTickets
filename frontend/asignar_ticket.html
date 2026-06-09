@@ -52,7 +52,7 @@
                         <td class="p-4">
                             <div class="flex items-center gap-2">
                                 <div class="w-full bg-zinc-800 rounded-full h-2 max-w-[100px]">
-                                    <div class="h-2 rounded-full {% if info.tickets_activos == 0 %}bg-emerald-500{% elif info.tickets_activos == 1 %}bg-emerald-400{% elif info.tickets_activos == 2 %}bg-amber-500{% else %}bg-red-500{% endif %}" style="width: {% if info.tickets_activos == 0 %}0%{% elif info.tickets_activos == 1 %}33.3%{% elif info.tickets_activos == 2 %}66.6%{% else %}100%{% endif %};"></div>
+                                    <div class="h-2 rounded-full {% if info.tickets_activos == 0 %}bg-emerald-500{% elif info.tickets_activos == 1 %}bg-emerald-400{% elif info.tickets_activos == 2 %}bg-amber-500{% else %}bg-red-500{% endif %}"></div>
                                 </div>
                                 <span class="text-xs text-assist-gray">{{ info.tickets_activos }}/3</span>
                             </div>
