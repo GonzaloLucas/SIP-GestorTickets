@@ -3,7 +3,7 @@ import re
 from django import forms
 from django_countries import countries
 from django.contrib.auth.password_validation import validate_password
-from .models import Usuario, InfoTicket, Empresa
+from .models import FeedbackPlatform, FeedbackSupportInternal, Usuario, InfoTicket, Empresa
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
 import unicodedata
@@ -187,6 +187,31 @@ class AdminUsuarioCreateForm(forms.Form):
             raise forms.ValidationError("Este email ya está registrado en el sistema.")
         return email
     
+
+
+class SuperAdminPlatformAdminCreateForm(forms.Form):
+    first_name = forms.CharField(max_length=150, label="Nombre")
+    last_name = forms.CharField(max_length=150, label="Apellido")
+    email_real = forms.EmailField(label="Email")
+    password = forms.CharField(label="Contrasenia", widget=forms.PasswordInput)
+    confirmar_password = forms.CharField(label="Confirmar contrasenia", widget=forms.PasswordInput)
+
+    def clean_email_real(self):
+        email = self.cleaned_data.get('email_real').lower().strip()
+        if Usuario.objects.filter(email=email).exists():
+            raise forms.ValidationError("Este email ya esta registrado en el sistema.")
+        return email
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        confirmar_password = cleaned_data.get('confirmar_password')
+
+        if password and confirmar_password and password != confirmar_password:
+            self.add_error('confirmar_password', 'Las contrasenias no coinciden.')
+
+        return cleaned_data
+
 # ==========================================
 # FORMULARIO: LOGIN
 # ==========================================
@@ -242,3 +267,47 @@ class TicketForm(forms.ModelForm):
             else:
                 cleaned_data['categoria'] = self._validate_text_field(categoria_otro, 'categoría')
         return cleaned_data
+
+
+# ==========================================
+# FORMULARIOS: FEEDBACK
+# ==========================================
+class UserFeedbackForm(forms.Form):
+    TIPOS_FEEDBACK = (
+        ('servicio', 'Servicio de Soporte'),
+        ('plataforma', 'Plataforma'),
+    )
+
+    rating = forms.ChoiceField(
+        choices=[(str(i), f'{i} estrella{"s" if i > 1 else ""}') for i in range(1, 6)],
+        label='Calificacion'
+    )
+    comment = forms.CharField(
+        required=False,
+        label='Comentario',
+        widget=forms.Textarea(attrs={'rows': 3, 'placeholder': 'Comentario opcional'})
+    )
+    feedback_type = forms.ChoiceField(choices=TIPOS_FEEDBACK, label='Tipo de feedback')
+    platform_category = forms.ChoiceField(
+        choices=FeedbackPlatform.CATEGORIAS,
+        required=False,
+        label='Categoria de plataforma'
+    )
+
+    def clean_rating(self):
+        return int(self.cleaned_data['rating'])
+
+
+class TechnicianFeedbackForm(forms.ModelForm):
+    class Meta:
+        model = FeedbackSupportInternal
+        fields = ['difficulty', 'comment', 'problems_found']
+        labels = {
+            'difficulty': 'Dificultad del caso',
+            'comment': 'Comentario sobre el proceso',
+            'problems_found': 'Problemas encontrados durante la resolucion',
+        }
+        widgets = {
+            'comment': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Comentario opcional'}),
+            'problems_found': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Problemas encontrados'}),
+        }

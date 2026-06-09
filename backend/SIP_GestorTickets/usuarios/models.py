@@ -31,6 +31,7 @@ class Usuario(AbstractUser):
         ('cliente', 'Cliente'),
         ('soporte', 'Soporte'),
         ('jefe', 'Jefe de Soporte'),
+        ('platform_admin', 'Administrador de Plataforma'),
     )
     empresa = models.ForeignKey(
         Empresa, on_delete=models.SET_NULL, 
@@ -157,3 +158,89 @@ class TicketAsignacion(models.Model):
 
     def __str__(self):
         return f"Asignacion #{self.id_asignacion} - Ticket #{self.ticket.id_ticket}"
+
+
+# ==========================================
+# MODELOS: FEEDBACK
+# ==========================================
+class FeedbackService(models.Model):
+    id = models.AutoField(primary_key=True)
+    ticket = models.ForeignKey(InfoTicket, on_delete=models.CASCADE, related_name='feedback_servicio')
+    user = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name='feedback_servicio_realizado')
+    technician = models.ForeignKey(
+        Usuario,
+        on_delete=models.PROTECT,
+        related_name='feedback_servicio_recibido',
+        limit_choices_to={'rol': 'soporte'},
+        blank=True,
+        null=True
+    )
+    rating = models.PositiveSmallIntegerField()
+    comment = models.TextField(blank=True, null=True)
+    is_critical = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'feedback_service'
+        ordering = ['-created_at']
+
+    def save(self, *args, **kwargs):
+        self.is_critical = self.rating <= 2
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Feedback servicio ticket #{self.ticket.id_ticket} - {self.rating}/5"
+
+
+class FeedbackPlatform(models.Model):
+    CATEGORIAS = (
+        ('BUG', 'Bug'),
+        ('MEJORA', 'Sugerencia de mejora'),
+        ('UX_UI', 'UX/UI'),
+        ('RENDIMIENTO', 'Rendimiento'),
+        ('FUNCIONALIDAD', 'Funcionalidad faltante'),
+        ('OTRO', 'Otro'),
+    )
+
+    id = models.AutoField(primary_key=True)
+    ticket = models.ForeignKey(InfoTicket, on_delete=models.CASCADE, related_name='feedback_plataforma')
+    user = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name='feedback_plataforma_realizado')
+    rating = models.PositiveSmallIntegerField()
+    comment = models.TextField(blank=True, null=True)
+    category = models.CharField(max_length=20, choices=CATEGORIAS, default='OTRO')
+    is_critical = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'feedback_platform'
+        ordering = ['-created_at']
+
+    def save(self, *args, **kwargs):
+        self.is_critical = self.rating <= 2
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Feedback plataforma ticket #{self.ticket.id_ticket} - {self.rating}/5"
+
+
+class FeedbackSupportInternal(models.Model):
+    DIFICULTADES = (
+        ('BAJA', 'Baja'),
+        ('MEDIA', 'Media'),
+        ('ALTA', 'Alta'),
+    )
+
+    id = models.AutoField(primary_key=True)
+    ticket = models.ForeignKey(InfoTicket, on_delete=models.CASCADE, related_name='feedback_interno_soporte')
+    technician = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name='feedback_interno_realizado')
+    difficulty = models.CharField(max_length=10, choices=DIFICULTADES)
+    comment = models.TextField(blank=True, null=True)
+    problems_found = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'feedback_support_internal'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Feedback interno ticket #{self.ticket.id_ticket} - {self.get_difficulty_display()}"

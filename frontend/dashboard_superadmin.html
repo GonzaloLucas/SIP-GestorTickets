@@ -1,0 +1,306 @@
+{% extends 'base.html' %}
+
+{% block title %}Panel SuperAdmin - Assistech{% endblock %}
+
+{% block navbar %}
+{% load static %}
+<nav class="border-b border-assist-dark px-6 py-4">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-y-3">
+        <a href="{% url 'dashboard' %}" class="flex items-center gap-3 hover:opacity-80 transition">
+            <img src="{% static 'usuarios/logo.jpeg' %}" alt="Logo Assistech" class="h-8 w-8 rounded-md bg-assist-coral">
+            <span class="text-xl font-bold tracking-tight">Assistech</span>
+        </a>
+        <div class="flex flex-wrap items-center gap-3 sm:gap-6">
+            <span class="text-xs sm:text-sm text-assist-gray">SuperAdmin: {{ request.user.username }}</span>
+            <a href="{% url 'logout' %}" class="text-xs sm:text-sm text-assist-coral hover:underline">Cerrar Sesion</a>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full">
+    <div class="mb-8">
+        <h1 class="text-2xl sm:text-3xl font-bold">Panel SuperAdmin</h1>
+        <p class="text-sm sm:text-base text-assist-gray mt-1">Vista global y privada de feedbacks del sistema.</p>
+        <a href="{% url 'crear_platform_admin' %}" class="mt-4 inline-flex rounded-lg bg-assist-coral px-4 py-2 text-sm font-bold text-white transition hover:brightness-110">
+            Crear Platform Admin
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
+        <div class="p-6 bg-zinc-900 border border-assist-coral/40 rounded-xl">
+            <p class="text-assist-gray">Feedbacks soporte</p>
+            <strong class="text-2xl text-white">{{ feedback_servicio.count }}</strong>
+        </div>
+        <div class="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
+            <p class="text-assist-gray">Promedio soporte</p>
+            <strong class="text-2xl text-white">{% if promedio_soporte %}{{ promedio_soporte|floatformat:1 }}/5{% else %}-{% endif %}</strong>
+        </div>
+        <div class="p-6 bg-zinc-900 border border-red-900/60 rounded-xl">
+            <p class="text-red-300">Soporte critico</p>
+            <strong class="text-2xl text-red-300">{{ feedback_servicio_critico.count }}</strong>
+        </div>
+        <div class="p-6 bg-zinc-900 border border-sky-500/40 rounded-xl">
+            <p class="text-assist-gray">Feedbacks plataforma</p>
+            <strong class="text-2xl text-white">{{ feedback_plataforma.count }}</strong>
+        </div>
+    </div>
+
+    <form method="GET" class="mb-8 rounded-xl border border-zinc-800 bg-zinc-900 p-4 shadow-lg">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div>
+                <label for="empresa" class="block text-xs font-medium text-assist-gray mb-1">Empresa</label>
+                <select id="empresa" name="empresa" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral">
+                    <option value="">Todas</option>
+                    {% for empresa in empresas %}
+                        <option value="{{ empresa.id_empresa }}" {% if empresa.id_empresa|stringformat:"s" == filtros.empresa %}selected{% endif %}>{{ empresa.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="tipo" class="block text-xs font-medium text-assist-gray mb-1">Tipo</label>
+                <select id="tipo" name="tipo" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral">
+                    <option value="todos" {% if filtros.tipo == 'todos' %}selected{% endif %}>Todos</option>
+                    <option value="soporte" {% if filtros.tipo == 'soporte' %}selected{% endif %}>Soporte</option>
+                    <option value="plataforma" {% if filtros.tipo == 'plataforma' %}selected{% endif %}>Plataforma</option>
+                </select>
+            </div>
+            <div>
+                <label for="rating" class="block text-xs font-medium text-assist-gray mb-1">Calificacion</label>
+                <select id="rating" name="rating" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral">
+                    <option value="">Todas</option>
+                    <option value="5" {% if filtros.rating == '5' %}selected{% endif %}>5 estrellas</option>
+                    <option value="4" {% if filtros.rating == '4' %}selected{% endif %}>4 estrellas</option>
+                    <option value="3" {% if filtros.rating == '3' %}selected{% endif %}>3 estrellas</option>
+                    <option value="2" {% if filtros.rating == '2' %}selected{% endif %}>2 estrellas</option>
+                    <option value="1" {% if filtros.rating == '1' %}selected{% endif %}>1 estrella</option>
+                </select>
+            </div>
+            <div>
+                <label for="critico" class="block text-xs font-medium text-assist-gray mb-1">Criticidad</label>
+                <select id="critico" name="critico" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral">
+                    <option value="" {% if not filtros.critico %}selected{% endif %}>Todos</option>
+                    <option value="1" {% if filtros.critico == '1' %}selected{% endif %}>Solo criticos</option>
+                </select>
+            </div>
+            <div>
+                <label for="q" class="block text-xs font-medium text-assist-gray mb-1">Buscar</label>
+                <input id="q" name="q" value="{{ filtros.q }}" type="text" placeholder="Ticket, usuario, tecnico..." class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral">
+            </div>
+        </div>
+        <div class="mt-4 flex flex-wrap gap-3">
+            <button type="submit" class="rounded-lg bg-assist-coral px-4 py-2 text-sm font-bold text-white transition hover:brightness-110">Aplicar filtros</button>
+            <a href="{% url 'dashboard' %}" class="rounded-lg border border-white/10 px-4 py-2 text-sm font-bold text-assist-gray transition hover:text-white">Limpiar</a>
+        </div>
+    </form>
+
+    {% if mostrar_soporte %}
+    <section class="rounded-xl border border-assist-coral/40 bg-zinc-900/50 p-6 mb-8">
+        <div class="mb-4 flex flex-col gap-1">
+            <div class="flex flex-wrap items-center gap-3">
+                <h2 class="text-xl font-semibold text-white">Feedbacks de soporte</h2>
+                <span class="rounded-full border border-assist-coral/40 bg-assist-coral/10 px-3 py-1 text-xs font-bold text-assist-coral">Soporte</span>
+            </div>
+            <p class="text-sm text-assist-gray">Comentarios sobre atencion, tiempos, resolucion y desempeno tecnico.</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-zinc-800/50 text-assist-gray text-sm">
+                        <th class="p-4">Empresa</th>
+                        <th class="p-4">Ticket</th>
+                        <th class="p-4">Quien lo hizo</th>
+                        <th class="p-4">Cuando</th>
+                        <th class="p-4">Quien trabajo</th>
+                        <th class="p-4">Calificacion</th>
+                        <th class="p-4">Accion</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-zinc-800">
+                    {% for feedback in feedback_servicio %}
+                    <tr class="hover:bg-zinc-800/30 transition">
+                        <td class="p-4">{{ feedback.ticket.solicitante.empresa.nombre|default:"Sin empresa" }}</td>
+                        <td class="p-4">
+                            <span class="text-assist-coral">#{{ feedback.ticket.numero_ticket_empresa }}</span>
+                            <p class="text-xs text-assist-gray">{{ feedback.ticket.titulo }}</p>
+                        </td>
+                        <td class="p-4">{{ feedback.user.username }}</td>
+                        <td class="p-4 text-sm text-assist-gray">{{ feedback.created_at|date:"d/m/Y H:i" }}</td>
+                        <td class="p-4">{{ feedback.technician.username|default:"Sin asignar" }}</td>
+                        <td class="p-4 {% if feedback.is_critical %}text-red-300 font-bold{% endif %}">{{ feedback.rating }}/5</td>
+                        <td class="p-4">
+                            <button type="button"
+                                class="rounded-lg border border-assist-coral/40 px-3 py-2 text-xs font-bold text-assist-coral transition hover:bg-assist-coral hover:text-white"
+                                data-kind="Soporte"
+                                data-company="{{ feedback.ticket.solicitante.empresa.nombre|default:'Sin empresa'|escape }}"
+                                data-ticket="#{{ feedback.ticket.numero_ticket_empresa }} - {{ feedback.ticket.titulo|escape }}"
+                                data-user="{{ feedback.user.username|escape }}"
+                                data-created="{{ feedback.created_at|date:'d/m/Y H:i' }}"
+                                data-worker="{{ feedback.technician.username|default:'Sin asignar'|escape }}"
+                                data-rating="{{ feedback.rating }}/5"
+                                data-critical="{% if feedback.is_critical %}Si{% else %}No{% endif %}"
+                                data-category="Servicio de Soporte"
+                                data-comment="{{ feedback.comment|default:'Sin comentario'|escape }}"
+                                onclick="openFeedbackModal(this)">
+                                Ver detalle
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="p-12 text-center text-assist-gray">No hay feedbacks de soporte con esos filtros.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% endif %}
+
+    {% if mostrar_plataforma %}
+    <section class="rounded-xl border border-sky-500/40 bg-zinc-900/50 p-6">
+        <div class="mb-4 flex flex-col gap-1">
+            <div class="flex flex-wrap items-center gap-3">
+                <h2 class="text-xl font-semibold text-white">Feedbacks de plataforma</h2>
+                <span class="rounded-full border border-sky-500/40 bg-sky-500/10 px-3 py-1 text-xs font-bold text-sky-300">Plataforma</span>
+            </div>
+            <p class="text-sm text-assist-gray">Comentarios sobre bugs, UX/UI, rendimiento y funcionalidades faltantes.</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-zinc-800/50 text-assist-gray text-sm">
+                        <th class="p-4">Empresa</th>
+                        <th class="p-4">Ticket</th>
+                        <th class="p-4">Usuario</th>
+                        <th class="p-4">Cuando</th>
+                        <th class="p-4">Categoria</th>
+                        <th class="p-4">Calificacion</th>
+                        <th class="p-4">Accion</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-zinc-800">
+                    {% for feedback in feedback_plataforma %}
+                    <tr class="hover:bg-zinc-800/30 transition">
+                        <td class="p-4">{{ feedback.ticket.solicitante.empresa.nombre|default:"Sin empresa" }}</td>
+                        <td class="p-4">
+                            <span class="text-sky-300">#{{ feedback.ticket.numero_ticket_empresa }}</span>
+                            <p class="text-xs text-assist-gray">{{ feedback.ticket.titulo }}</p>
+                        </td>
+                        <td class="p-4">{{ feedback.user.username }}</td>
+                        <td class="p-4 text-sm text-assist-gray">{{ feedback.created_at|date:"d/m/Y H:i" }}</td>
+                        <td class="p-4">{{ feedback.get_category_display }}</td>
+                        <td class="p-4 {% if feedback.is_critical %}text-red-300 font-bold{% endif %}">{{ feedback.rating }}/5</td>
+                        <td class="p-4">
+                            <button type="button"
+                                class="rounded-lg border border-sky-500/40 px-3 py-2 text-xs font-bold text-sky-300 transition hover:bg-sky-500 hover:text-white"
+                                data-kind="Plataforma"
+                                data-company="{{ feedback.ticket.solicitante.empresa.nombre|default:'Sin empresa'|escape }}"
+                                data-ticket="#{{ feedback.ticket.numero_ticket_empresa }} - {{ feedback.ticket.titulo|escape }}"
+                                data-user="{{ feedback.user.username|escape }}"
+                                data-created="{{ feedback.created_at|date:'d/m/Y H:i' }}"
+                                data-worker="No aplica"
+                                data-rating="{{ feedback.rating }}/5"
+                                data-critical="{% if feedback.is_critical %}Si{% else %}No{% endif %}"
+                                data-category="{{ feedback.get_category_display|escape }}"
+                                data-comment="{{ feedback.comment|default:'Sin comentario'|escape }}"
+                                onclick="openFeedbackModal(this)">
+                                Ver detalle
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="p-12 text-center text-assist-gray">No hay feedbacks de plataforma con esos filtros.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% endif %}
+</div>
+
+<div id="feedbackModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 px-4">
+    <section class="w-full max-w-2xl rounded-xl border border-zinc-700 bg-zinc-900 p-6 shadow-2xl">
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <p id="modalKind" class="text-xs font-bold uppercase tracking-wider text-assist-coral"></p>
+                <h2 class="mt-1 text-xl font-semibold">Detalle del feedback</h2>
+            </div>
+            <button type="button" class="rounded-lg border border-white/10 px-3 py-1 text-sm text-assist-gray hover:text-white" onclick="closeFeedbackModal()">Cerrar</button>
+        </div>
+
+        <dl class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+                <dt class="text-xs uppercase tracking-wider text-assist-gray">Empresa</dt>
+                <dd id="modalCompany" class="mt-1 font-medium text-white"></dd>
+            </div>
+            <div>
+                <dt class="text-xs uppercase tracking-wider text-assist-gray">Ticket</dt>
+                <dd id="modalTicket" class="mt-1 font-medium text-white"></dd>
+            </div>
+            <div>
+                <dt class="text-xs uppercase tracking-wider text-assist-gray">Quien lo hizo</dt>
+                <dd id="modalUser" class="mt-1 font-medium text-white"></dd>
+            </div>
+            <div>
+                <dt class="text-xs uppercase tracking-wider text-assist-gray">Cuando</dt>
+                <dd id="modalCreated" class="mt-1 font-medium text-white"></dd>
+            </div>
+            <div>
+                <dt class="text-xs uppercase tracking-wider text-assist-gray">Quien trabajo</dt>
+                <dd id="modalWorker" class="mt-1 font-medium text-white"></dd>
+            </div>
+            <div>
+                <dt class="text-xs uppercase tracking-wider text-assist-gray">Calificacion</dt>
+                <dd id="modalRating" class="mt-1 font-medium text-white"></dd>
+            </div>
+            <div>
+                <dt class="text-xs uppercase tracking-wider text-assist-gray">Categoria</dt>
+                <dd id="modalCategory" class="mt-1 font-medium text-white"></dd>
+            </div>
+            <div>
+                <dt class="text-xs uppercase tracking-wider text-assist-gray">Critico</dt>
+                <dd id="modalCritical" class="mt-1 font-medium text-white"></dd>
+            </div>
+        </dl>
+
+        <div class="mt-6 rounded-xl border border-white/10 bg-white/5 p-4">
+            <h3 class="text-sm font-semibold text-assist-gray">Comentario completo</h3>
+            <p id="modalComment" class="mt-3 whitespace-pre-line break-words text-sm leading-6 text-white"></p>
+        </div>
+    </section>
+</div>
+
+<script>
+    function setModalText(id, value) {
+        const element = document.getElementById(id);
+        if (element) element.textContent = value || '-';
+    }
+
+    function openFeedbackModal(button) {
+        setModalText('modalKind', button.dataset.kind);
+        setModalText('modalCompany', button.dataset.company);
+        setModalText('modalTicket', button.dataset.ticket);
+        setModalText('modalUser', button.dataset.user);
+        setModalText('modalCreated', button.dataset.created);
+        setModalText('modalWorker', button.dataset.worker);
+        setModalText('modalRating', button.dataset.rating);
+        setModalText('modalCritical', button.dataset.critical);
+        setModalText('modalCategory', button.dataset.category);
+        setModalText('modalComment', button.dataset.comment);
+
+        const modal = document.getElementById('feedbackModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeFeedbackModal() {
+        const modal = document.getElementById('feedbackModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+</script>
+{% endblock %}

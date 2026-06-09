@@ -130,4 +130,113 @@
         </aside>
     </div>
 </div>
+
+{% if show_user_feedback_modal %}
+<div id="userFeedbackModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+    <section class="w-full max-w-lg rounded-xl border border-zinc-700 bg-zinc-900 p-6 shadow-2xl">
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <h2 class="text-xl font-semibold">Tu feedback</h2>
+                <p class="mt-1 text-sm text-assist-gray">La respuesta es opcional y ayuda a mejorar el soporte y la plataforma.</p>
+            </div>
+            <button type="button" class="rounded-lg border border-white/10 px-3 py-1 text-sm text-assist-gray hover:text-white" onclick="closeUserFeedbackModal()">Omitir</button>
+        </div>
+
+        <form action="{% url 'guardar_feedback_usuario' ticket.id_ticket %}" method="POST" class="mt-5 space-y-4">
+            {% csrf_token %}
+            <div>
+                <label for="feedback_type">Tipo de feedback</label>
+                <select id="feedback_type" name="feedback_type" onchange="togglePlatformCategory()">
+                    <option value="servicio">Servicio de Soporte</option>
+                    <option value="plataforma">Plataforma</option>
+                </select>
+            </div>
+            <div id="platformCategoryField" class="hidden">
+                <label for="platform_category">Categoria de plataforma</label>
+                <select id="platform_category" name="platform_category">
+                    <option value="BUG">Bug</option>
+                    <option value="MEJORA">Sugerencia de mejora</option>
+                    <option value="UX_UI">UX/UI</option>
+                    <option value="RENDIMIENTO">Rendimiento</option>
+                    <option value="FUNCIONALIDAD">Funcionalidad faltante</option>
+                    <option value="OTRO" selected>Otro</option>
+                </select>
+            </div>
+            <div>
+                <label for="rating">Calificacion</label>
+                <select id="rating" name="rating" required>
+                    <option value="5">5 - Excelente</option>
+                    <option value="4">4 - Buena</option>
+                    <option value="3">3 - Regular</option>
+                    <option value="2">2 - Mala</option>
+                    <option value="1">1 - Muy mala</option>
+                </select>
+            </div>
+            <div>
+                <label for="comment">Comentario opcional</label>
+                <textarea id="comment" name="comment" rows="3" placeholder="Escribe un comentario breve..."></textarea>
+            </div>
+            <button type="submit" class="w-full rounded-xl bg-assist-coral px-4 py-3 font-bold text-white transition hover:brightness-110">
+                Enviar feedback
+            </button>
+        </form>
+    </section>
+</div>
+{% endif %}
+
+{% if show_technician_feedback_modal %}
+<div id="technicianFeedbackModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+    <section class="w-full max-w-lg rounded-xl border border-zinc-700 bg-zinc-900 p-6 shadow-2xl">
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <h2 class="text-xl font-semibold">Feedback interno</h2>
+                <p class="mt-1 text-sm text-assist-gray">Registrá informacion breve sobre el cierre del caso.</p>
+            </div>
+            <button type="button" class="rounded-lg border border-white/10 px-3 py-1 text-sm text-assist-gray hover:text-white" onclick="closeTechnicianFeedbackModal()">Omitir</button>
+        </div>
+
+        <form action="{% url 'guardar_feedback_tecnico' ticket.id_ticket %}" method="POST" class="mt-5 space-y-4">
+            {% csrf_token %}
+            <div>
+                <label for="difficulty">Dificultad del caso</label>
+                <select id="difficulty" name="difficulty" required>
+                    <option value="BAJA">Baja</option>
+                    <option value="MEDIA">Media</option>
+                    <option value="ALTA">Alta</option>
+                </select>
+            </div>
+            <div>
+                <label for="internal_comment">Comentario opcional sobre el proceso</label>
+                <textarea id="internal_comment" name="comment" rows="3" placeholder="Comentario opcional"></textarea>
+            </div>
+            <div>
+                <label for="problems_found">Problemas encontrados durante la resolucion</label>
+                <textarea id="problems_found" name="problems_found" rows="3" placeholder="Problemas encontrados"></textarea>
+            </div>
+            <button type="submit" class="w-full rounded-xl bg-assist-coral px-4 py-3 font-bold text-white transition hover:brightness-110">
+                Guardar feedback interno
+            </button>
+        </form>
+    </section>
+</div>
+{% endif %}
+
+<script>
+    function closeUserFeedbackModal() {
+        const modal = document.getElementById('userFeedbackModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function closeTechnicianFeedbackModal() {
+        const modal = document.getElementById('technicianFeedbackModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function togglePlatformCategory() {
+        const typeField = document.getElementById('feedback_type');
+        const categoryField = document.getElementById('platformCategoryField');
+        if (!typeField || !categoryField) return;
+        categoryField.classList.toggle('hidden', typeField.value !== 'plataforma');
+    }
+</script>
 {% endblock %}

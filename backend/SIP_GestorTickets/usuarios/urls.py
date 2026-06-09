@@ -26,6 +26,7 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('logout/', views.logout_view, name='logout'),
+    path('platform-admin/nuevo/', views.crear_platform_admin_view, name='crear_platform_admin'),
     
     path('usuario/<int:pk>/aprobar/', views.aprobar_usuario_view, name='aprobar_usuario'), 
     path('usuario/<int:pk>/eliminar-definitivo/', views.eliminar_usuario_definitivo_view, name='eliminar_usuario_definitivo'),
@@ -37,6 +38,8 @@ urlpatterns = [
     path('ticket/<int:pk>/', views.detalle_ticket_view, name='detalle_ticket'),
     path('ticket/<int:pk>/eliminar/', views.eliminar_ticket, name='eliminar_ticket'),
     path('ticket/<int:pk>/estado/', views.actualizar_estado, name='actualizar_estado'),
+    path('ticket/<int:pk>/feedback/usuario/', views.guardar_feedback_usuario, name='guardar_feedback_usuario'),
+    path('ticket/<int:pk>/feedback/tecnico/', views.guardar_feedback_tecnico, name='guardar_feedback_tecnico'),
     path('ticket/<int:pk>/cambiar-prioridad/', views.cambiar_prioridad, name='cambiar_prioridad'),
     path('usuario/<int:pk>/quitar-acceso/', views.quitar_acceso_view, name='quitar_acceso'),
     path('usuario/<int:pk>/confirmar-baja/', views.confirmar_baja_view, name='confirmar_baja'),

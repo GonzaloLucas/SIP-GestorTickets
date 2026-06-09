@@ -27,12 +27,130 @@
 
     <h2 class="text-2xl sm:text-3xl font-bold mb-6">Panel de Control Global (Jefe de Soporte)</h2>
 
-    <div class="flex gap-4 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
         <div class="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
             <p class="text-assist-gray">Total de Tickets</p>
             <strong class="text-2xl text-white">{{ tickets.count }}</strong>
         </div>
+        <div class="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
+            <p class="text-assist-gray">Promedio soporte</p>
+            <strong class="text-2xl text-white">{% if promedio_soporte %}{{ promedio_soporte|floatformat:1 }}/5{% else %}-{% endif %}</strong>
+        </div>
+        <div class="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
+            <p class="text-assist-gray">Comentarios recibidos</p>
+            <strong class="text-2xl text-white">{{ feedback_servicio.count }}</strong>
+        </div>
+        <div class="p-6 bg-zinc-900 border border-red-900/60 rounded-xl">
+            <p class="text-red-300">Calificaciones bajas</p>
+            <strong class="text-2xl text-red-300">{{ feedback_bajo.count }}</strong>
+        </div>
     </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <section class="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
+            <h3 class="text-xl font-semibold mb-4 text-assist-gray">Metricas por tecnico</h3>
+            <div class="space-y-3">
+                {% for metrica in metricas_tecnico %}
+                <div class="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 p-4">
+                    <span class="font-medium text-white">{{ metrica.technician__username|default:"Sin tecnico asignado" }}</span>
+                    <span class="text-sm text-assist-gray">{{ metrica.promedio|floatformat:1 }}/5 · {{ metrica.cantidad }} feedback</span>
+                </div>
+                {% empty %}
+                <p class="text-sm text-assist-gray">Aun no hay feedback de servicio.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="rounded-xl border border-red-900/60 bg-red-950/20 p-6">
+            <h3 class="text-xl font-semibold mb-4 text-red-200">Tickets con calificacion baja</h3>
+            <div class="space-y-3">
+                {% for feedback in feedback_bajo %}
+                <article class="rounded-lg border border-red-500/30 bg-red-500/10 p-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <span class="font-semibold text-white">Ticket #{{ feedback.ticket.numero_ticket_empresa }}</span>
+                        <span class="text-sm font-bold text-red-200">{{ feedback.rating }}/5</span>
+                    </div>
+                    <p class="mt-2 text-sm text-red-100/80">{{ feedback.comment|default:"Sin comentario" }}</p>
+                </article>
+                {% empty %}
+                <p class="text-sm text-assist-gray">No hay feedback critico de servicio.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+
+    <section class="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 mb-8">
+        <div class="mb-4 flex flex-col gap-1">
+            <h3 class="text-xl font-semibold text-assist-gray">Feedbacks</h3>
+            <p class="text-sm text-assist-gray">Comentarios enviados al area de soporte.</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-zinc-800/50 text-assist-gray text-sm">
+                        <th class="p-4">Ticket</th>
+                        <th class="p-4">Quien lo hizo</th>
+                        <th class="p-4">Cuando</th>
+                        <th class="p-4">Quien trabajo</th>
+                        <th class="p-4">Calificacion</th>
+                        <th class="p-4">Comentario</th>
+                        <th class="p-4">Accion</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-zinc-800">
+                    {% for feedback in feedback_servicio %}
+                    <tr class="hover:bg-zinc-800/30 transition">
+                        <td class="p-4">
+                            <a href="{% url 'detalle_ticket' feedback.ticket.id_ticket %}" class="text-assist-coral hover:underline">#{{ feedback.ticket.numero_ticket_empresa }}</a>
+                            <p class="text-xs text-assist-gray">{{ feedback.ticket.titulo }}</p>
+                        </td>
+                        <td class="p-4">{{ feedback.user.username }}</td>
+                        <td class="p-4 text-sm text-assist-gray">{{ feedback.created_at|date:"d/m/Y H:i" }}</td>
+                        <td class="p-4">{{ feedback.technician.username|default:"Sin asignar" }}</td>
+                        <td class="p-4 {% if feedback.is_critical %}text-red-300 font-bold{% endif %}">{{ feedback.rating }}/5</td>
+                        <td class="p-4 text-sm text-assist-gray">{{ feedback.comment|default:"Sin comentario" }}</td>
+                        <td class="p-4">
+                            <button type="button"
+                                class="rounded-lg border border-assist-coral/40 px-3 py-2 text-xs font-bold text-assist-coral transition hover:bg-assist-coral hover:text-white"
+                                data-ticket="#{{ feedback.ticket.numero_ticket_empresa }} - {{ feedback.ticket.titulo|escape }}"
+                                data-user="{{ feedback.user.username|escape }}"
+                                data-created="{{ feedback.created_at|date:'d/m/Y H:i' }}"
+                                data-worker="{{ feedback.technician.username|default:'Sin asignar'|escape }}"
+                                data-rating="{{ feedback.rating }}/5"
+                                data-critical="{% if feedback.is_critical %}Si{% else %}No{% endif %}"
+                                data-comment="{{ feedback.comment|default:'Sin comentario'|escape }}"
+                                onclick="openServiceFeedbackModal(this)">
+                                Ver detalle
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="p-12 text-center text-assist-gray">Aun no hay feedbacks de soporte.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 mb-8">
+        <h3 class="text-xl font-semibold mb-4 text-assist-gray">Feedback interno de tecnicos</h3>
+        <div class="space-y-3">
+            {% for feedback in feedback_interno %}
+            <article class="rounded-lg border border-white/10 bg-white/5 p-4">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <span class="font-semibold text-white">Ticket #{{ feedback.ticket.numero_ticket_empresa }} · {{ feedback.technician.username }}</span>
+                    <span class="text-sm text-assist-gray">Dificultad {{ feedback.get_difficulty_display }}</span>
+                </div>
+                <p class="mt-2 text-sm text-assist-gray">{{ feedback.comment|default:"Sin comentario de proceso" }}</p>
+                <p class="mt-2 text-sm text-assist-gray">Problemas: {{ feedback.problems_found|default:"Sin problemas registrados" }}</p>
+            </article>
+            {% empty %}
+            <p class="text-sm text-assist-gray">Aun no hay feedback interno.</p>
+            {% endfor %}
+        </div>
+    </section>
 
     <h3 class="text-xl font-semibold mb-4 text-assist-gray">Todos los Tickets del Sistema</h3>
 
@@ -127,7 +245,76 @@
     </div>
 </div>
 
+<div id="serviceFeedbackModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 px-4">
+    <section class="w-full max-w-2xl rounded-xl border border-zinc-700 bg-zinc-900 p-6 shadow-2xl">
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-wider text-assist-coral">Soporte</p>
+                <h2 class="mt-1 text-xl font-semibold">Detalle del feedback</h2>
+            </div>
+            <button type="button" class="rounded-lg border border-white/10 px-3 py-1 text-sm text-assist-gray hover:text-white" onclick="closeServiceFeedbackModal()">Cerrar</button>
+        </div>
+
+        <dl class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+                <dt class="text-xs uppercase tracking-wider text-assist-gray">Ticket</dt>
+                <dd id="serviceModalTicket" class="mt-1 font-medium text-white"></dd>
+            </div>
+            <div>
+                <dt class="text-xs uppercase tracking-wider text-assist-gray">Quien lo hizo</dt>
+                <dd id="serviceModalUser" class="mt-1 font-medium text-white"></dd>
+            </div>
+            <div>
+                <dt class="text-xs uppercase tracking-wider text-assist-gray">Cuando</dt>
+                <dd id="serviceModalCreated" class="mt-1 font-medium text-white"></dd>
+            </div>
+            <div>
+                <dt class="text-xs uppercase tracking-wider text-assist-gray">Quien trabajo</dt>
+                <dd id="serviceModalWorker" class="mt-1 font-medium text-white"></dd>
+            </div>
+            <div>
+                <dt class="text-xs uppercase tracking-wider text-assist-gray">Calificacion</dt>
+                <dd id="serviceModalRating" class="mt-1 font-medium text-white"></dd>
+            </div>
+            <div>
+                <dt class="text-xs uppercase tracking-wider text-assist-gray">Critico</dt>
+                <dd id="serviceModalCritical" class="mt-1 font-medium text-white"></dd>
+            </div>
+        </dl>
+
+        <div class="mt-6 rounded-xl border border-white/10 bg-white/5 p-4">
+            <h3 class="text-sm font-semibold text-assist-gray">Comentario completo</h3>
+            <p id="serviceModalComment" class="mt-3 whitespace-pre-line break-words text-sm leading-6 text-white"></p>
+        </div>
+    </section>
+</div>
+
 <script>
+    function setServiceModalText(id, value) {
+        const element = document.getElementById(id);
+        if (element) element.textContent = value || '-';
+    }
+
+    function openServiceFeedbackModal(button) {
+        setServiceModalText('serviceModalTicket', button.dataset.ticket);
+        setServiceModalText('serviceModalUser', button.dataset.user);
+        setServiceModalText('serviceModalCreated', button.dataset.created);
+        setServiceModalText('serviceModalWorker', button.dataset.worker);
+        setServiceModalText('serviceModalRating', button.dataset.rating);
+        setServiceModalText('serviceModalCritical', button.dataset.critical);
+        setServiceModalText('serviceModalComment', button.dataset.comment);
+
+        const modal = document.getElementById('serviceFeedbackModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeServiceFeedbackModal() {
+        const modal = document.getElementById('serviceFeedbackModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
     // --- FILTRADO DE TICKETS ---
     function filterTable() {
         const searchInput = document.getElementById('searchInput').value.toLowerCase();
