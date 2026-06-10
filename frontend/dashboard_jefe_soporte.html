@@ -25,6 +25,16 @@
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full">
 
+    {% if messages %}
+        <div class="mb-6 space-y-3">
+            {% for message in messages %}
+                <div class="rounded-xl border px-4 py-3 text-sm font-semibold {% if message.tags == 'error' %}border-red-500/30 bg-red-500/10 text-red-200{% elif message.tags == 'warning' %}border-amber-500/30 bg-amber-500/10 text-amber-200{% else %}border-emerald-500/30 bg-emerald-500/10 text-emerald-200{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     <h2 class="text-2xl sm:text-3xl font-bold mb-6">Panel de Control Global (Jefe de Soporte)</h2>
 
     <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
@@ -104,21 +114,21 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <section class="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
-            <h3 class="text-xl font-semibold mb-4 text-assist-gray">Metricas por tecnico</h3>
+        <h3 class="text-xl font-semibold mb-4 text-assist-gray">Métricas por técnico</h3>
             <div class="space-y-3">
                 {% for metrica in metricas_tecnico %}
                 <div class="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 p-4">
-                    <span class="font-medium text-white">{{ metrica.technician__username|default:"Sin tecnico asignado" }}</span>
+                <span class="font-medium text-white">{{ metrica.technician__username|default:"Sin técnico asignado" }}</span>
                     <span class="text-sm text-assist-gray">{{ metrica.promedio|floatformat:1 }}/5 · {{ metrica.cantidad }} feedback</span>
                 </div>
                 {% empty %}
-                <p class="text-sm text-assist-gray">Aun no hay feedback de servicio.</p>
+            <p class="text-sm text-assist-gray">Aún no hay feedback de servicio.</p>
                 {% endfor %}
             </div>
         </section>
 
         <section class="rounded-xl border border-red-900/60 bg-red-950/20 p-6">
-            <h3 class="text-xl font-semibold mb-4 text-red-200">Tickets con calificacion baja</h3>
+        <h3 class="text-xl font-semibold mb-4 text-red-200">Tickets con calificación baja</h3>
             <div class="space-y-3">
                 {% for feedback in feedback_bajo %}
                 <article class="rounded-lg border border-red-500/30 bg-red-500/10 p-4">
@@ -129,7 +139,7 @@
                     <p class="mt-2 text-sm text-red-100/80">{{ feedback.comment|default:"Sin comentario" }}</p>
                 </article>
                 {% empty %}
-                <p class="text-sm text-assist-gray">No hay feedback critico de servicio.</p>
+            <p class="text-sm text-assist-gray">No hay feedback crítico de servicio.</p>
                 {% endfor %}
             </div>
         </section>
@@ -145,12 +155,12 @@
                 <thead>
                     <tr class="bg-zinc-800/50 text-assist-gray text-sm">
                         <th class="p-4">Ticket</th>
-                        <th class="p-4">Quien lo hizo</th>
-                        <th class="p-4">Cuando</th>
-                        <th class="p-4">Quien trabajo</th>
-                        <th class="p-4">Calificacion</th>
+                    <th class="p-4">Quién lo hizo</th>
+                    <th class="p-4">Cuándo</th>
+                    <th class="p-4">Quién trabajó</th>
+                    <th class="p-4">Calificación</th>
                         <th class="p-4">Comentario</th>
-                        <th class="p-4">Accion</th>
+                    <th class="p-4">Acción</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-zinc-800">
@@ -182,7 +192,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="p-12 text-center text-assist-gray">Aun no hay feedbacks de soporte.</td>
+                    <td colspan="7" class="p-12 text-center text-assist-gray">Aún no hay feedbacks de soporte.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -191,7 +201,7 @@
     </section>
 
     <section class="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 mb-8">
-        <h3 class="text-xl font-semibold mb-4 text-assist-gray">Feedback interno de tecnicos</h3>
+        <h3 class="text-xl font-semibold mb-4 text-assist-gray">Feedback interno de técnicos</h3>
         <div class="space-y-3">
             {% for feedback in feedback_interno %}
             <article class="rounded-lg border border-white/10 bg-white/5 p-4">
@@ -203,7 +213,7 @@
                 <p class="mt-2 text-sm text-assist-gray">Problemas: {{ feedback.problems_found|default:"Sin problemas registrados" }}</p>
             </article>
             {% empty %}
-            <p class="text-sm text-assist-gray">Aun no hay feedback interno.</p>
+            <p class="text-sm text-assist-gray">Aún no hay feedback interno.</p>
             {% endfor %}
         </div>
     </section>
@@ -279,11 +289,21 @@
                     </td>
                     <td class="p-4">{{ ticket.get_estado_display }}</td>
                     <td class="p-4">
-                        {% with asignacion=ticket.asignaciones.first %}
-                            {% if asignacion and asignacion.activo %}
-                                <a href="{% url 'asignar_ticket' ticket.id_ticket %}" class="text-assist-coral hover:underline font-medium" title="Reasignar soporte">{{ asignacion.soporte.first_name }} {{ asignacion.soporte.last_name }}</a>
+                        {% with asignacion=ticket.asignaciones.last %}
+                            {% if asignacion %}
+                                {% if ticket.estado == 'RESUELTO' or ticket.estado == 'CERRADO' %}
+                                    <span class="text-zinc-500 font-medium cursor-not-allowed" title="Ticket finalizado">{{ asignacion.soporte.first_name }} {{ asignacion.soporte.last_name }}</span>
+                                {% elif asignacion.activo %}
+                                    <a href="{% url 'asignar_ticket' ticket.id_ticket %}" class="text-assist-coral hover:underline font-medium" title="Reasignar soporte">{{ asignacion.soporte.first_name }} {{ asignacion.soporte.last_name }}</a>
+                                {% else %}
+                                    <a href="{% url 'asignar_ticket' ticket.id_ticket %}" class="text-red-500 font-medium hover:underline" title="Asignar soporte">Sin asignar</a>
+                                {% endif %}
                             {% else %}
-                                <a href="{% url 'asignar_ticket' ticket.id_ticket %}" class="text-red-500 font-medium hover:underline" title="Asignar soporte">Sin asignar</a>
+                                {% if ticket.estado == 'RESUELTO' or ticket.estado == 'CERRADO' %}
+                                    <span class="text-zinc-500 font-medium cursor-not-allowed" title="Ticket finalizado">Sin asignar</span>
+                                {% else %}
+                                    <a href="{% url 'asignar_ticket' ticket.id_ticket %}" class="text-red-500 font-medium hover:underline" title="Asignar soporte">Sin asignar</a>
+                                {% endif %}
                             {% endif %}
                         {% endwith %}
                     </td>
@@ -317,23 +337,23 @@
                 <dd id="serviceModalTicket" class="mt-1 font-medium text-white"></dd>
             </div>
             <div>
-                <dt class="text-xs uppercase tracking-wider text-assist-gray">Quien lo hizo</dt>
+                <dt class="text-xs uppercase tracking-wider text-assist-gray">Quién lo hizo</dt>
                 <dd id="serviceModalUser" class="mt-1 font-medium text-white"></dd>
             </div>
             <div>
-                <dt class="text-xs uppercase tracking-wider text-assist-gray">Cuando</dt>
+                <dt class="text-xs uppercase tracking-wider text-assist-gray">Cuándo</dt>
                 <dd id="serviceModalCreated" class="mt-1 font-medium text-white"></dd>
             </div>
             <div>
-                <dt class="text-xs uppercase tracking-wider text-assist-gray">Quien trabajo</dt>
+                <dt class="text-xs uppercase tracking-wider text-assist-gray">Quién trabajó</dt>
                 <dd id="serviceModalWorker" class="mt-1 font-medium text-white"></dd>
             </div>
             <div>
-                <dt class="text-xs uppercase tracking-wider text-assist-gray">Calificacion</dt>
+                <dt class="text-xs uppercase tracking-wider text-assist-gray">Calificación</dt>
                 <dd id="serviceModalRating" class="mt-1 font-medium text-white"></dd>
             </div>
             <div>
-                <dt class="text-xs uppercase tracking-wider text-assist-gray">Critico</dt>
+                <dt class="text-xs uppercase tracking-wider text-assist-gray">Crítico</dt>
                 <dd id="serviceModalCritical" class="mt-1 font-medium text-white"></dd>
             </div>
         </dl>

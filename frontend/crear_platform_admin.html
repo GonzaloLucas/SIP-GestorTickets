@@ -12,7 +12,7 @@
         </a>
         <div class="flex flex-wrap items-center gap-3 sm:gap-6">
             <span class="text-xs sm:text-sm text-assist-gray">SuperAdmin: {{ request.user.username }}</span>
-            <a href="{% url 'logout' %}" class="text-xs sm:text-sm text-assist-coral hover:underline">Cerrar Sesion</a>
+            <a href="{% url 'logout' %}" class="text-xs sm:text-sm text-assist-coral hover:underline">Cerrar Sesión</a>
         </div>
     </div>
 </nav>
@@ -64,7 +64,7 @@
         </div>
 
         <div>
-            <label class="text-lg font-bold text-white block mb-1">Contrasenia</label>
+            <label class="text-lg font-bold text-white block mb-1">Contraseña</label>
             <input type="password" name="password" class="w-full rounded-xl border border-white/10 bg-assist-slate px-3 py-2 text-white focus:outline-none">
             {% if form.password.errors %}
                 <p class="text-red-500 text-xs mt-1 font-bold">{{ form.password.errors.as_text }}</p>
@@ -72,7 +72,7 @@
         </div>
 
         <div>
-            <label class="text-lg font-bold text-white block mb-1">Confirmar contrasenia</label>
+            <label class="text-lg font-bold text-white block mb-1">Confirmar contraseña</label>
             <input type="password" name="confirmar_password" class="w-full rounded-xl border border-white/10 bg-assist-slate px-3 py-2 text-white focus:outline-none">
             {% if form.confirmar_password.errors %}
                 <p class="text-red-500 text-xs mt-1 font-bold">{{ form.confirmar_password.errors.as_text }}</p>

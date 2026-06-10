@@ -34,15 +34,15 @@
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
         <div class="bg-assist-dark p-6 rounded-2xl border border-white/5">
             <p class="text-assist-gray text-sm">Tickets Pendientes</p>
-            <p class="text-4xl font-bold mt-2">-</p>
+            <p class="text-4xl font-bold mt-2">{{ pendientes }}</p>
         </div>
         <div class="bg-assist-dark p-6 rounded-2xl border border-white/5">
             <p class="text-assist-gray text-sm">Urgencia Alta</p>
-            <p class="text-4xl font-bold mt-2 text-assist-coral">-</p>
+            <p class="text-4xl font-bold mt-2 text-assist-coral">{{ urgencia_alta }}</p>
         </div>
         <div class="bg-assist-dark p-6 rounded-2xl border border-white/5">
             <p class="text-assist-gray text-sm">Resueltos hoy</p>
-            <p class="text-4xl font-bold mt-2">-</p>
+            <p class="text-4xl font-bold mt-2 text-emerald-400">{{ resueltos_hoy }}</p>
         </div>
     </div>
 
@@ -72,12 +72,14 @@
                         {% if ticket.estado == 'ABIERTO' or ticket.estado == 'EN_PROCESO' %}
                         <tr class="hover:bg-white/5 transition">
                             <td class="p-4">
-                                {% if ticket.prioridad == 'ALTA' %}
+                                {% if ticket.prioridad == 'ALTA' or ticket.prioridad == 'alta' %}
                                     <span class="text-red-500 font-bold">ALTA</span>
-                                {% elif ticket.prioridad == 'MEDIA' %}
+                                {% elif ticket.prioridad == 'MEDIA' or ticket.prioridad == 'media' %}
                                     <span class="text-orange-500 font-bold">MEDIA</span>
-                                {% else %}
+                                {% elif ticket.prioridad == 'BAJA' or ticket.prioridad == 'baja' %}
                                     <span class="text-green-500 font-bold">BAJA</span>
+                                {% else %}
+                                    <span class="text-zinc-500 font-bold">SIN ASIGNAR</span>
                                 {% endif %}
                             </td>
                             <td class="p-4">
@@ -120,12 +122,14 @@
                         {% if ticket.estado == 'RESUELTO' or ticket.estado == 'CERRADO' %}
                         <tr class="hover:bg-white/5 transition">
                             <td class="p-4">
-                                {% if ticket.prioridad == 'ALTA' %}
+                                {% if ticket.prioridad == 'ALTA' or ticket.prioridad == 'alta' %}
                                     <span class="text-red-500 font-bold">ALTA</span>
-                                {% elif ticket.prioridad == 'MEDIA' %}
+                                {% elif ticket.prioridad == 'MEDIA' or ticket.prioridad == 'media' %}
                                     <span class="text-orange-500 font-bold">MEDIA</span>
-                                {% else %}
+                                {% elif ticket.prioridad == 'BAJA' or ticket.prioridad == 'baja' %}
                                     <span class="text-green-500 font-bold">BAJA</span>
+                                {% else %}
+                                    <span class="text-zinc-500 font-bold">SIN ASIGNAR</span>
                                 {% endif %}
                             </td>
                             <td class="p-4">

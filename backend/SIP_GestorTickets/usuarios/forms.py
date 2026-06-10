@@ -221,13 +221,13 @@ class SuperAdminPlatformAdminCreateForm(forms.Form):
     first_name = forms.CharField(max_length=150, label="Nombre")
     last_name = forms.CharField(max_length=150, label="Apellido")
     email_real = forms.EmailField(label="Email")
-    password = forms.CharField(label="Contrasenia", widget=forms.PasswordInput)
-    confirmar_password = forms.CharField(label="Confirmar contrasenia", widget=forms.PasswordInput)
+    password = forms.CharField(label="Contraseña", widget=forms.PasswordInput)
+    confirmar_password = forms.CharField(label="Confirmar contraseña", widget=forms.PasswordInput)
 
     def clean_email_real(self):
         email = self.cleaned_data.get('email_real').lower().strip()
         if Usuario.objects.filter(email=email).exists():
-            raise forms.ValidationError("Este email ya esta registrado en el sistema.")
+            raise forms.ValidationError("Este email ya está registrado en el sistema.")
         return email
 
     def clean(self):
@@ -236,7 +236,7 @@ class SuperAdminPlatformAdminCreateForm(forms.Form):
         confirmar_password = cleaned_data.get('confirmar_password')
 
         if password and confirmar_password and password != confirmar_password:
-            self.add_error('confirmar_password', 'Las contrasenias no coinciden.')
+            self.add_error('confirmar_password', 'Las contraseñas no coinciden.')
 
         return cleaned_data
 
@@ -308,7 +308,7 @@ class UserFeedbackForm(forms.Form):
 
     rating = forms.ChoiceField(
         choices=[(str(i), f'{i} estrella{"s" if i > 1 else ""}') for i in range(1, 6)],
-        label='Calificacion'
+        label='Calificación'
     )
     comment = forms.CharField(
         required=False,
@@ -319,7 +319,7 @@ class UserFeedbackForm(forms.Form):
     platform_category = forms.ChoiceField(
         choices=FeedbackPlatform.CATEGORIAS,
         required=False,
-        label='Categoria de plataforma'
+        label='Categoría de plataforma'
     )
 
     def clean_rating(self):
@@ -333,7 +333,7 @@ class TechnicianFeedbackForm(forms.ModelForm):
         labels = {
             'difficulty': 'Dificultad del caso',
             'comment': 'Comentario sobre el proceso',
-            'problems_found': 'Problemas encontrados durante la resolucion',
+            'problems_found': 'Problemas encontrados durante la resolución',
         }
         widgets = {
             'comment': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Comentario opcional'}),

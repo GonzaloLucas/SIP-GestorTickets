@@ -32,7 +32,7 @@ from django.utils.crypto import get_random_string
 
 
 # ==========================================
-# VISTAS DE AUTENTICACIÃ“N Y REGISTRO
+# VISTAS DE AUTENTICACIÓN Y REGISTRO
 # ==========================================
 def crear_usuario_admin_view(request):
     if not request.user.is_authenticated or request.user.rol != 'admin_cliente':
@@ -78,9 +78,9 @@ def crear_usuario_admin_view(request):
                     Tus datos para loguearte son:
                     - Link de acceso: {link_acceso}
                     - Usuario: {email}
-                    - Contrasenia provisoria: {password_aleatoria}
+                - Contraseña provisoria: {password_aleatoria}
 
-                    Recorda que vas a tener que cambiar esta contrasenia generica apenas ingreses por primera vez.
+                Recordá que vas a tener que cambiar esta contraseña genérica apenas ingreses por primera vez.
                     """
 
                     send_mail(
@@ -95,7 +95,7 @@ def crear_usuario_admin_view(request):
             except Exception:
                 messages.error(
                     request,
-                    "No se pudo enviar el correo de credenciales. El usuario no fue creado; revisa la configuracion de email e intentalo de nuevo."
+                    "No se pudo enviar el correo de credenciales. El usuario no fue creado; revisá la configuración de email e intentalo de nuevo."
                 )
     else:
         form = AdminUsuarioCreateForm()
@@ -119,9 +119,9 @@ def cambiar_contrasenia_obligatorio_view(request):
         confirmar_pass = request.POST.get('confirmar_password')
 
         if not nueva_pass:
-            error = "La contraseÃ±a no puede estar vacÃ­a."
+            error = "La contraseña no puede estar vacía."
         elif nueva_pass != confirmar_pass:
-            error = "Las contraseÃ±as no coinciden."
+            error = "Las contraseñas no coinciden."
         else:
             try:
                 # Validamos que cumpla las reglas de Django
@@ -129,7 +129,7 @@ def cambiar_contrasenia_obligatorio_view(request):
                 request.user.set_password(nueva_pass)
                 request.user.require_password_change = False
                 request.user.save()
-                # Esto es clave para que Django no lo desloguee al cambiar la contraseÃ±a
+                # Esto es clave para que Django no lo desloguee al cambiar la contraseña
                 update_session_auth_hash(request, request.user)
                 return redirect('dashboard')
             except Exception as e:
@@ -146,9 +146,9 @@ def registrar_empresa_view(request):
             
             messages.success(
                 request, 
-                f"Â¡Empresa registrada con Ã©xito! Generamos tus credenciales de administrador de forma segura. "
-                f"<br>Te enviamos un correo electrÃ³nico a <strong>{user.email}</strong> con tu contraseÃ±a provisoria aleatoria. "
-                f" <br><br>RevisÃ¡ tu bandeja de entrada (o Spam) para poder ingresar."
+                f"¡Empresa registrada con éxito! Generamos tus credenciales de administrador de forma segura. "
+                f"<br>Te enviamos un correo electrónico a <strong>{user.email}</strong> con tu contraseña provisoria aleatoria. "
+                f" <br><br>Revisá tu bandeja de entrada (o Spam) para poder ingresar."
             )
             
             return redirect('login')
@@ -192,7 +192,7 @@ def login_view(request):
                             
                         return redirect('dashboard')
                     else:
-                        error = "La contraseÃ±a es incorrecta."
+                        error = "La contraseña es incorrecta."
 
     return render(request, 'login.html', {'form': form, 'error': error})
 
@@ -341,7 +341,24 @@ def dashboard_view(request):
 
     elif rol == 'soporte':
         tickets = InfoTicket.objects.filter(asignaciones__soporte=request.user, asignaciones__activo=True,solicitante__empresa=request.user.empresa).distinct()
-        return render(request, 'dashboard_soporte.html', {'tickets': tickets})
+        
+        hoy = timezone.now().date()
+        pendientes = tickets.filter(estado__in=['ABIERTO', 'EN_PROCESO']).count()
+        urgencia_alta = tickets.filter(estado__in=['ABIERTO', 'EN_PROCESO'], prioridad__in=['ALTA', 'CRITICA', 'alta', 'critica']).count()
+        
+        resueltos_hoy = InfoTicket.objects.filter(
+            asignaciones__soporte=request.user,
+            estado__in=['RESUELTO', 'CERRADO']
+        ).filter(
+            Q(fecha_resolucion__date=hoy) | Q(fecha_cierre__date=hoy)
+        ).distinct().count()
+
+        return render(request, 'dashboard_soporte.html', {
+            'tickets': tickets,
+            'pendientes': pendientes,
+            'urgencia_alta': urgencia_alta,
+            'resueltos_hoy': resueltos_hoy
+        })
 
     elif rol == 'jefe':
         tickets = InfoTicket.objects.filter(solicitante__empresa=request.user.empresa)
@@ -357,7 +374,7 @@ def dashboard_view(request):
         soportes = Usuario.objects.filter(empresa=request.user.empresa, rol='soporte', is_active=True)
         soportes_stats = []
         for soporte in soportes:
-            tickets_activos = TicketAsignacion.objects.filter(soporte=soporte, activo=True).count()
+            tickets_activos = TicketAsignacion.objects.filter(soporte=soporte, activo=True, ticket__estado__in=['ABIERTO', 'EN_PROCESO']).count()
             tickets_resueltos = InfoTicket.objects.filter(
                 asignaciones__soporte=soporte,
                 estado__in=['RESUELTO', 'CERRADO']
@@ -403,7 +420,7 @@ def dashboard_view(request):
     return redirect('landing')
 
 # ==========================================
-# VISTAS DE GESTIÃ“N DE TICKETS
+# VISTAS DE GESTIÓN DE TICKETS
 # ==========================================
 def crear_ticket(request):
     ticket_creado = False
@@ -493,7 +510,8 @@ def actualizar_estado(request, pk):
             ticket.fecha_resolucion = timezone.now()
         elif nuevo_estado == 'CERRADO':
             ticket.fecha_cierre = timezone.now()
-        ticket.save()        
+
+        ticket.save()
         TicketHistorial.objects.create(ticket=ticket,estado_anterior=estado_anterior,
             estado_nuevo=nuevo_estado,realizado_por=request.user,observacion="Cambio de estado desde el panel de control"
         )
@@ -592,7 +610,7 @@ def asignar_ticket_view(request, pk):
 
     soportes_info = []
     for soporte in soportes:
-        tickets_activos = TicketAsignacion.objects.filter(soporte=soporte, activo=True).count()
+        tickets_activos = TicketAsignacion.objects.filter(soporte=soporte, activo=True, ticket__estado__in=['ABIERTO', 'EN_PROCESO']).count()
         
         esta_trabajando = False
         dias_soporte = soporte.dias_laborales.split(',') if soporte.dias_laborales else []
@@ -616,6 +634,14 @@ def asignar_ticket_view(request, pk):
 
     if request.method == 'POST':
         soporte_id = request.POST.get('soporte_id')
+        action = request.POST.get('action')
+
+        if action == 'deassign' and soporte_id:
+            soporte_a_desasignar = get_object_or_404(Usuario, pk=soporte_id, empresa=request.user.empresa, rol='soporte')
+            TicketAsignacion.objects.filter(ticket=ticket, soporte=soporte_a_desasignar, activo=True).update(activo=False)
+            messages.success(request, f'Se ha desasignado el ticket del técnico {soporte_a_desasignar.get_full_name()}.')
+            return redirect('asignar_ticket', pk=pk)
+
         if soporte_id:
             soporte_seleccionado = get_object_or_404(Usuario, pk=soporte_id, empresa=request.user.empresa, rol='soporte')
             
@@ -627,19 +653,23 @@ def asignar_ticket_view(request, pk):
                 else:
                     trabaja_ahora = hora_actual >= soporte_seleccionado.horario_ingreso or hora_actual <= soporte_seleccionado.horario_egreso
 
+            tickets_activos_pre = TicketAsignacion.objects.filter(soporte=soporte_seleccionado, activo=True, ticket__estado__in=['ABIERTO', 'EN_PROCESO']).count()
+            
+            TicketAsignacion.objects.filter(ticket=ticket, activo=True).update(activo=False)
+            TicketAsignacion.objects.create(ticket=ticket, soporte=soporte_seleccionado, asignado_por=request.user, activo=True)
+            messages.success(request, f'Ticket asignado a {soporte_seleccionado.get_full_name()} correctamente.')
+            
             if not trabaja_ahora:
-                messages.error(request, 'No se pudo asignar. El técnico seleccionado se encuentra fuera de su horario laboral.')
-            elif TicketAsignacion.objects.filter(soporte=soporte_seleccionado, activo=True).count() < 3:
-                TicketAsignacion.objects.filter(ticket=ticket, activo=True).update(activo=False)
-                TicketAsignacion.objects.create(ticket=ticket, soporte=soporte_seleccionado, asignado_por=request.user, activo=True)
-                return redirect('dashboard')
-            else:
-                messages.error(request, 'No se pudo asignar. El técnico seleccionado ya alcanzó el máximo de 3 tickets permitidos.')
+                messages.warning(request, 'Nota: El técnico fue asignado a pesar de estar fuera de su horario laboral.')
+            if tickets_activos_pre >= 3:
+                messages.warning(request, 'Nota: El técnico asignado superó el límite recomendado de 3 tickets en progreso.')
+                
+            return redirect('dashboard')
 
     return render(request, 'asignar_ticket.html', {'ticket': ticket, 'soportes_info': soportes_info})
 
 # ==========================================
-# VISTAS DE ADMINISTRACIÃ“N DE PERSONAL
+# VISTAS DE ADMINISTRACIÓN DE PERSONAL
 # ==========================================
 
 def quitar_acceso_view(request, pk):
@@ -683,7 +713,7 @@ def confirmar_baja_view(request, pk):
 def aprobar_usuario_view(request, pk):
     empleado = _obtener_empleado_controlado(request, pk)    
     if empleado.empresa == request.user.empresa:
-        empleado.autorizado = True  # ðŸ‘ˆ Esto es lo que saca la suspensiÃ³n
+        empleado.autorizado = True  # Esto es lo que saca la suspensión
         empleado.save()        
     return redirect('dashboard')
 

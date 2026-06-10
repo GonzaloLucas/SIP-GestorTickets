@@ -12,7 +12,7 @@
         </a>
         <div class="flex flex-wrap items-center gap-3 sm:gap-6">
             <span class="text-xs sm:text-sm text-assist-gray">SuperAdmin: {{ request.user.username }}</span>
-            <a href="{% url 'logout' %}" class="text-xs sm:text-sm text-assist-coral hover:underline">Cerrar Sesion</a>
+            <a href="{% url 'logout' %}" class="text-xs sm:text-sm text-assist-coral hover:underline">Cerrar Sesión</a>
         </div>
     </div>
 </nav>
@@ -38,7 +38,7 @@
             <strong class="text-2xl text-white">{% if promedio_soporte %}{{ promedio_soporte|floatformat:1 }}/5{% else %}-{% endif %}</strong>
         </div>
         <div class="p-6 bg-zinc-900 border border-red-900/60 rounded-xl">
-            <p class="text-red-300">Soporte critico</p>
+            <p class="text-red-300">Soporte crítico</p>
             <strong class="text-2xl text-red-300">{{ feedback_servicio_critico.count }}</strong>
         </div>
         <div class="p-6 bg-zinc-900 border border-sky-500/40 rounded-xl">
@@ -67,7 +67,7 @@
                 </select>
             </div>
             <div>
-                <label for="rating" class="block text-xs font-medium text-assist-gray mb-1">Calificacion</label>
+                <label for="rating" class="block text-xs font-medium text-assist-gray mb-1">Calificación</label>
                 <select id="rating" name="rating" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral">
                     <option value="">Todas</option>
                     <option value="5" {% if filtros.rating == '5' %}selected{% endif %}>5 estrellas</option>
@@ -81,12 +81,12 @@
                 <label for="critico" class="block text-xs font-medium text-assist-gray mb-1">Criticidad</label>
                 <select id="critico" name="critico" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral">
                     <option value="" {% if not filtros.critico %}selected{% endif %}>Todos</option>
-                    <option value="1" {% if filtros.critico == '1' %}selected{% endif %}>Solo criticos</option>
+                    <option value="1" {% if filtros.critico == '1' %}selected{% endif %}>Solo críticos</option>
                 </select>
             </div>
             <div>
                 <label for="q" class="block text-xs font-medium text-assist-gray mb-1">Buscar</label>
-                <input id="q" name="q" value="{{ filtros.q }}" type="text" placeholder="Ticket, usuario, tecnico..." class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral">
+                <input id="q" name="q" value="{{ filtros.q }}" type="text" placeholder="Ticket, usuario, técnico..." class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral">
             </div>
         </div>
         <div class="mt-4 flex flex-wrap gap-3">
@@ -102,7 +102,7 @@
                 <h2 class="text-xl font-semibold text-white">Feedbacks de soporte</h2>
                 <span class="rounded-full border border-assist-coral/40 bg-assist-coral/10 px-3 py-1 text-xs font-bold text-assist-coral">Soporte</span>
             </div>
-            <p class="text-sm text-assist-gray">Comentarios sobre atencion, tiempos, resolucion y desempeno tecnico.</p>
+        <p class="text-sm text-assist-gray">Comentarios sobre atención, tiempos, resolución y desempeño técnico.</p>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
@@ -110,11 +110,11 @@
                     <tr class="bg-zinc-800/50 text-assist-gray text-sm">
                         <th class="p-4">Empresa</th>
                         <th class="p-4">Ticket</th>
-                        <th class="p-4">Quien lo hizo</th>
-                        <th class="p-4">Cuando</th>
-                        <th class="p-4">Quien trabajo</th>
-                        <th class="p-4">Calificacion</th>
-                        <th class="p-4">Accion</th>
+                    <th class="p-4">Quién lo hizo</th>
+                    <th class="p-4">Cuándo</th>
+                    <th class="p-4">Quién trabajó</th>
+                    <th class="p-4">Calificación</th>
+                    <th class="p-4">Acción</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-zinc-800">
@@ -174,10 +174,10 @@
                         <th class="p-4">Empresa</th>
                         <th class="p-4">Ticket</th>
                         <th class="p-4">Usuario</th>
-                        <th class="p-4">Cuando</th>
-                        <th class="p-4">Categoria</th>
-                        <th class="p-4">Calificacion</th>
-                        <th class="p-4">Accion</th>
+                    <th class="p-4">Cuándo</th>
+                    <th class="p-4">Categoría</th>
+                    <th class="p-4">Calificación</th>
+                    <th class="p-4">Acción</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-zinc-800">
@@ -242,27 +242,27 @@
                 <dd id="modalTicket" class="mt-1 font-medium text-white"></dd>
             </div>
             <div>
-                <dt class="text-xs uppercase tracking-wider text-assist-gray">Quien lo hizo</dt>
+            <dt class="text-xs uppercase tracking-wider text-assist-gray">Quién lo hizo</dt>
                 <dd id="modalUser" class="mt-1 font-medium text-white"></dd>
             </div>
             <div>
-                <dt class="text-xs uppercase tracking-wider text-assist-gray">Cuando</dt>
+            <dt class="text-xs uppercase tracking-wider text-assist-gray">Cuándo</dt>
                 <dd id="modalCreated" class="mt-1 font-medium text-white"></dd>
             </div>
             <div>
-                <dt class="text-xs uppercase tracking-wider text-assist-gray">Quien trabajo</dt>
+            <dt class="text-xs uppercase tracking-wider text-assist-gray">Quién trabajó</dt>
                 <dd id="modalWorker" class="mt-1 font-medium text-white"></dd>
             </div>
             <div>
-                <dt class="text-xs uppercase tracking-wider text-assist-gray">Calificacion</dt>
+            <dt class="text-xs uppercase tracking-wider text-assist-gray">Calificación</dt>
                 <dd id="modalRating" class="mt-1 font-medium text-white"></dd>
             </div>
             <div>
-                <dt class="text-xs uppercase tracking-wider text-assist-gray">Categoria</dt>
+            <dt class="text-xs uppercase tracking-wider text-assist-gray">Categoría</dt>
                 <dd id="modalCategory" class="mt-1 font-medium text-white"></dd>
             </div>
             <div>
-                <dt class="text-xs uppercase tracking-wider text-assist-gray">Critico</dt>
+            <dt class="text-xs uppercase tracking-wider text-assist-gray">Crítico</dt>
                 <dd id="modalCritical" class="mt-1 font-medium text-white"></dd>
             </div>
         </dl>
