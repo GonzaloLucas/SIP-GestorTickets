@@ -135,53 +135,37 @@
 </div>
 
 {% if show_user_feedback_modal %}
-<div id="userFeedbackModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+<div id="serviceFeedbackModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
     <section class="w-full max-w-lg rounded-xl border border-zinc-700 bg-zinc-900 p-6 shadow-2xl">
         <div class="flex items-start justify-between gap-4">
             <div>
-                <h2 class="text-xl font-semibold">Tu feedback</h2>
-                <p class="mt-1 text-sm text-assist-gray">La respuesta es opcional y ayuda a mejorar el soporte y la plataforma.</p>
+                <h2 class="text-xl font-semibold">Feedback del servicio de soporte</h2>
+                <p class="mt-1 text-sm text-assist-gray">Cuéntanos como fue nuestro servicio.</p>
+                <p class="mt-1 text-sm text-assist-gray">La respuesta es opcional y ayuda a mejorar el soporte.</p>
             </div>
             <button type="button" class="rounded-lg border border-white/10 px-3 py-1 text-sm text-assist-gray hover:text-white" onclick="closeUserFeedbackModal()">Omitir</button>
         </div>
 
         <form action="{% url 'guardar_feedback_usuario' ticket.id_ticket %}" method="POST" class="mt-5 space-y-4">
             {% csrf_token %}
-            <div>
-                <label for="feedback_type">Tipo de feedback</label>
-                <select id="feedback_type" name="feedback_type" onchange="togglePlatformCategory()">
-                    <option value="servicio">Servicio de Soporte</option>
-                    <option value="plataforma">Plataforma</option>
-                </select>
-            </div>
-            <div id="platformCategoryField" class="hidden">
-                <label for="platform_category">Categoría de plataforma</label>
-                <select id="platform_category" name="platform_category">
-                    <option value="BUG">Bug</option>
-                    <option value="MEJORA">Sugerencia de mejora</option>
-                    <option value="UX_UI">UX/UI</option>
-                    <option value="RENDIMIENTO">Rendimiento</option>
-                    <option value="FUNCIONALIDAD">Funcionalidad faltante</option>
-                    <option value="OTRO" selected>Otro</option>
-                </select>
-            </div>
+            <input type="hidden" name="feedback_type" value="servicio">
             <div>
                 <label>Calificación</label>
-                <div class="flex gap-2 mt-1" id="starRating">
+                <div class="flex gap-2 mt-1" id="starRatingServicio">
                     {% for i in "12345" %}
                     <button
                         type="button"
-                        class="star-btn text-3xl text-zinc-600 hover:text-yellow-400 transition"
+                        class="star-btn-servicio text-3xl text-zinc-600 hover:text-yellow-400 transition"
                         data-value="{{ forloop.counter }}"
-                        onclick="setRating(parseInt(this.dataset.value))">★</button>
+                        onclick="setRating(parseInt(this.dataset.value), 'servicio')">★</button>
                     {% endfor %}
                 </div>
-                <input type="hidden" id="rating" name="rating" required>
-                <p class="mt-1 text-sm text-assist-gray" id="ratingText">Selecciona una calificación</p>
+                <input type="hidden" id="rating_servicio" name="rating" required>
+                <p class="mt-1 text-sm text-assist-gray" id="ratingTextServicio">Selecciona una calificación</p>
             </div>
             <div>
-                <label for="comment">Comentario opcional</label>
-                <textarea id="comment" name="comment" rows="3" placeholder="Escribe un comentario breve..."></textarea>
+                <label for="comment_servicio">Comentario opcional</label>
+                <textarea id="comment_servicio" name="comment" rows="3" placeholder="Escribe un comentario breve..."></textarea>
             </div>
             <button type="submit" class="w-full rounded-xl bg-assist-coral px-4 py-3 font-bold text-white transition hover:brightness-110">
                 Enviar feedback
@@ -199,7 +183,7 @@
                 <h2 class="text-xl font-semibold">Feedback interno</h2>
             <p class="mt-1 text-sm text-assist-gray">Registrá información breve sobre el cierre del caso.</p>
             </div>
-            <button type="button" class="rounded-lg border border-white/10 px-3 py-1 text-sm text-assist-gray hover:text-white" onclick="closeTechnicianFeedbackModal()">Omitir</button>
+            <!-- <button type="button" class="rounded-lg border border-white/10 px-3 py-1 text-sm text-assist-gray hover:text-white" onclick="closeTechnicianFeedbackModal()">Omitir</button> -->
         </div>
 
         <form action="{% url 'guardar_feedback_tecnico' ticket.id_ticket %}" method="POST" class="mt-5 space-y-4">
@@ -238,21 +222,18 @@
     5: "5 - Excelente"
     };
 
-    function setRating(value) {
-    document.getElementById('rating').value = value;
-    document.getElementById('ratingText').textContent = ratingLabels[value];
+    function setRating(value, type) {
+        document.getElementById('rating_' + type).value = value;
+        const labels = {1:"1 - Muy mala",2:"2 - Mala",3:"3 - Regular",4:"4 - Buena",5:"5 - Excelente"};
+        const labelId = type === 'servicio' ? 'ratingTextServicio' : 'ratingTextPlataforma';
+        document.getElementById(labelId).textContent = labels[value];
 
-    document.querySelectorAll('.star-btn').forEach(btn => {
-        const starValue = parseInt(btn.dataset.value);
-        if (starValue <= value) {
-            btn.classList.remove('text-zinc-600');
-            btn.classList.add('text-yellow-400');
-        } else {
-            btn.classList.remove('text-yellow-400');
-            btn.classList.add('text-zinc-600');
-        }
+        document.querySelectorAll('.star-btn-' + type).forEach(btn => {
+            const starValue = parseInt(btn.dataset.value);
+            btn.classList.toggle('text-yellow-400', starValue <= value);
+            btn.classList.toggle('text-zinc-600', starValue > value);
     });
-    }
+}
 
     function closeUserFeedbackModal() {
         const modal = document.getElementById('userFeedbackModal');
@@ -264,11 +245,11 @@
         if (modal) modal.classList.add('hidden');
     }
 
-    function togglePlatformCategory() {
-        const typeField = document.getElementById('feedback_type');
-        const categoryField = document.getElementById('platformCategoryField');
-        if (!typeField || !categoryField) return;
-        categoryField.classList.toggle('hidden', typeField.value !== 'plataforma');
-    }
+    // function togglePlatformCategory() {
+    //     const typeField = document.getElementById('feedback_type');
+    //     const categoryField = document.getElementById('platformCategoryField');
+    //     if (!typeField || !categoryField) return;
+    //     categoryField.classList.toggle('hidden', typeField.value !== 'plataforma');
+    // }
 </script>
 {% endblock %}

@@ -14,7 +14,7 @@ from .models import (FeedbackPlatform,FeedbackService,FeedbackSupportInternal,Em
     Usuario,InfoTicket,TicketComentario,TicketHistorial,TicketAsignacion,)
 from .forms import (
     LoginForm,SuperAdminPlatformAdminCreateForm,TechnicianFeedbackForm,
-    TicketForm,EmpresaRegisterForm,UserFeedbackForm,AdminUsuarioCreateForm)
+    TicketForm,EmpresaRegisterForm,UserFeedbackForm,AdminUsuarioCreateForm,FeedbackPlatformForm)
 
 # ==========================================
 # FUNCIONES INTERNAS Y UTILIDADES (HELPERS)
@@ -479,11 +479,31 @@ def guardar_feedback_usuario(request, pk):
         asignacion = ticket.asignaciones.filter(activo=True).first() or ticket.asignaciones.first()
         if form.cleaned_data['feedback_type'] == 'servicio':
             FeedbackService.objects.get_or_create(
-                ticket=ticket,user=request.user,
-                defaults={'rating': form.cleaned_data['rating'], 'comment': form.cleaned_data['comment'], 'category': form.cleaned_data.get('platform_category') or 'OTRO'}
+                ticket=ticket,
+                user=request.user,
+                defaults={
+                    'rating': form.cleaned_data['rating'], 
+                    'comment': form.cleaned_data['comment']
+                }
             )
 
     return redirect('detalle_ticket', pk=pk)
+
+def guardar_feedback_plataforma_general(request):
+    if request.method != 'POST':
+        raise PermissionDenied
+
+    form = FeedbackPlatformForm(request.POST) 
+    
+    if form.is_valid():
+        FeedbackPlatform.objects.create(
+            ticket=None,
+            user=request.user,
+            rating=form.cleaned_data['rating'],
+            comment=form.cleaned_data['comment'],
+            category=form.cleaned_data.get('platform_category', form.cleaned_data.get('category')), 
+        )
+    return redirect('dashboard')
 
 def guardar_feedback_tecnico(request, pk):
     if request.method != 'POST' or request.user.rol != 'soporte':

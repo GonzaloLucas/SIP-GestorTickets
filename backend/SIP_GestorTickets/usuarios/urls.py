@@ -39,4 +39,6 @@ urlpatterns = [
     path('usuario/<int:pk>/quitar-acceso/', views.quitar_acceso_view, name='quitar_acceso'),
     path('usuario/<int:pk>/confirmar-baja/', views.confirmar_baja_view, name='confirmar_baja'),
     path('ticket/<int:pk>/asignar/', views.asignar_ticket_view, name='asignar_ticket'),
+    path('feedback/plataforma/', views.guardar_feedback_plataforma_general, name='guardar_feedback_plataforma_general'),
+
 ]
