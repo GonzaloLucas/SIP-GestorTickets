@@ -413,11 +413,7 @@ def detalle_ticket_view(request, pk):
             TicketComentario.objects.create(ticket=ticket, usuario=request.user, comentario=texto)
             return redirect('detalle_ticket', pk=pk)
 
-    puede_dejar_feedback_usuario = (
-        request.user.rol == 'cliente'
-        and ticket.solicitante == request.userand ticket.estado in ['RESUELTO', 'CERRADO']
-        and not ticket.feedback_servicio.exists()and not ticket.feedback_plataforma.exists()
-    )
+    puede_dejar_feedback_usuario = (request.user.rol == 'cliente' and ticket.solicitante == request.user and ticket.estado in ['RESUELTO', 'CERRADO'] and not ticket.feedback_servicio.exists() and not ticket.feedback_plataforma.exists())
     puede_dejar_feedback_tecnico = (
         request.user.rol == 'soporte'and ticket.estado in ['RESUELTO', 'CERRADO']
         and ticket.asignaciones.filter(soporte=request.user, activo=True).exists()
