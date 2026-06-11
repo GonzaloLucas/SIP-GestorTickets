@@ -1,11 +1,11 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="es"></html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Assistech{% endblock %}</title>
-    
+    <link rel="icon" type="image/png" href="{% static 'usuarios/logo-solo.png' %}" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -61,13 +61,19 @@
 <body class="bg-[#111827] text-assist-white min-h-screen font-sans flex flex-col overflow-x-hidden">
 
     {% block navbar %}
-    <nav class="border-b border-assist-dark px-6 py-4">
+    <nav class="border-b border-white/5 bg-[#121212]/90 backdrop-blur-md px-6 py-4 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             
             <a href="{% url 'landing' %}" class="flex items-center gap-3 hover:opacity-80 transition">
-                <img src="{% static 'usuarios/logo-solo.png' %}" alt="Logo Assistech" class="h-8 w-8 rounded-md">
-                <span class="text-xl font-bold tracking-tight">Assistech</span>
+                <img src="{% static 'usuarios/logo-solo.png' %}" alt="Logo Assistech" class="h-8 w-8 object-contain">
+                <span class="text-xl font-bold tracking-tight text-white">Assistech</span>
             </a>
+
+            <div class="flex items-center gap-4 text-sm">
+                {% if user.is_authenticated %}
+                    <span class="text-zinc-500 hidden sm:inline">Hola, {{ user.username }}</span>
+                {% endif %}
+            </div>
 
         </div>
     </nav>
