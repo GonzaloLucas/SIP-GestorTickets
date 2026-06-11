@@ -388,7 +388,6 @@ def _dashboard_platform_admin(request):
 # ==========================================
 def crear_ticket(request):
     ticket_creado = False
-
     if request.method == 'POST':
         form = TicketForm(request.POST)
         if form.is_valid():
@@ -399,73 +398,51 @@ def crear_ticket(request):
             form = TicketForm()  
     else:
         form = TicketForm()
-
     return render(request, 'crear_ticket.html', {'form': form,'ticket_creado': ticket_creado})
 
 def detalle_ticket_view(request, pk):
-    ticket = get_object_or_404(InfoTicket, pk=pk)
-    
-    if ticket.solicitante.empresa != request.user.empresa:
-        raise PermissionDenied
-    
-    comentarios = ticket.comentarios.all().order_by('fecha_comentario')
-
+    ticket = _get_ticket_con_control_empresa(request, pk)
     if request.user.rol == 'cliente' and ticket.solicitante != request.user:
         raise PermissionDenied
     
     if request.method == 'POST':
         if request.user.rol == 'cliente':
             raise PermissionDenied
-
         texto = request.POST.get('comentario')
         if texto:
-            TicketComentario.objects.create(ticket=ticket,usuario=request.user,comentario=texto)
+            TicketComentario.objects.create(ticket=ticket, usuario=request.user, comentario=texto)
             return redirect('detalle_ticket', pk=pk)
 
     puede_dejar_feedback_usuario = (
         request.user.rol == 'cliente'
-        and ticket.solicitante == request.user
-        and ticket.estado in ['RESUELTO', 'CERRADO']
-        and not ticket.feedback_servicio.exists()
-        and not ticket.feedback_plataforma.exists()
+        and ticket.solicitante == request.userand ticket.estado in ['RESUELTO', 'CERRADO']
+        and not ticket.feedback_servicio.exists()and not ticket.feedback_plataforma.exists()
     )
     puede_dejar_feedback_tecnico = (
-        request.user.rol == 'soporte'
-        and ticket.estado in ['RESUELTO', 'CERRADO']
+        request.user.rol == 'soporte'and ticket.estado in ['RESUELTO', 'CERRADO']
         and ticket.asignaciones.filter(soporte=request.user, activo=True).exists()
         and not ticket.feedback_interno_soporte.filter(technician=request.user).exists()
     )
 
     return render(request, 'detalle_ticket.html', {
-        'ticket': ticket,
-        'comentarios': comentarios,
-        'estados_ticket': InfoTicket.ESTADO,
-        'user_feedback_form': UserFeedbackForm(),
-        'technician_feedback_form': TechnicianFeedbackForm(),
-        'show_user_feedback_modal': puede_dejar_feedback_usuario,
-        'show_technician_feedback_modal': puede_dejar_feedback_tecnico,
+        'ticket': ticket,'comentarios': ticket.comentarios.all().order_by('fecha_comentario'),
+        'estados_ticket': InfoTicket.ESTADO,'user_feedback_form': UserFeedbackForm(),'technician_feedback_form': TechnicianFeedbackForm(),
+        'show_user_feedback_modal': puede_dejar_feedback_usuario,'show_technician_feedback_modal': puede_dejar_feedback_tecnico,
     })
 
 def eliminar_ticket(request, pk):
     ticket = get_object_or_404(InfoTicket, pk=pk)
-
     if request.user.rol != 'cliente' or ticket.solicitante != request.user:
         raise PermissionDenied
-
     ticket.delete()
     return redirect('dashboard')
 
 def actualizar_estado(request, pk):
-    ticket = get_object_or_404(InfoTicket, pk=pk)
-    
-    if ticket.solicitante.empresa != request.user.empresa:
-        raise PermissionDenied
-    
+    ticket = _get_ticket_con_control_empresa(request, pk)
     estado_anterior = ticket.estado
     nuevo_estado = request.POST.get('nuevo_estado')
-    estados_validos = dict(InfoTicket.ESTADO)
-
-    if nuevo_estado not in estados_validos:
+    
+    if nuevo_estado not in dict(InfoTicket.ESTADO):
         raise PermissionDenied
 
     if estado_anterior != nuevo_estado:
@@ -474,24 +451,19 @@ def actualizar_estado(request, pk):
             ticket.fecha_resolucion = timezone.now()
         elif nuevo_estado == 'CERRADO':
             ticket.fecha_cierre = timezone.now()
-
         ticket.save()
-        TicketHistorial.objects.create(ticket=ticket,estado_anterior=estado_anterior,
-            estado_nuevo=nuevo_estado,realizado_por=request.user,observacion="Cambio de estado desde el panel de control"
+        
+        TicketHistorial.objects.create(
+            ticket=ticket,estado_anterior=estado_anterior,estado_nuevo=nuevo_estado,
+            realizado_por=request.user,observacion="Cambio de estado desde el panel de control"
         )
     return redirect('detalle_ticket', pk=pk)
 
 def cambiar_prioridad(request, pk):
     if request.user.rol == 'cliente':
-        raise PermissionDenied
-    
-    ticket = get_object_or_404(InfoTicket, pk=pk)
-    
-    if ticket.solicitante.empresa != request.user.empresa:
-        raise PermissionDenied
-    nueva_prioridad = request.POST.get('prioridad')
-
-    ticket.prioridad = nueva_prioridad
+        raise PermissionDenied    
+    ticket = _get_ticket_con_control_empresa(request, pk)
+    ticket.prioridad = request.POST.get('prioridad')
     ticket.save()
     return redirect('dashboard')
 
@@ -501,55 +473,26 @@ def cambiar_prioridad(request, pk):
 def guardar_feedback_usuario(request, pk):
     if request.method != 'POST':
         raise PermissionDenied
+    ticket = _get_ticket_con_control_empresa(request, pk)
 
-    ticket = get_object_or_404(InfoTicket, pk=pk)
-
-    if request.user.rol != 'cliente' or ticket.solicitante != request.user:
+    if request.user.rol != 'cliente' or ticket.solicitante != request.user or ticket.estado not in ['RESUELTO', 'CERRADO']:
         raise PermissionDenied
-    if ticket.estado not in ['RESUELTO', 'CERRADO']:
-        raise PermissionDenied
-
+    
     form = UserFeedbackForm(request.POST)
     if form.is_valid():
         asignacion = ticket.asignaciones.filter(activo=True).first() or ticket.asignaciones.first()
-        feedback_type = form.cleaned_data['feedback_type']
-
-        if feedback_type == 'servicio':
+        if form.cleaned_data['feedback_type'] == 'servicio':
             FeedbackService.objects.get_or_create(
-                ticket=ticket,
-                user=request.user,
-                defaults={
-                    'technician': asignacion.soporte if asignacion else None,
-                    'rating': form.cleaned_data['rating'],
-                    'comment': form.cleaned_data['comment'],
-                }
-            )
-        else:
-            FeedbackPlatform.objects.get_or_create(
-                ticket=ticket,
-                user=request.user,
-                defaults={
-                    'rating': form.cleaned_data['rating'],
-                    'comment': form.cleaned_data['comment'],
-                    'category': form.cleaned_data.get('platform_category') or 'OTRO',
-                }
+                ticket=ticket,user=request.user,
+                defaults={'rating': form.cleaned_data['rating'], 'comment': form.cleaned_data['comment'], 'category': form.cleaned_data.get('platform_category') or 'OTRO'}
             )
 
     return redirect('detalle_ticket', pk=pk)
 
-
 def guardar_feedback_tecnico(request, pk):
-    if request.method != 'POST':
+    if request.method != 'POST' or request.user.rol != 'soporte':
         raise PermissionDenied
-
-    ticket = get_object_or_404(InfoTicket, pk=pk)
-
-    if request.user.rol != 'soporte':
-        raise PermissionDenied
-    if ticket.solicitante.empresa != request.user.empresa:
-        raise PermissionDenied
-    # if ticket.estado != 'CERRADO' or not ticket.asignaciones.filter(soporte=request.user, activo=True).exists():
-    #     raise PermissionDenied
+    ticket = _get_ticket_con_control_empresa(request, pk)
 
     form = TechnicianFeedbackForm(request.POST)
     if form.is_valid() and not ticket.feedback_interno_soporte.filter(technician=request.user).exists():
@@ -567,63 +510,38 @@ def asignar_ticket_view(request, pk):
     if not request.user.is_authenticated or request.user.rol != 'jefe':
         raise PermissionDenied
 
-    ticket = get_object_or_404(InfoTicket, pk=pk)
+    ticket = _get_ticket_con_control_empresa(request, pk)
     
-    if ticket.solicitante.empresa != request.user.empresa:
-        raise PermissionDenied
-
     soportes = Usuario.objects.filter(empresa=request.user.empresa, rol='soporte', is_active=True, autorizado=True)
-
     hora_actual = timezone.now().strftime("%H:%M")
     dia_actual = str(timezone.now().weekday())
 
     soportes_info = []
     for soporte in soportes:
         tickets_activos = TicketAsignacion.objects.filter(soporte=soporte, activo=True, ticket__estado__in=['ABIERTO', 'EN_PROCESO']).count()
+        esta_trabajando = _verificar_horario_laboral(soporte, hora_actual, dia_actual)
         
-        esta_trabajando = False
-        dias_soporte = soporte.dias_laborales.split(',') if soporte.dias_laborales else []
-        if soporte.horario_ingreso and soporte.horario_egreso and dia_actual in dias_soporte:
-            if soporte.horario_ingreso <= soporte.horario_egreso:
-                esta_trabajando = soporte.horario_ingreso <= hora_actual <= soporte.horario_egreso
-            else:
-                esta_trabajando = hora_actual >= soporte.horario_ingreso or hora_actual <= soporte.horario_egreso
-                
-        puede_asignar = tickets_activos < 3 and esta_trabajando
-        es_asignado_actual = ticket.asignaciones.filter(soporte=soporte, activo=True).exists()
-
         soportes_info.append({
-            'soporte': soporte,
-            'tickets_activos': tickets_activos,
-            'puede_asignar': puede_asignar,
-            'es_asignado_actual': es_asignado_actual,
-            'esta_trabajando': esta_trabajando,
+            'soporte': soporte, 'tickets_activos': tickets_activos, 'esta_trabajando': esta_trabajando,
+            'puede_asignar': tickets_activos < 3 and esta_trabajando,
+            'es_asignado_actual': ticket.asignaciones.filter(soporte=soporte, activo=True).exists(),
             'dias_formateados': _formatear_dias(soporte.dias_laborales),
         })
 
     if request.method == 'POST':
         soporte_id = request.POST.get('soporte_id')
-        action = request.POST.get('action')
 
-        if action == 'deassign' and soporte_id:
+        if request.POST.get('action') == 'deassign' and soporte_id:
             soporte_a_desasignar = get_object_or_404(Usuario, pk=soporte_id, empresa=request.user.empresa, rol='soporte')
             TicketAsignacion.objects.filter(ticket=ticket, soporte=soporte_a_desasignar, activo=True).update(activo=False)
-            messages.success(request, f'Se ha desasignado el ticket del técnico {soporte_a_desasignar.get_full_name()}.')
+            messages.success(request, f'Se desasignó al técnico {soporte_a_desasignar.get_full_name()}.')
             return redirect('asignar_ticket', pk=pk)
 
         if soporte_id:
             soporte_seleccionado = get_object_or_404(Usuario, pk=soporte_id, empresa=request.user.empresa, rol='soporte')
-            
-            trabaja_ahora = False
-            dias_soporte_sel = soporte_seleccionado.dias_laborales.split(',') if soporte_seleccionado.dias_laborales else []
-            if soporte_seleccionado.horario_ingreso and soporte_seleccionado.horario_egreso and dia_actual in dias_soporte_sel:
-                if soporte_seleccionado.horario_ingreso <= soporte_seleccionado.horario_egreso:
-                    trabaja_ahora = soporte_seleccionado.horario_ingreso <= hora_actual <= soporte_seleccionado.horario_egreso
-                else:
-                    trabaja_ahora = hora_actual >= soporte_seleccionado.horario_ingreso or hora_actual <= soporte_seleccionado.horario_egreso
-
+            trabaja_ahora = _verificar_horario_laboral(soporte_seleccionado, hora_actual, dia_actual)
             tickets_activos_pre = TicketAsignacion.objects.filter(soporte=soporte_seleccionado, activo=True, ticket__estado__in=['ABIERTO', 'EN_PROCESO']).count()
-            
+                        
             TicketAsignacion.objects.filter(ticket=ticket, activo=True).update(activo=False)
             TicketAsignacion.objects.create(ticket=ticket, soporte=soporte_seleccionado, asignado_por=request.user, activo=True)
             messages.success(request, f'Ticket asignado a {soporte_seleccionado.get_full_name()} correctamente.')
