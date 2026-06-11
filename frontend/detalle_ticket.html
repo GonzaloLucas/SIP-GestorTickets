@@ -83,6 +83,9 @@
                 {% if ticket.estado == 'CERRADO' %}
                     <h2 class="text-xl font-semibold text-red-200">Ticket cerrado</h2>
                     <p class="mt-1 text-sm text-red-100/80">Este ticket fue cerrado.</p>
+                {% elif ticket.estado == 'RESUELTO' %}
+                    <h2 class="text-xl font-semibold text-red-200">Ticket resuelto</h2>
+                    <p class="mt-1 text-sm text-red-100/80">Este ticket fue resuelto.</p>
                 {% else %}
                 <h2 class="text-xl font-semibold text-red-200">Cerrar ticket</h2>
                 <p class="mt-1 text-sm text-red-100/80">Esta acción no se puede deshacer.</p>
@@ -163,14 +166,18 @@
                 </select>
             </div>
             <div>
-                <label for="rating">Calificación</label>
-                <select id="rating" name="rating" required>
-                    <option value="5">5 - Excelente</option>
-                    <option value="4">4 - Buena</option>
-                    <option value="3">3 - Regular</option>
-                    <option value="2">2 - Mala</option>
-                    <option value="1">1 - Muy mala</option>
-                </select>
+                <label>Calificación</label>
+                <div class="flex gap-2 mt-1" id="starRating">
+                    {% for i in "12345" %}
+                    <button
+                        type="button"
+                        class="star-btn text-3xl text-zinc-600 hover:text-yellow-400 transition"
+                        data-value="{{ forloop.counter }}"
+                        onclick="setRating(parseInt(this.dataset.value))">★</button>
+                    {% endfor %}
+                </div>
+                <input type="hidden" id="rating" name="rating" required>
+                <p class="mt-1 text-sm text-assist-gray" id="ratingText">Selecciona una calificación</p>
             </div>
             <div>
                 <label for="comment">Comentario opcional</label>
@@ -222,6 +229,31 @@
 {% endif %}
 
 <script>
+
+    const ratingLabels = {
+    1: "1 - Muy mala",
+    2: "2 - Mala",
+    3: "3 - Regular",
+    4: "4 - Buena",
+    5: "5 - Excelente"
+    };
+
+    function setRating(value) {
+    document.getElementById('rating').value = value;
+    document.getElementById('ratingText').textContent = ratingLabels[value];
+
+    document.querySelectorAll('.star-btn').forEach(btn => {
+        const starValue = parseInt(btn.dataset.value);
+        if (starValue <= value) {
+            btn.classList.remove('text-zinc-600');
+            btn.classList.add('text-yellow-400');
+        } else {
+            btn.classList.remove('text-yellow-400');
+            btn.classList.add('text-zinc-600');
+        }
+    });
+    }
+
     function closeUserFeedbackModal() {
         const modal = document.getElementById('userFeedbackModal');
         if (modal) modal.classList.add('hidden');
