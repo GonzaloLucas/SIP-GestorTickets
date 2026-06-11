@@ -467,7 +467,7 @@ def detalle_ticket_view(request, pk):
     )
     puede_dejar_feedback_tecnico = (
         request.user.rol == 'soporte'
-        and ticket.estado == 'CERRADO'
+        and ticket.estado in ['RESUELTO', 'CERRADO']
         and ticket.asignaciones.filter(soporte=request.user, activo=True).exists()
         and not ticket.feedback_interno_soporte.filter(technician=request.user).exists()
     )
@@ -582,8 +582,8 @@ def guardar_feedback_tecnico(request, pk):
         raise PermissionDenied
     if ticket.solicitante.empresa != request.user.empresa:
         raise PermissionDenied
-    if ticket.estado != 'CERRADO' or not ticket.asignaciones.filter(soporte=request.user, activo=True).exists():
-        raise PermissionDenied
+    # if ticket.estado != 'CERRADO' or not ticket.asignaciones.filter(soporte=request.user, activo=True).exists():
+    #     raise PermissionDenied
 
     form = TechnicianFeedbackForm(request.POST)
     if form.is_valid() and not ticket.feedback_interno_soporte.filter(technician=request.user).exists():
