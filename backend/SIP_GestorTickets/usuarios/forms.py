@@ -9,31 +9,32 @@ from django.utils.crypto import get_random_string
 import unicodedata
 
 # ==========================================
-# 🛠️ FUNCIONES DE AYUDA
+# FUNCIONES DE VALIDACIÓN REUTILIZABLES
 # ==========================================
-def validar_nombre_usuario(username):
-    if Usuario.objects.filter(username=username).exists():
-        raise forms.ValidationError("Este nombre de usuario ya está en uso.")
-    return username
+def validar_sin_numeros(texto, nombre_campo="campo"):
+    """Evita que un texto contenga dígitos numéricos."""
+    if texto and any(char.isdigit() for char in texto):
+        raise forms.ValidationError(f"El {nombre_campo} no puede contener números.")
+    return texto
 
-def limpiar_texto_comun(texto):
-    if not texto:
-        return ""
-    texto_normalizado = unicodedata.normalize('NFD', texto)
-    texto_sin_tildes = "".join([c for c in texto_normalizado if unicodedata.category(c) != 'Mn'])
-    return texto_sin_tildes.lower().strip().replace(" ", "")
 
-def validar_contrasenia_segura(password):
-    validate_password(password)
-    return password
+def validar_formato_telefono(tel):
+    """Valida que el teléfono cumpla con caracteres internacionales comunes."""
+    if not tel: 
+        return tel
+    if not re.match(r'^\+?[\d\s\-]+$', tel):
+        raise forms.ValidationError("Teléfono inválido. Solo números, espacios, guiones o '+'.")
+    return tel
 
-def generar_y_validar_email(nombre_empresa, email_usuario):
-    dominio = nombre_empresa.lower().replace(" ", "")
-    email_completo = f"{email_usuario.lower()}@{dominio}.com"
 
-    if Usuario.objects.filter(email=email_completo).exists():
-        raise forms.ValidationError(f"El email {email_completo} ya está registrado.")        
-    return email_completo
+def validar_email_unico(email, mensaje_error="Este email ya está registrado."):
+    """Normaliza el email y verifica su unicidad en la base de datos."""
+    if not email:
+        return email
+    email_limpio = email.lower().strip()
+    if Usuario.objects.filter(email=email_limpio).exists():
+        raise forms.ValidationError(mensaje_error)
+    return email_limpio
 
 # ==========================================
 # FORMULARIO: REGISTRO DE EMPRESA
@@ -61,31 +62,16 @@ class EmpresaRegisterForm(forms.Form):
         return cuil
     
     def clean_telefono(self):
-        tel = self.cleaned_data.get('telefono')
-        if not tel: 
-            return tel
-            
-        if not re.match(r'^\+?[\d\s\-]+$', tel):
-            raise forms.ValidationError("Teléfono inválido. Solo números, espacios, guiones o '+'.")
-        return tel
+        return validar_formato_telefono(self.cleaned_data.get('telefono'))
 
     def clean_first_name(self):
-        nombre = self.cleaned_data.get('first_name')
-        if any(char.isdigit() for char in nombre):
-            raise forms.ValidationError("El nombre no puede contener números.")
-        return nombre
+        return validar_sin_numeros(self.cleaned_data.get('first_name'), "nombre")
 
     def clean_last_name(self):
-        apellido = self.cleaned_data.get('last_name')
-        if any(char.isdigit() for char in apellido):
-            raise forms.ValidationError("El apellido no puede contener números.")
-        return apellido
+        return validar_sin_numeros(self.cleaned_data.get('last_name'), "apellido")
     
     def clean_email_real(self):
-        email = self.cleaned_data.get('email_real').lower().strip()
-        if Usuario.objects.filter(email=email).exists():
-            raise forms.ValidationError("Este email ya está registrado con otro usuario.")
-        return email
+        return validar_email_unico(self.cleaned_data.get('email_real'), "Este email ya está registrado con otro usuario.")
 
     def save(self, request=None):
         from django.db import transaction
@@ -136,12 +122,7 @@ class EmpresaRegisterForm(forms.Form):
             """
             
             send_mail(
-                subject=asunto,
-                message=mensaje_cuerpo,
-                from_email='assistech.soporte@gmail.com',
-                recipient_list=[email],
-                fail_silently=False,
-            )
+                subject=asunto,message=mensaje_cuerpo,from_email='assistech.soporte@gmail.com',recipient_list=[email],fail_silently=False,)
             
         return user
 
@@ -160,13 +141,8 @@ class AdminUsuarioCreateForm(forms.Form):
         for h in range(24) for m in (0, 30)
     ]
     DIAS_SEMANA = [
-        ('0', 'Lunes'),
-        ('1', 'Martes'),
-        ('2', 'Miércoles'),
-        ('3', 'Jueves'),
-        ('4', 'Viernes'),
-        ('5', 'Sábado'),
-        ('6', 'Domingo'),
+        ('0', 'Lunes'),('1', 'Martes'),('2', 'Miércoles'),
+        ('3', 'Jueves'),('4', 'Viernes'),('5', 'Sábado'),('6', 'Domingo'),
     ]
     first_name = forms.CharField(max_length=150, label="Nombre")
     last_name = forms.CharField(max_length=150, label="Apellido")
@@ -178,30 +154,16 @@ class AdminUsuarioCreateForm(forms.Form):
     dias_laborales = forms.MultipleChoiceField(choices=DIAS_SEMANA, widget=forms.CheckboxSelectMultiple, required=False, label="Días Laborales")
         
     def clean_telefono(self):
-        tel = self.cleaned_data.get('telefono')
-        if not tel: 
-            return tel
-        if not re.match(r'^\+?[\d\s\-]+$', tel):
-            raise forms.ValidationError("Teléfono inválido. Solo números, espacios, guiones o '+'.")
-        return tel
+        return validar_formato_telefono(self.cleaned_data.get('telefono'))
 
     def clean_first_name(self):
-        nombre = self.cleaned_data.get('first_name')
-        if any(char.isdigit() for char in nombre):
-            raise forms.ValidationError("El nombre no puede contener números.")
-        return nombre
+        return validar_sin_numeros(self.cleaned_data.get('first_name'), "nombre")
 
     def clean_last_name(self):
-        apellido = self.cleaned_data.get('last_name')
-        if any(char.isdigit() for char in apellido):
-            raise forms.ValidationError("El apellido no puede contener números.")
-        return apellido
+        return validar_sin_numeros(self.cleaned_data.get('last_name'), "apellido")
     
     def clean_email_real(self):
-        email = self.cleaned_data.get('email_real').lower().strip()
-        if Usuario.objects.filter(email=email).exists():
-            raise forms.ValidationError("Este email ya está registrado en el sistema.")
-        return email
+        return validar_email_unico(self.cleaned_data.get('email_real'), "Este email ya está registrado en el sistema.")
 
     def clean(self):
         cleaned_data = super().clean()
@@ -225,10 +187,7 @@ class SuperAdminPlatformAdminCreateForm(forms.Form):
     confirmar_password = forms.CharField(label="Confirmar contraseña", widget=forms.PasswordInput)
 
     def clean_email_real(self):
-        email = self.cleaned_data.get('email_real').lower().strip()
-        if Usuario.objects.filter(email=email).exists():
-            raise forms.ValidationError("Este email ya está registrado en el sistema.")
-        return email
+        return validar_email_unico(self.cleaned_data.get('email_real'), "Este email ya está registrado en el sistema.")
 
     def clean(self):
         cleaned_data = super().clean()
@@ -253,7 +212,6 @@ class LoginForm(forms.Form):
 
 class TicketForm(forms.ModelForm):
     titulo = forms.CharField(max_length=25, label="Título", widget=forms.TextInput(attrs={'placeholder': 'Máximo 25 caracteres'}))
-    
     categoria = forms.ChoiceField(choices=InfoTicket.CATEGORIAS,label='Categoría')
     categoria_otro = forms.CharField(
         required=False,label='Otra categoría',
@@ -274,7 +232,6 @@ class TicketForm(forms.ModelForm):
 
     def clean_titulo(self):
         titulo = self.cleaned_data.get('titulo', '')
-        
         if len(titulo) > 25:
             raise forms.ValidationError('El título debe contener un máximo de 25 caracteres.')
         
@@ -316,11 +273,7 @@ class UserFeedbackForm(forms.Form):
         widget=forms.Textarea(attrs={'rows': 3, 'placeholder': 'Comentario opcional'})
     )
     feedback_type = forms.ChoiceField(choices=TIPOS_FEEDBACK, label='Tipo de feedback')
-    platform_category = forms.ChoiceField(
-        choices=FeedbackPlatform.CATEGORIAS,
-        required=False,
-        label='Categoría de plataforma'
-    )
+    platform_category = forms.ChoiceField(choices=FeedbackPlatform.CATEGORIAS,required=False,label='Categoría de plataforma')
 
     def clean_rating(self):
         return int(self.cleaned_data['rating'])

@@ -14,7 +14,6 @@ class Empresa(models.Model):
     nombre = models.CharField(max_length=255)
     domicilio = models.CharField(max_length=255, blank=True, null=True)
     pais = models.CharField(max_length=100, blank=True, null=True)
-    
     cuil = models.CharField(max_length=11, unique=True, null=True, blank=True) 
     plan = models.CharField(max_length=20, choices=PLANES, default='BASICO')
     fecha_creacion = models.DateTimeField(auto_now_add=True)
@@ -45,8 +44,8 @@ class Usuario(AbstractUser):
     horario_ingreso = models.CharField(max_length=5, blank=True, null=True)
     horario_egreso = models.CharField(max_length=5, blank=True, null=True)
     dias_laborales = models.CharField(max_length=50, blank=True, null=True)
-
     require_password_change = models.BooleanField(default=False)
+    
     def __str__(self):
         return f"{self.username} ({self.get_rol_display()})"
     
@@ -81,7 +80,6 @@ class InfoTicket(models.Model):
 
     id_ticket = models.AutoField(primary_key=True)
     numero_ticket_empresa = models.PositiveIntegerField(null=True, blank=True)
-    
     titulo = models.CharField(max_length=255)
     descripcion = models.TextField()
     categoria = models.CharField(max_length=255)
@@ -105,8 +103,7 @@ class InfoTicket(models.Model):
         return f"#{self.numero_ticket_empresa} - {self.titulo}"
     
     def save(self, *args, **kwargs):
-        if not self.pk: # Solo si el ticket es NUEVO
-            # Buscamos el número más alto de ticket que tenga la empresa de este solicitante
+        if not self.pk: 
             ultimo_numero = InfoTicket.objects.filter(
                 solicitante__empresa=self.solicitante.empresa
             ).aggregate(models.Max('numero_ticket_empresa'))['numero_ticket_empresa__max']
@@ -114,12 +111,12 @@ class InfoTicket(models.Model):
             if ultimo_numero is not None:
                 self.numero_ticket_empresa = ultimo_numero + 1
             else:
-                self.numero_ticket_empresa = 1 # Si es el primero de la empresa, arranca en 1
+                self.numero_ticket_empresa = 1 
                 
         super().save(*args, **kwargs)
 
 # ==========================================
-# MODELO: HISTORIAL TICKET
+# MODELOS AUXILIARES DE TICKETS
 # ==========================================
 class TicketHistorial(models.Model):
     id_historial = models.AutoField(primary_key=True)
@@ -134,9 +131,6 @@ class TicketHistorial(models.Model):
     def __str__(self):
         return f"Historial #{self.id_historial} - Ticket #{self.ticket.id_ticket}"
 
-# ==========================================
-# MODELO: COMENTARIO TICKET
-# ==========================================
 class TicketComentario(models.Model):
     id_comentario = models.AutoField(primary_key=True)
     ticket = models.ForeignKey(InfoTicket,on_delete=models.CASCADE,related_name='comentarios')
@@ -147,10 +141,6 @@ class TicketComentario(models.Model):
     def __str__(self):
         return f"Comentario #{self.id_comentario} - Ticket #{self.ticket.id_ticket}"
 
-
-# ==========================================
-# MODELO: ASIGNACION TICKET
-# ==========================================
 class TicketAsignacion(models.Model):
     id_asignacion = models.AutoField(primary_key=True)
     ticket = models.ForeignKey(InfoTicket,on_delete=models.CASCADE,related_name='asignaciones')
@@ -164,9 +154,31 @@ class TicketAsignacion(models.Model):
 
 
 # ==========================================
-# MODELOS: FEEDBACK
+# MODELOS ABSTRACTOS DE FEEDBACK
 # ==========================================
-class FeedbackService(models.Model):
+class BaseFeedback(models.Model):
+    comment = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        abstract = True
+        ordering = ['-created_at']
+
+class BaseCustomerFeedback(BaseFeedback):
+    rating = models.PositiveSmallIntegerField()
+    is_critical = models.BooleanField(default=False)
+
+    class Meta(BaseFeedback.Meta):
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        self.is_critical = self.rating <= 2
+        super().save(*args, **kwargs)
+               
+# ==========================================
+# MODELOS DE FEEDBACK IMPLEMENTADOS
+# ==========================================
+class FeedbackService(BaseCustomerFeedback):
     id = models.AutoField(primary_key=True)
     ticket = models.ForeignKey(InfoTicket, on_delete=models.CASCADE, related_name='feedback_servicio')
     user = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name='feedback_servicio_realizado')
@@ -178,24 +190,14 @@ class FeedbackService(models.Model):
         blank=True,
         null=True
     )
-    rating = models.PositiveSmallIntegerField()
-    comment = models.TextField(blank=True, null=True)
-    is_critical = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-
     class Meta:
         db_table = 'feedback_service'
-        ordering = ['-created_at']
-
-    def save(self, *args, **kwargs):
-        self.is_critical = self.rating <= 2
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Feedback servicio ticket #{self.ticket.id_ticket} - {self.rating}/5"
 
 
-class FeedbackPlatform(models.Model):
+class FeedbackPlatform(BaseCustomerFeedback):
     CATEGORIAS = (
         ('BUG', 'Bug'),
         ('MEJORA', 'Sugerencia de mejora'),
@@ -208,25 +210,15 @@ class FeedbackPlatform(models.Model):
     id = models.AutoField(primary_key=True)
     ticket = models.ForeignKey(InfoTicket, on_delete=models.CASCADE, related_name='feedback_plataforma')
     user = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name='feedback_plataforma_realizado')
-    rating = models.PositiveSmallIntegerField()
-    comment = models.TextField(blank=True, null=True)
     category = models.CharField(max_length=20, choices=CATEGORIAS, default='OTRO')
-    is_critical = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'feedback_platform'
-        ordering = ['-created_at']
-
-    def save(self, *args, **kwargs):
-        self.is_critical = self.rating <= 2
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Feedback plataforma ticket #{self.ticket.id_ticket} - {self.rating}/5"
 
-
-class FeedbackSupportInternal(models.Model):
+class FeedbackSupportInternal(BaseFeedback):
     DIFICULTADES = (
         ('BAJA', 'Baja'),
         ('MEDIA', 'Media'),
@@ -237,13 +229,10 @@ class FeedbackSupportInternal(models.Model):
     ticket = models.ForeignKey(InfoTicket, on_delete=models.CASCADE, related_name='feedback_interno_soporte')
     technician = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name='feedback_interno_realizado')
     difficulty = models.CharField(max_length=10, choices=DIFICULTADES)
-    comment = models.TextField(blank=True, null=True)
     problems_found = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'feedback_support_internal'
-        ordering = ['-created_at']
 
     def __str__(self):
         return f"Feedback interno ticket #{self.ticket.id_ticket} - {self.get_difficulty_display()}"
