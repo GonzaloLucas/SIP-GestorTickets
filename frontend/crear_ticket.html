@@ -23,8 +23,20 @@
 <div class="w-full max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
 
     <div class="mb-6 sm:mb-8">
-        <h2 class="text-3xl font-bold tracking-tight">Crear nuevo ticket</h2>
-        <p class="mt-2 text-sm text-assist-gray">Completá los datos de tu solicitud y nuestro equipo la atenderá a la brevedad.</p>
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h2 class="text-3xl font-bold tracking-tight">Crear nuevo ticket</h2>
+                <p class="mt-2 text-sm text-assist-gray">Completá los datos de tu solicitud y nuestro equipo la atenderá a la brevedad.</p>
+            </div>
+            {% if request.user.empresa.plan == 'GRATIS' %}
+            <div class="w-full sm:w-auto bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3">
+                <div class="flex items-center gap-2 text-sm">
+                    <span class="text-assist-gray">Tickets este mes:</span>
+                    <span class="text-white font-bold">{{ tickets_consumidos|default:"0" }}/500</span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
     </div>
 
     {% if ticket_creado %}

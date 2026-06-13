@@ -35,7 +35,13 @@
         </div>
     {% endif %}
 
-    <h2 class="text-2xl sm:text-3xl font-bold mb-6">Panel de Control Global (Jefe de Soporte)</h2>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <h2 class="text-2xl sm:text-3xl font-bold">Panel de Control Global (Jefe de Soporte)</h2>
+        <div class="px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-right">
+            <p class="text-xs text-assist-gray uppercase tracking-wider">Plan Actual</p>
+            <p class="text-lg font-bold text-assist-coral">{{ request.user.empresa.get_plan_display }}</p>
+        </div>
+    </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
         <div class="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
@@ -113,6 +119,7 @@
     </section>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {% if request.user.empresa.plan != 'GRATIS' %}
         <section class="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
         <h3 class="text-xl font-semibold mb-4 text-assist-gray">Métricas por técnico</h3>
             <div class="space-y-3">
@@ -143,6 +150,12 @@
                 {% endfor %}
             </div>
         </section>
+        {% else %}
+        <section class="lg:col-span-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-8 text-center">
+            <h3 class="text-xl font-bold mb-2 text-amber-200">Métricas Avanzadas Bloqueadas</h3>
+            <p class="text-amber-100/80 mb-4 max-w-2xl mx-auto">Tu empresa se encuentra en el plan <strong>Gratis</strong>. Este plan no incluye acceso a métricas de rendimiento por técnico ni reportes de calificaciones bajas. Actualizá tu plan a <strong>Básico</strong> o <strong>Premium</strong> para desbloquear estas herramientas y gestionar mejor a tu equipo.</p>
+        </section>
+        {% endif %}
     </div>
 
     <section class="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 mb-8">
