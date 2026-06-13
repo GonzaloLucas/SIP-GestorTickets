@@ -6,8 +6,8 @@ from django.db import models
 # ==========================================
 class Empresa(models.Model):
     PLANES = (
-        ('BASICO', 'Básico (Gratis)'),
-        ('ESTANDAR', 'Estándar'),
+        ('GRATIS', 'Gratis'),
+        ('BASICO', 'Básico'),
         ('PREMIUM', 'Premium'),
     )
     id_empresa = models.AutoField(primary_key=True)
@@ -15,7 +15,7 @@ class Empresa(models.Model):
     domicilio = models.CharField(max_length=255, blank=True, null=True)
     pais = models.CharField(max_length=100, blank=True, null=True)
     cuil = models.CharField(max_length=11, unique=True, null=True, blank=True) 
-    plan = models.CharField(max_length=20, choices=PLANES, default='BASICO')
+    plan = models.CharField(max_length=20, choices=PLANES, default='GRATIS')
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
