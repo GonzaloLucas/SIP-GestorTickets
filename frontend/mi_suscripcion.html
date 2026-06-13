@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+
+{% block title %}Mi Suscripción — Assistech{% endblock %}
+
+{% block navbar %}
+{% load static %}
+<div class="w-full max-w-7xl mx-auto px-4 pt-6">
+    <div class="flex items-center gap-2 px-3 py-1.5 w-fit rounded-lg bg-assist-accent/10 border border-assist-accent/20 text-xs font-medium text-assist-accent">
+        Panel Administrador: <strong class="text-white ml-1">{{ request.user.empresa.nombre }}</strong>
+    </div>
+</div>
+<nav class="border-b border-assist-dark px-6 py-4">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-y-3">
+        <a href="{% url 'dashboard' %}" class="flex items-center gap-3 hover:opacity-80 transition">
+            <img src="{% static 'usuarios/logo-solo.png' %}" alt="Logo Assistech" class="h-8 w-8">
+            <span class="text-xl font-bold tracking-tight">Assistech</span>
+        </a>
+        <div class="flex flex-wrap items-center gap-3 sm:gap-6">
+            <a href="{% url 'dashboard' %}" class="text-xs sm:text-sm text-assist-gray hover:text-assist-white transition">Volver al Panel</a>
+            <span class="text-xs sm:text-sm text-assist-gray"><span class="hidden sm:inline">Hola, </span>{{ request.user.username }}</span>
+            <a href="{% url 'logout' %}" class="text-xs sm:text-sm text-assist-coral hover:underline">Cerrar Sesión</a>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-5xl px-4 sm:px-6 py-6 sm:py-10 w-full">
+    {% if messages %}
+        <div class="mb-6 space-y-3">
+            {% for message in messages %}
+                <div class="rounded-xl border px-4 py-3 text-sm font-semibold {% if message.tags == 'error' %}border-red-500/30 bg-red-500/10 text-red-200{% else %}border-emerald-500/30 bg-emerald-500/10 text-emerald-200{% endif %}">
+                    {{ message|safe }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="mb-8">
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Gestión de Suscripción</h1>
+        <p class="mt-2 text-sm text-assist-body">Administrá el plan de tu empresa y los límites de tu cuenta.</p>
+    </div>
+
+    <!-- Planes -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <!-- Plan Gratis -->
+        <article class="relative flex flex-col rounded-2xl border {% if empresa.plan == 'GRATIS' %}border-assist-coral bg-assist-coral/5{% else %}border-white/10 bg-zinc-900/50{% endif %} p-6">
+            <div class="flex-1">
+                <h3 class="text-xl font-semibold text-white mb-2">Plan Gratis</h3>
+                <p class="text-3xl font-bold text-white mb-4">$0 <span class="text-sm font-normal text-zinc-400">/mes</span></p>
+                <ul class="space-y-3 text-sm text-zinc-300 mb-6">
+                    <li class="flex items-center gap-2"><span class="text-assist-coral">✓</span> Hasta 10 usuarios</li>
+                    <li class="flex items-center gap-2"><span class="text-assist-coral">✓</span> 500 tickets mensuales</li>
+                    <li class="flex items-center gap-2"><span class="text-assist-coral">✓</span> Soporte por email</li>
+                </ul>
+            </div>
+            
+            {% if empresa.plan == 'GRATIS' %}
+                <button disabled class="w-full py-3 rounded-xl bg-assist-coral/20 text-assist-coral font-bold cursor-not-allowed border border-assist-coral/30">Plan Actual</button>
+            {% else %}
+                <button type="button" class="w-full py-3 rounded-xl border border-white/20 text-white font-bold hover:bg-white/5 transition" onclick="openPlanModal('GRATIS', '¿Estás seguro que querés bajar al plan Gratis? Tus límites se reducirán.')">Elegir Gratis</button>
+            {% endif %}
+        </article>
+
+        <!-- Plan Básico -->
+        <article class="relative flex flex-col rounded-2xl border {% if empresa.plan == 'BASICO' %}border-assist-coral bg-assist-coral/5{% else %}border-white/10 bg-zinc-900/50{% endif %} p-6">
+            <div class="flex-1">
+                <h3 class="text-xl font-semibold text-white mb-2">Plan Básico</h3>
+                <p class="text-3xl font-bold text-white mb-4">$80 <span class="text-sm font-normal text-zinc-400">/mes</span></p>
+                <ul class="space-y-3 text-sm text-zinc-300 mb-6">
+                    <li class="flex items-center gap-2"><span class="text-assist-coral">✓</span> Hasta 50 usuarios</li>
+                    <li class="flex items-center gap-2"><span class="text-assist-coral">✓</span> Tickets ilimitados</li>
+                    <li class="flex items-center gap-2"><span class="text-assist-coral">✓</span> Reportes avanzados</li>
+                </ul>
+            </div>
+            
+            {% if empresa.plan == 'BASICO' %}
+                <button disabled class="w-full py-3 rounded-xl bg-assist-coral/20 text-assist-coral font-bold cursor-not-allowed border border-assist-coral/30">Plan Actual</button>
+            {% else %}
+                <button type="button" class="w-full py-3 rounded-xl {% if empresa.plan == 'GRATIS' %}bg-assist-coral text-white hover:brightness-110{% else %}border border-white/20 text-white hover:bg-white/5{% endif %} font-bold transition" onclick="openPlanModal('BASICO', '¿Confirmás el cambio al plan Básico? Disfrutarás de más beneficios.')">Elegir Básico</button>
+            {% endif %}
+        </article>
+
+        <!-- Plan Premium -->
+        <article class="relative flex flex-col rounded-2xl border {% if empresa.plan == 'PREMIUM' %}border-assist-coral bg-assist-coral/5{% else %}border-white/10 bg-zinc-900/50{% endif %} p-6">
+            <div class="flex-1">
+                <h3 class="text-xl font-semibold text-white mb-2">Plan Premium</h3>
+                <p class="text-3xl font-bold text-white mb-4">$150 <span class="text-sm font-normal text-zinc-400">/mes</span></p>
+                <ul class="space-y-3 text-sm text-zinc-300 mb-6">
+                    <li class="flex items-center gap-2"><span class="text-assist-coral">✓</span> Usuarios ilimitados</li>
+                    <li class="flex items-center gap-2"><span class="text-assist-coral">✓</span> Tickets ilimitados</li>
+                    <li class="flex items-center gap-2"><span class="text-assist-coral">✓</span> Soporte prioritario</li>
+                </ul>
+            </div>
+            
+            {% if empresa.plan == 'PREMIUM' %}
+                <button disabled class="w-full py-3 rounded-xl bg-assist-coral/20 text-assist-coral font-bold cursor-not-allowed border border-assist-coral/30">Plan Actual</button>
+            {% else %}
+                <button type="button" class="w-full py-3 rounded-xl bg-assist-coral text-white font-bold hover:brightness-110 transition" onclick="openPlanModal('PREMIUM', '¿Confirmás el upgrade al plan Premium? Tendrás acceso a funciones ilimitadas.')">Elegir Premium</button>
+            {% endif %}
+        </article>
+    </div>
+
+    <!-- Consumo actual -->
+    <div class="bg-zinc-900 border border-white/10 rounded-2xl p-6">
+        <h3 class="text-lg font-semibold text-white mb-4">Tu consumo actual</h3>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm text-assist-gray">Usuarios Registrados</span>
+                    <span class="text-sm font-bold text-white">
+                        {{ cantidad_usuarios }} 
+                        {% if empresa.plan == 'GRATIS' %} / 10 
+                        {% elif empresa.plan == 'BASICO' %} / 50 
+                        {% else %} (Ilimitado) {% endif %}
+                    </span>
+                </div>
+                <div class="w-full bg-zinc-800 rounded-full h-2">
+                    <div class="bg-assist-coral h-2 rounded-full" 
+                        style="--w: {{ porcentaje_usuarios }}%; width: var(--w);">
+                    </div>                
+                </div>
+            </div>
+
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm text-assist-gray">Tickets Creados (Mes actual)</span>
+                    <span class="text-sm font-bold text-white">
+                        {{ tickets_consumidos }} 
+                        {% if empresa.plan == 'GRATIS' %} / 500 
+                        {% else %} (Ilimitado) {% endif %}
+                    </span>
+                </div>
+                <div class="w-full bg-zinc-800 rounded-full h-2">
+                    <div class="bg-assist-coral h-2 rounded-full" 
+                        style="--w: {{ porcentaje_tickets }}%; width: var(--w);">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="planModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 px-4">
+    <section class="w-full max-w-md rounded-xl border border-zinc-700 bg-zinc-900 p-6 shadow-2xl">
+        <h2 class="text-xl font-semibold text-white">Confirmar cambio de plan</h2>
+        <p id="planModalMessage" class="mt-2 text-sm text-assist-gray">¿Estás seguro?</p>
+
+        <form method="POST" action="{% url 'cambiar_suscripcion' %}" class="mt-6 flex gap-3">
+            {% csrf_token %}
+            <input type="hidden" name="plan" id="planModalInput" value="">
+            <button type="button" onclick="closePlanModal()" class="flex-1 rounded-xl border border-white/10 py-3 text-sm font-bold text-white hover:bg-white/5 transition">
+                Cancelar
+            </button>
+            <button type="submit" class="flex-1 rounded-xl bg-assist-coral py-3 text-sm font-bold text-white hover:brightness-110 transition">
+                Confirmar
+            </button>
+        </form>
+    </section>
+</div>
+
+<script>
+    function openPlanModal(plan, message) {
+        document.getElementById('planModalInput').value = plan;
+        document.getElementById('planModalMessage').textContent = message;
+        const modal = document.getElementById('planModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closePlanModal() {
+        const modal = document.getElementById('planModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+</script>
+{% endblock %}

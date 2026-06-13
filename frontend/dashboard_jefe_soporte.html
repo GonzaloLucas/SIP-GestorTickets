@@ -29,7 +29,7 @@
         <div class="mb-6 space-y-3">
             {% for message in messages %}
                 <div class="rounded-xl border px-4 py-3 text-sm font-semibold {% if message.tags == 'error' %}border-red-500/30 bg-red-500/10 text-red-200{% elif message.tags == 'warning' %}border-amber-500/30 bg-amber-500/10 text-amber-200{% else %}border-emerald-500/30 bg-emerald-500/10 text-emerald-200{% endif %}">
-                    {{ message }}
+                    {{ message|safe }}
                 </div>
             {% endfor %}
         </div>
@@ -43,11 +43,12 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
+    <div class="grid grid-cols-1 {% if request.user.empresa.plan != 'GRATIS' %}sm:grid-cols-4{% endif %} gap-4 mb-8">
         <div class="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
             <p class="text-assist-gray">Total de Tickets</p>
             <strong class="text-2xl text-white">{{ tickets.count }}</strong>
         </div>
+        {% if request.user.empresa.plan != 'GRATIS' %}
         <div class="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
             <p class="text-assist-gray">Promedio soporte</p>
             <strong class="text-2xl text-white">{% if promedio_soporte %}{{ promedio_soporte|floatformat:1 }}/5{% else %}-{% endif %}</strong>
@@ -60,6 +61,7 @@
             <p class="text-red-300">Calificaciones bajas</p>
             <strong class="text-2xl text-red-300">{{ feedback_bajo.count }}</strong>
         </div>
+        {% endif %}
     </div>
 
     <section class="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 mb-8">
@@ -158,6 +160,7 @@
         {% endif %}
     </div>
 
+    {% if request.user.empresa.plan != 'GRATIS' %}
     <section class="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 mb-8">
         <div class="mb-4 flex flex-col gap-1">
             <h3 class="text-xl font-semibold text-assist-gray">Feedbacks</h3>
@@ -230,6 +233,7 @@
             {% endfor %}
         </div>
     </section>
+    {% endif %}
 
     <h3 class="text-xl font-semibold mb-4 text-assist-gray">Todos los Tickets del Sistema</h3>
 

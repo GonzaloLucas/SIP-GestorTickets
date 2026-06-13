@@ -29,7 +29,7 @@
         <div class="mb-6 space-y-3">
             {% for message in messages %}
                 <div class="rounded-xl border px-4 py-3 text-sm font-semibold {% if message.tags == 'error' %}border-red-500/30 bg-red-500/10 text-red-200{% else %}border-emerald-500/30 bg-emerald-500/10 text-emerald-200{% endif %}">
-                    {{ message }}
+                    {{ message|safe }}
                 </div>
             {% endfor %}
         </div>
@@ -40,16 +40,27 @@
             <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Panel de {{ request.user.empresa.nombre }}</h1>
             <p class="mt-2 text-sm text-assist-body">Hola, {{ request.user.first_name }}. Estás viendo todas las solicitudes de tu organización.</p>
         </div>
-        <div class="mt-4 md:mt-0 px-4 py-3 rounded-lg border border-white/10 bg-white/5 w-full sm:w-64">
-            <div class="flex justify-between items-center">
-                <div class="text-left">
-                    <p class="text-xs text-assist-gray uppercase tracking-wider">Plan Actual</p>
-                    <p class="text-lg font-bold text-assist-coral">{{ request.user.empresa.get_plan_display }}</p>
+        <div class="flex flex-col items-end gap-3 mt-4 md:mt-0 w-full sm:w-auto">
+            <a href="{% url 'mi_suscripcion' %}" class="px-4 py-2 rounded-lg bg-assist-charcoal border border-white/10 hover:bg-white/5 transition text-sm font-semibold text-white w-full sm:w-auto text-center">Gestionar Suscripción</a>
+            <div class="px-4 py-3 rounded-lg border border-white/10 bg-white/5 w-full sm:w-64">
+                <div class="flex justify-between items-center">
+                    <div class="text-left">
+                        <p class="text-xs text-assist-gray uppercase tracking-wider">Plan Actual</p>
+                        <p class="text-lg font-bold text-assist-coral">{{ request.user.empresa.get_plan_display }}</p>
+                    </div>
+                    {% if request.user.empresa.plan == 'GRATIS' %}
+                    <div class="text-right">
+                        <span class="text-white font-bold text-sm">{{ tickets_consumidos|default:"0" }}/500</span>
+                        <p class="text-xs text-assist-gray">tickets</p>
+                    </div>
+                    {% endif %}
                 </div>
-                {% if request.user.empresa.plan == 'GRATIS' %}
-                <div class="text-right">
-                    <span class="text-white font-bold text-sm">{{ tickets_consumidos|default:"0" }}/500</span>
-                    <p class="text-xs text-assist-gray">este mes</p>
+                {% if request.user.empresa.plan == 'GRATIS' or request.user.empresa.plan == 'BASICO' %}
+                <div class="mt-2 border-t border-white/5 pt-2 flex justify-between items-center">
+                    <span class="text-xs text-assist-gray">Usuarios totales</span>
+                    <span class="text-white font-bold text-sm">
+                        {{ cantidad_usuarios|default:"0" }}/{% if request.user.empresa.plan == 'GRATIS' %}10{% else %}50{% endif %}
+                    </span>
                 </div>
                 {% endif %}
             </div>
@@ -81,6 +92,22 @@
     </div>
     
     <div class="flex flex-col sm:flex-row justify-end mb-8">
+        {% if limite_usuarios_alcanzado %}
+        <div class="relative group w-full sm:w-auto">
+            <button disabled class="inline-flex items-center justify-center gap-4 bg-zinc-800 text-zinc-500 text-base sm:text-lg font-bold px-8 py-4 rounded-2xl border border-white/5 cursor-not-allowed w-full">
+                <span class="bg-zinc-700/50 p-1.5 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                </span>
+                <span class="tracking-wide">Crear Nuevo Usuario</span>
+            </button>
+            <!-- Tooltip explicativo -->
+            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden w-max max-w-xs bg-zinc-900 text-white text-xs rounded-lg px-3 py-2 border border-zinc-700 shadow-xl group-hover:block z-10 text-center">
+                Alcanzaste el límite de usuarios de tu plan. <a href="{% url 'mi_suscripcion' %}" class="text-assist-coral hover:underline font-bold">Mejorá tu plan</a> para agregar más.
+            </div>
+        </div>
+        {% else %}
         <a href="{% url 'crear_usuario_admin' %}" class="group relative inline-flex items-center justify-center gap-4 bg-gradient-to-r from-assist-accent to-assist-coral text-white text-base sm:text-lg font-bold px-8 py-4 rounded-2xl border border-white/20 transition-all duration-300 hover:brightness-110 hover:-translate-y-1 shadow-[0_0_20px_rgba(242,92,84,0.4)] hover:shadow-[0_0_35px_rgba(242,92,84,0.6)] active:translate-y-0 w-full sm:w-auto">
             <!-- Cajita semi-transparente para el ícono -->
             <span class="bg-white/20 p-1.5 rounded-lg transition-transform duration-300 group-hover:rotate-180">
@@ -90,6 +117,7 @@
             </span>
             <span class="tracking-wide">Crear Nuevo Usuario</span>
         </a>
+        {% endif %}
     </div>
     
     <div class="bg-assist-charcoal rounded-xl border border-white/5 overflow-x-auto mb-8 w-full">

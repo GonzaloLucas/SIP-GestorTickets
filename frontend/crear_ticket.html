@@ -45,16 +45,22 @@
         </div>
     {% endif %}
 
-    <form method="post" class="space-y-2">
+    <form method="post" class="space-y-4">
         {% csrf_token %}
-        {{ form.as_p }}
+        
+        <div class="space-y-2">
+        
+            {{ form.as_p }}
+            
+        </div>
+
         <div class="flex flex-col sm:flex-row gap-3 pt-4">
             <button type="submit"
                 class="flex-1 bg-assist-coral text-white font-semibold py-3 rounded-xl hover:brightness-110 transition">
                 Cargar Ticket
             </button>
             <a href="{% url 'dashboard' %}"
-                class="flex-1 text-center border border-white/20 text-assist-gray font-semibold py-3 rounded-xl hover:bg-white/5 transition">
+                class="flex-1 text-center flex items-center justify-center border border-white/20 text-assist-gray font-semibold py-3 rounded-xl hover:bg-white/5 transition">
                 Volver al Dashboard
             </a>
         </div>

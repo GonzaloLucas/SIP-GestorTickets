@@ -179,6 +179,15 @@ def crear_platform_admin_view(request):
 def crear_usuario_admin_view(request):
     admin_empresa = _obtener_empleado_controlado(request, request.user.pk)
 
+    cantidad_usuarios = Usuario.objects.filter(empresa=request.user.empresa).count()
+    plan = request.user.empresa.plan
+    if plan == 'GRATIS' and cantidad_usuarios >= 10:
+        messages.error(request, "Tu empresa ha alcanzado el límite de 10 usuarios del plan Gratis. <a href='/mi-suscripcion/' class='underline font-bold text-white'>Mejorá tu plan para agregar más equipo</a>.")
+        return redirect('dashboard')
+    elif plan == 'BASICO' and cantidad_usuarios >= 50:
+        messages.error(request, "Tu empresa ha alcanzado el límite de 50 usuarios del plan Básico. <a href='/mi-suscripcion/' class='underline font-bold text-white'>Mejorá tu plan para agregar más equipo</a>.")
+        return redirect('dashboard')
+
     if request.method == 'POST':
         form = AdminUsuarioCreateForm(request.POST)
         if form.is_valid():
@@ -332,13 +341,23 @@ def _dashboard_admin_cliente(request):
         ).count()
         tickets = _filtrar_tickets_por_plan(request.user.empresa, tickets_qs)
         
+        cantidad_usuarios = Usuario.objects.filter(empresa=request.user.empresa).count()
+        plan = request.user.empresa.plan
+        limite_usuarios_alcanzado = False
+        if plan == 'GRATIS' and cantidad_usuarios >= 10:
+            limite_usuarios_alcanzado = True
+        elif plan == 'BASICO' and cantidad_usuarios >= 50:
+            limite_usuarios_alcanzado = True
+        
         return render(request, 'dashboard_admin_cliente.html', {
         'tickets': tickets,
         'empleados_activos': Usuario.objects.filter(empresa=request.user.empresa, is_active=True).exclude(pk=request.user.pk),
         'cant_abiertos': tickets.filter(estado='ABIERTO').count(),    
         'cant_proceso': tickets.filter(estado='EN_PROCESO').count(),      
         'cant_resueltos': tickets.filter(estado__in=['RESUELTO', 'CERRADO']).count(),
-        'tickets_consumidos': tickets_consumidos
+        'tickets_consumidos': tickets_consumidos,
+        'limite_usuarios_alcanzado': limite_usuarios_alcanzado,
+        'cantidad_usuarios': cantidad_usuarios,
     })
 
 def _dashboard_cliente(request):
@@ -350,6 +369,7 @@ def _dashboard_cliente(request):
         fecha_creacion__year=hoy.year,
         fecha_creacion__month=hoy.month
     ).count()
+    
     return render(request, 'dashboard_cliente.html', {
         'tickets': tickets,
         'tickets_consumidos': tickets_consumidos
@@ -441,6 +461,64 @@ def _dashboard_platform_admin(request):
     })
 
 # ==========================================
+# GESTIÓN DE SUSCRIPCIÓN
+# ==========================================
+def mi_suscripcion_view(request):
+    if not request.user.is_authenticated or request.user.rol != 'admin_cliente':
+        raise PermissionDenied
+    
+    empresa = request.user.empresa
+    cantidad_usuarios = Usuario.objects.filter(empresa=empresa).count()
+    
+    hoy = timezone.now()
+    tickets_consumidos = InfoTicket.objects.filter(
+        solicitante__empresa=empresa,
+        fecha_creacion__year=hoy.year,
+        fecha_creacion__month=hoy.month
+    ).count()
+
+    porcentaje_usuarios = 100
+    if empresa.plan == 'GRATIS':
+        porcentaje_usuarios = min((cantidad_usuarios * 100) // 10, 100)
+    elif empresa.plan == 'BASICO':
+        porcentaje_usuarios = min((cantidad_usuarios * 100) // 50, 100)
+        
+    porcentaje_tickets = 100
+    if empresa.plan == 'GRATIS':
+        porcentaje_tickets = min((tickets_consumidos * 100) // 500, 100)
+
+    return render(request, 'mi_suscripcion.html', {
+        'empresa': empresa,
+        'cantidad_usuarios': cantidad_usuarios,
+        'tickets_consumidos': tickets_consumidos,
+        'porcentaje_usuarios': porcentaje_usuarios,
+        'porcentaje_tickets': porcentaje_tickets,
+    })
+
+def cambiar_suscripcion_view(request):
+    if not request.user.is_authenticated or request.user.rol != 'admin_cliente':
+        raise PermissionDenied
+        
+    if request.method == 'POST':
+        nuevo_plan = request.POST.get('plan')
+        if nuevo_plan in dict(Empresa.PLANES):
+            empresa = request.user.empresa
+            cantidad_usuarios = Usuario.objects.filter(empresa=empresa).count()
+            
+            if nuevo_plan == 'GRATIS' and cantidad_usuarios > 10:
+                messages.error(request, "No podés bajar al plan Gratis porque superás el límite de 10 usuarios. Eliminá cuentas de tu personal primero.")
+                return redirect('mi_suscripcion')
+            elif nuevo_plan == 'BASICO' and cantidad_usuarios > 50:
+                messages.error(request, "No podés bajar al plan Básico porque superás el límite de 50 usuarios. Eliminá cuentas de tu personal primero.")
+                return redirect('mi_suscripcion')
+                
+            empresa.plan = nuevo_plan
+            empresa.save()
+            messages.success(request, f"¡Suscripción actualizada al plan {empresa.get_plan_display()} correctamente!")
+            
+    return redirect('mi_suscripcion')
+
+# ==========================================
 # GESTIÓN DE CASOS Y TICKETS
 # ==========================================
 def crear_ticket(request):
@@ -454,14 +532,9 @@ def crear_ticket(request):
         fecha_creacion__month=hoy.month
     ).count()
     
-    # 2. Verificamos si supera el límite del plan GRATIS antes de hacer nada
-    if request.user.empresa.plan == 'GRATIS':
-        if cantidad_tickets >= 500:
-            messages.error(
-                request, 
-                "Tu empresa ha alcanzado el límite de 500 tickets mensuales del plan Gratis. Por favor, contactá al administrador de tu empresa para mejorar el plan."
-            )
-            return redirect('dashboard')
+    if request.user.empresa.plan == 'GRATIS' and cantidad_tickets >= 500:
+        messages.error(request, "Tu empresa ha alcanzado el límite de 500 tickets mensuales del plan Gratis. Solicitale al administrador de tu empresa que mejore la suscripción.")
+        return redirect('dashboard')
 
     if request.method == 'POST':
         form = TicketForm(request.POST)
@@ -479,7 +552,10 @@ def crear_ticket(request):
             ).count()
     else:
         form = TicketForm()
-    return render(request, 'crear_ticket.html', {'form': form,'ticket_creado': ticket_creado, 'tickets_consumidos': cantidad_tickets})
+    return render(request, 'crear_ticket.html', {
+        'form': form, 'ticket_creado': ticket_creado, 
+        'tickets_consumidos': cantidad_tickets
+    })
 
 def detalle_ticket_view(request, pk):
     ticket = _get_ticket_con_control_empresa(request, pk)
