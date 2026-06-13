@@ -179,7 +179,7 @@ def crear_platform_admin_view(request):
 def crear_usuario_admin_view(request):
     admin_empresa = _obtener_empleado_controlado(request, request.user.pk)
 
-    cantidad_usuarios = Usuario.objects.filter(empresa=request.user.empresa).count()
+    cantidad_usuarios = Usuario.objects.filter(empresa=request.user.empresa, is_active=True).count()
     plan = request.user.empresa.plan
     if plan == 'GRATIS' and cantidad_usuarios >= 10:
         messages.error(request, "Tu empresa ha alcanzado el límite de 10 usuarios del plan Gratis. <a href='/mi-suscripcion/' class='underline font-bold text-white'>Mejorá tu plan para agregar más equipo</a>.")
@@ -341,7 +341,7 @@ def _dashboard_admin_cliente(request):
         ).count()
         tickets = _filtrar_tickets_por_plan(request.user.empresa, tickets_qs)
         
-        cantidad_usuarios = Usuario.objects.filter(empresa=request.user.empresa).count()
+        cantidad_usuarios = Usuario.objects.filter(empresa=request.user.empresa, is_active=True).count()
         plan = request.user.empresa.plan
         limite_usuarios_alcanzado = False
         if plan == 'GRATIS' and cantidad_usuarios >= 10:
@@ -468,7 +468,7 @@ def mi_suscripcion_view(request):
         raise PermissionDenied
     
     empresa = request.user.empresa
-    cantidad_usuarios = Usuario.objects.filter(empresa=empresa).count()
+    cantidad_usuarios = Usuario.objects.filter(empresa=empresa, is_active=True).count()
     
     hoy = timezone.now()
     tickets_consumidos = InfoTicket.objects.filter(
@@ -503,7 +503,7 @@ def cambiar_suscripcion_view(request):
         nuevo_plan = request.POST.get('plan')
         if nuevo_plan in dict(Empresa.PLANES):
             empresa = request.user.empresa
-            cantidad_usuarios = Usuario.objects.filter(empresa=empresa).count()
+            cantidad_usuarios = Usuario.objects.filter(empresa=empresa, is_active=True).count()
             
             if nuevo_plan == 'GRATIS' and cantidad_usuarios > 10:
                 messages.error(request, "No podés bajar al plan Gratis porque superás el límite de 10 usuarios. Eliminá cuentas de tu personal primero.")
