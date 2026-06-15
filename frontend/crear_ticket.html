@@ -28,26 +28,6 @@
         <div class="mb-6 sm:mb-8">
             <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">Soluciones Rápidas</h2>
             <p class="mt-2 text-sm text-assist-gray">Revisá si tu problema está en esta lista. Podés resolverlo ahora mismo sin necesidad de abrir un ticket.</p>
-    <div class="mb-6 sm:mb-8">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-                <h2 class="text-3xl font-bold tracking-tight">Crear nuevo ticket</h2>
-                <p class="mt-2 text-sm text-assist-gray">Completá los datos de tu solicitud y nuestro equipo la atenderá a la brevedad.</p>
-            </div>
-            {% if request.user.empresa.plan == 'GRATIS' %}
-            <div class="w-full sm:w-auto bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3">
-                <div class="flex items-center gap-2 text-sm">
-                    <span class="text-assist-gray">Tickets este mes:</span>
-                    <span class="text-white font-bold">{{ tickets_consumidos|default:"0" }}/500</span>
-                </div>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-
-    {% if ticket_creado %}
-        <div class="mb-6 px-4 py-4 rounded-xl border border-green-500/30 bg-green-500/10 text-green-400 text-sm">
-            Tu ticket fue creado correctamente. Podés hacer el seguimiento desde <a href="{% url 'dashboard' %}" class="underline font-medium">Mis Tickets</a>.
         </div>
 
         <div class="mb-4">
@@ -88,23 +68,7 @@
             <button type="button" onclick="mostrarFormularioTicket()" class="w-full sm:flex-1 bg-assist-coral text-white font-semibold py-3 rounded-xl hover:brightness-110 transition text-sm text-center">
                 No pude resolverlo, crear ticket
             </button>
-            <a href="{% url 'dashboard' %}" class="w-full sm:flex-1 text-center border border-white/20 text-assist-gray font-semibold py-3 rounded-xl hover:bg-white/5 transition text-sm">
-    <form method="post" class="space-y-4">
-        {% csrf_token %}
-        
-        <div class="space-y-2">
-        
-            {{ form.as_p }}
-            
-        </div>
-
-        <div class="flex flex-col sm:flex-row gap-3 pt-4">
-            <button type="submit"
-                class="flex-1 bg-assist-coral text-white font-semibold py-3 rounded-xl hover:brightness-110 transition">
-                Cargar Ticket
-            </button>
-            <a href="{% url 'dashboard' %}"
-                class="flex-1 text-center flex items-center justify-center border border-white/20 text-assist-gray font-semibold py-3 rounded-xl hover:bg-white/5 transition">
+            <a href="{% url 'dashboard' %}" class="w-full sm:flex-1 text-center flex items-center justify-center border border-white/20 text-assist-gray font-semibold py-3 rounded-xl hover:bg-white/5 transition text-sm">
                 Volver al Dashboard
             </a>
         </div>
@@ -118,8 +82,21 @@
                 </svg>
                 Ver problemas frecuentes
             </button>
-            <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">Crear nuevo ticket</h2>
-            <p class="mt-2 text-sm text-assist-gray">Completá los datos de tu solicitud y nuestro equipo la atenderá a la brevedad.</p>
+            
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 class="text-3xl font-bold tracking-tight">Crear nuevo ticket</h2>
+                    <p class="mt-2 text-sm text-assist-gray">Completá los datos de tu solicitud y nuestro equipo la atenderá a la brevedad.</p>
+                </div>
+                {% if request.user.empresa.plan == 'GRATIS' %}
+                <div class="w-full sm:w-auto bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3">
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="text-assist-gray">Tickets este mes:</span>
+                        <span class="text-white font-bold">{{ tickets_consumidos|default:"0" }}/500</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
         </div>
 
         {% if ticket_creado %}
@@ -128,93 +105,98 @@
             </div>
         {% endif %}
 
-        <form method="post" class="space-y-2">
+        <form method="post" class="space-y-4">
             {% csrf_token %}
-            {{ form.as_p }}
+            <div class="space-y-2">
+                {{ form.as_p }}
+            </div>
+
             <div class="flex flex-col sm:flex-row gap-3 pt-4">
                 <button type="submit" class="flex-1 bg-assist-coral text-white font-semibold py-3 rounded-xl hover:brightness-110 transition">
                     Cargar Ticket
                 </button>
-                <a href="{% url 'dashboard' %}" class="flex-1 text-center border border-white/20 text-assist-gray font-semibold py-3 rounded-xl hover:bg-white/5 transition">
+                <a href="{% url 'dashboard' %}" class="flex-1 text-center flex items-center justify-center border border-white/20 text-assist-gray font-semibold py-3 rounded-xl hover:bg-white/5 transition">
                     Volver al Dashboard
                 </a>
             </div>
         </form>
-    </div> <script>
-        function toggleFAQ(id) {
-            const answer = document.getElementById(`answer-${id}`);
-            const icon = document.getElementById(`icon-${id}`);
-            if (answer.classList.contains('hidden')) {
-                answer.classList.remove('hidden');
-                icon.classList.add('rotate-180');
-            } else {
-                answer.classList.add('hidden');
-                icon.classList.remove('rotate-180');
-            }
-        }
-
-        function filtrarFAQs() {
-            const input = document.getElementById('faq-search').value.toLowerCase();
-            const items = document.getElementsByClassName('faq-item');
-            let found = 0;
-
-            for (let i = 0; i < items.length; i++) {
-                const titulo = items[i].getAttribute('data-titulo');
-                if (titulo.includes(input)) {
-                    items[i].style.display = "block";
-                    found++;
-                } else {
-                    items[i].style.display = "none";
-                }
-            }
-            document.getElementById('no-faq-results').style.display = (found === 0) ? "block" : "none";
-        }
-
-        function mostrarFormularioTicket() {
-            document.getElementById('seccion-faq').classList.replace('block', 'hidden');
-            document.getElementById('seccion-formulario').classList.replace('hidden', 'block');
-        }
-
-        function mostrarFAQ() {
-            document.getElementById('seccion-formulario').classList.replace('block', 'hidden');
-            document.getElementById('seccion-faq').classList.replace('hidden', 'block');
-        }
-
-        // Solución al error de la línea 148: Leemos el estado desde el DOM limpio de HTML5
-        document.addEventListener('DOMContentLoaded', function() {
-            const bridge = document.getElementById('data-bridge');
-            if (bridge && bridge.getAttribute('data-ticket-creado') === 'true') {
-                mostrarFormularioTicket();
-            }
-
-            // LÓGICA DE CATEGORÍA "OTRO" (TUYA ORIGINAL)
-            const categoriaSelect = document.getElementById('id_categoria');
-            const categoriaOtroInput = document.getElementById('id_categoria_otro');
-            if (!categoriaSelect || !categoriaOtroInput) return;
-
-            const categoriaOtroWrapper = categoriaOtroInput.closest('p');
-            function updateCategoriaOtroVisibility() {
-                if (categoriaSelect.value === 'OTRO') {
-                    categoriaOtroWrapper.style.display = 'block';
-                } else {
-                    categoriaOtroWrapper.style.display = 'none';
-                    categoriaOtroInput.value = '';
-                }
-            }
-            updateCategoriaOtroVisibility();
-            categoriaSelect.addEventListener('change', updateCategoriaOtroVisibility);
-        });
-    </script>
-
-    <style>
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(4px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-    </style>
+    </div>
 
 </div>
+
+<script>
+    function toggleFAQ(id) {
+        const answer = document.getElementById(`answer-${id}`);
+        const icon = document.getElementById(`icon-${id}`);
+        if (answer.classList.contains('hidden')) {
+            answer.classList.remove('hidden');
+            icon.classList.add('rotate-180');
+        } else {
+            answer.classList.add('hidden');
+            icon.classList.remove('rotate-180');
+        }
+    }
+
+    function filtrarFAQs() {
+        const input = document.getElementById('faq-search').value.toLowerCase();
+        const items = document.getElementsByClassName('faq-item');
+        let found = 0;
+
+        for (let i = 0; i < items.length; i++) {
+            const titulo = items[i].getAttribute('data-titulo');
+            if (titulo.includes(input)) {
+                items[i].style.display = "block";
+                found++;
+            } else {
+                items[i].style.display = "none";
+            }
+        }
+        document.getElementById('no-faq-results').style.display = (found === 0) ? "block" : "none";
+    }
+
+    function mostrarFormularioTicket() {
+        document.getElementById('seccion-faq').classList.replace('block', 'hidden');
+        document.getElementById('seccion-formulario').classList.replace('hidden', 'block');
+    }
+
+    function mostrarFAQ() {
+        document.getElementById('seccion-formulario').classList.replace('block', 'hidden');
+        document.getElementById('seccion-faq').classList.replace('hidden', 'block');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const bridge = document.getElementById('data-bridge');
+        if (bridge && bridge.getAttribute('data-ticket-creado') === 'true') {
+            mostrarFormularioTicket();
+        }
+
+        const categoriaSelect = document.getElementById('id_categoria');
+        const categoriaOtroInput = document.getElementById('id_categoria_otro');
+        if (!categoriaSelect || !categoriaOtroInput) return;
+
+        const categoriaOtroWrapper = categoriaOtroInput.closest('p');
+        if (!categoriaOtroWrapper) return;
+
+        function updateCategoriaOtroVisibility() {
+            if (categoriaSelect.value === 'OTRO') {
+                categoriaOtroWrapper.style.display = 'block';
+            } else {
+                categoriaOtroWrapper.style.display = 'none';
+                categoriaOtroInput.value = '';
+            }
+        }
+        updateCategoriaOtroVisibility();
+        categoriaSelect.addEventListener('change', updateCategoriaOtroVisibility);
+    });
+</script>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(4px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+</style>
 {% endblock %}
