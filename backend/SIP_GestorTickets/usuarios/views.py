@@ -357,7 +357,7 @@ def _dashboard_admin_cliente(request):
         'cant_abiertos': tickets.filter(estado='ABIERTO').count(),    
         'cant_proceso': tickets.filter(estado='EN_PROCESO').count(),      
         'cant_resueltos': tickets.filter(estado__in=['RESUELTO']).count(),   
-        'cant_autogestionados': cant_faq
+        'cant_autogestionados': cant_faq,
         'tickets_consumidos': tickets_consumidos,
         'limite_usuarios_alcanzado': limite_usuarios_alcanzado,
         'cantidad_usuarios': cantidad_usuarios,
@@ -447,6 +447,7 @@ def dashboard_jefe_soporte (request):
 
     return render(request, 'dashboard_jefe_soporte.html', {
         'tickets': tickets,
+        'cant_tickets_humanos': cant_tickets_humanos,
         'feedback_servicio': feedback_servicio,
         'feedback_interno': feedback_interno,
         'promedio_soporte': feedback_servicio.aggregate(promedio=Avg('rating'))['promedio'],
@@ -658,7 +659,7 @@ def actualizar_estado(request, pk):
 
     if estado_anterior != nuevo_estado:
         ticket.estado = nuevo_estado
-        if nuevo_estado == ['RESUELTO', 'RESUELTO_FAQ']:
+        if nuevo_estado in ['RESUELTO', 'RESUELTO_FAQ']:
             ticket.fecha_resolucion = timezone.now()
         ticket.save()
         
