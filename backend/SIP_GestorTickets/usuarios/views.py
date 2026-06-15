@@ -577,6 +577,27 @@ def crear_ticket(request):
             ticket.solicitante = request.user
             ticket.save()
             ticket_creado = True
+            
+            # Mail al Cliente
+            send_mail(
+                subject=f"Assistech - Ticket #{ticket.numero_ticket_empresa} Registrado",
+                message=f"Hola {ticket.solicitante.first_name},\n\nTu ticket '{ticket.titulo}' fue creado correctamente.\nTe avisaremos por este medio cuando haya novedades de nuestro equipo.",
+                from_email='assistech.soporte@gmail.com',
+                recipient_list=[ticket.solicitante.email],
+                fail_silently=True
+            )
+            
+            # Mail a todos los Jefes de Soporte activos de la misma empresa
+            jefes_emails = list(Usuario.objects.filter(empresa=request.user.empresa, rol='jefe', is_active=True).values_list('email', flat=True))
+            if jefes_emails:
+                send_mail(
+                    subject=f"Nuevo Ticket en el Sistema: #{ticket.numero_ticket_empresa}",
+                    message=f"El usuario {ticket.solicitante.get_full_name()} ha creado el ticket #{ticket.numero_ticket_empresa}: '{ticket.titulo}'.\n\nIngresá al panel para asignarle un técnico.",
+                    from_email='assistech.soporte@gmail.com',
+                    recipient_list=jefes_emails,
+                    fail_silently=True
+                )
+                
             form = TicketForm()  
             # Actualizamos la cantidad después de crear uno nuevo
             cantidad_tickets = InfoTicket.objects.filter(
@@ -627,6 +648,16 @@ def detalle_ticket_view(request, pk):
         texto = request.POST.get('comentario')
         if texto:
             TicketComentario.objects.create(ticket=ticket, usuario=request.user, comentario=texto)
+            
+            if request.user.rol in ['soporte', 'jefe']:
+                send_mail(
+                    subject=f"Assistech - Novedades en tu Ticket #{ticket.numero_ticket_empresa}",
+                    message=f"Hola {ticket.solicitante.first_name},\n\nEl equipo de soporte dejó un comentario en tu ticket #{ticket.numero_ticket_empresa}:\n\n\"{texto}\"\n\nPodés responder ingresando a la plataforma.",
+                    from_email='assistech.soporte@gmail.com',
+                    recipient_list=[ticket.solicitante.email],
+                    fail_silently=True
+                )
+                
             return redirect('detalle_ticket', pk=pk)
 
     puede_dejar_feedback_usuario = (request.user.rol == 'cliente' and ticket.solicitante == request.user and ticket.estado in ['RESUELTO'] and not ticket.feedback_servicio.exists() and not ticket.feedback_plataforma.exists())
@@ -662,6 +693,15 @@ def actualizar_estado(request, pk):
         if nuevo_estado in ['RESUELTO', 'RESUELTO_FAQ']:
             ticket.fecha_resolucion = timezone.now()
         ticket.save()
+        
+        if nuevo_estado == 'RESUELTO':
+            send_mail(
+                subject=f"Assistech - Solución de Ticket #{ticket.numero_ticket_empresa}",
+                message=f"Hola {ticket.solicitante.first_name},\n\nProblema solucionado, verificar solucion.\n\nTu ticket #{ticket.numero_ticket_empresa} ha sido marcado como resuelto por nuestro equipo técnico. Por favor, ingresá a validar la resolución y calificar la atención.",
+                from_email='assistech.soporte@gmail.com',
+                recipient_list=[ticket.solicitante.email],
+                fail_silently=True
+            )
         
         TicketHistorial.objects.create(
             ticket=ticket,estado_anterior=estado_anterior,estado_nuevo=nuevo_estado,
@@ -783,6 +823,25 @@ def asignar_ticket_view(request, pk):
                         
             TicketAsignacion.objects.filter(ticket=ticket, activo=True).update(activo=False)
             TicketAsignacion.objects.create(ticket=ticket, soporte=soporte_seleccionado, asignado_por=request.user, activo=True)
+            
+            # Mail al Soporte Técnico asignado
+            send_mail(
+                subject=f"Assistech - Se te asignó el Ticket #{ticket.numero_ticket_empresa}",
+                message=f"Hola {soporte_seleccionado.first_name},\n\nEl Jefe de Soporte te ha asignado el caso #{ticket.numero_ticket_empresa}: '{ticket.titulo}'.\n\nPor favor, ingresá a la plataforma para iniciar la resolución.",
+                from_email='assistech.soporte@gmail.com',
+                recipient_list=[soporte_seleccionado.email],
+                fail_silently=True
+            )
+            
+            # Mail al Cliente informando quién tiene su caso
+            send_mail(
+                subject=f"Assistech - Técnico asignado a tu Ticket #{ticket.numero_ticket_empresa}",
+                message=f"Hola {ticket.solicitante.first_name},\n\nTe informamos que el técnico {soporte_seleccionado.get_full_name()} tiene tu ticket #{ticket.numero_ticket_empresa} asignado y ya está trabajando en él.",
+                from_email='assistech.soporte@gmail.com',
+                recipient_list=[ticket.solicitante.email],
+                fail_silently=True
+            )
+            
             messages.success(request, f'Ticket asignado a {soporte_seleccionado.get_full_name()} correctamente.')
             
             if not trabaja_ahora:
