@@ -24,20 +24,38 @@
 
 {% block content %}
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full">
+        {% if messages %}
+            <div class="mb-6 space-y-3">
+                {% for message in messages %}
+                    <div class="rounded-xl border px-4 py-3 text-sm font-semibold {% if message.tags == 'error' %}border-red-500/30 bg-red-500/10 text-red-200{% elif message.tags == 'warning' %}border-amber-500/30 bg-amber-500/10 text-amber-200{% else %}border-emerald-500/30 bg-emerald-500/10 text-emerald-200{% endif %}">
+                        {{ message|safe }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         <div class="flex flex-col gap-4 mb-6 sm:mb-8 sm:flex-row sm:items-start sm:justify-between">
             <div>
                 <h1 class="text-2xl sm:text-3xl font-bold">Mis Tickets</h1>
                 <p class="text-assist-gray mt-1">Hacé el seguimiento de tus solicitudes en tiempo real.</p>
             </div>
-            <div class="flex flex-col sm:flex-row justify-end mb-8">
-            <a href="{% url 'crear_ticket' %}" class="group relative inline-flex items-center justify-center gap-4 bg-gradient-to-r from-assist-accent to-assist-coral text-white text-base sm:text-lg font-bold px-8 py-4 rounded-2xl border border-white/20 transition-all duration-300 hover:brightness-110 hover:-translate-y-1 shadow-[0_0_20px_rgba(242,92,84,0.4)] hover:shadow-[0_0_35px_rgba(242,92,84,0.6)] active:translate-y-0 w-full sm:w-auto">
-                <span class="bg-white/20 p-1.5 rounded-lg transition-transform duration-300 group-hover:rotate-180">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                </span>
-                <span class="tracking-wide">Crear Nuevo Ticket</span>
-            </a>
+            <div class="flex flex-col sm:flex-row justify-end gap-4 items-center">
+                {% if request.user.empresa.plan == 'GRATIS' %}
+                <div class="w-full sm:w-auto bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3">
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="text-assist-gray">Plan Gratis</span>
+                        <span class="text-white font-bold">{{ tickets_consumidos|default:"0" }}/500 Tickets este mes</span>
+                    </div>
+                </div>
+                {% endif %}
+                <a href="{% url 'crear_ticket' %}" class="group relative inline-flex items-center justify-center gap-4 bg-gradient-to-r from-assist-accent to-assist-coral text-white text-base sm:text-lg font-bold px-8 py-4 rounded-2xl border border-white/20 transition-all duration-300 hover:brightness-110 hover:-translate-y-1 shadow-[0_0_20px_rgba(242,92,84,0.4)] hover:shadow-[0_0_35px_rgba(242,92,84,0.6)] active:translate-y-0 w-full sm:w-auto">
+                    <span class="bg-white/20 p-1.5 rounded-lg transition-transform duration-300 group-hover:rotate-180">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                    </span>
+                    <span class="tracking-wide">Crear Nuevo Ticket</span>
+                </a>
             </div>
         </div>
 
@@ -137,6 +155,60 @@
         </div>
     </div>
 
+<div class="flex justify-center mt-10 mb-6">
+        <button type="button" onclick="document.getElementById('platformFeedbackModal').classList.remove('hidden'); document.getElementById('platformFeedbackModal').classList.add('flex');" class="text-sm text-assist-coral hover:underline font-medium">
+            Danos tu feedback de plataforma
+        </button>
+    </div>
+
+    <div id="platformFeedbackModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 px-4">
+        <section class="w-full max-w-lg rounded-xl border border-zinc-700 bg-zinc-900 p-6 shadow-2xl">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-semibold">Feedback de la plataforma</h2>
+                    <p class="mt-1 text-sm text-assist-gray">La respuesta es opcional y ayuda a mejorar la plataforma.</p>
+                </div>
+                <button type="button" class="rounded-lg border border-white/10 px-3 py-1 text-sm text-assist-gray hover:text-white" onclick="closePlatformFeedbackModal()">Omitir</button>
+            </div>
+
+            <form action="{% url 'guardar_feedback_plataforma_general' %}" method="POST" class="mt-5 space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label for="platform_category">Categoría de plataforma</label>
+                    <select id="platform_category" name="platform_category">
+                        <option value="BUG">Bug</option>
+                        <option value="MEJORA">Sugerencia de mejora</option>
+                        <option value="UX_UI">UX/UI</option>
+                        <option value="RENDIMIENTO">Rendimiento</option>
+                        <option value="FUNCIONALIDAD">Funcionalidad faltante</option>
+                        <option value="OTRO" selected>Otro</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Calificación</label>
+                    <div class="flex gap-2 mt-1" id="starRatingPlataforma">
+                        {% for i in "12345" %}
+                        <button
+                            type="button"
+                            class="star-btn-plataforma text-3xl text-zinc-600 hover:text-yellow-400 transition"
+                            data-value="{{ forloop.counter }}"
+                            onclick="setRating(parseInt(this.dataset.value), 'plataforma')">★</button>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" id="rating_plataforma" name="rating" required>
+                    <p class="mt-1 text-sm text-assist-gray" id="ratingTextPlataforma">Selecciona una calificación</p>
+                </div>
+                <div>
+                    <label for="comment_plataforma">Comentario opcional</label>
+                    <textarea id="comment_plataforma" name="comment" rows="3" placeholder="Escribe un comentario breve..."></textarea>
+                </div>
+                <button type="submit" class="w-full rounded-xl bg-assist-coral px-4 py-3 font-bold text-white transition hover:brightness-110">
+                    Enviar feedback
+                </button>
+            </form>
+        </section>
+    </div>
+    
     <script>
         function switchTab(tab) {
             const tabCompletados = document.getElementById('tab-completados');
@@ -175,6 +247,31 @@
                 btnCompletados.classList.replace('text-white', 'text-assist-gray');
             }
         }
+
+        function closePlatformFeedbackModal() {
+            const modal = document.getElementById('platformFeedbackModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        const ratingLabelsPlataforma = {
+            1: "1 - Muy mala",
+            2: "2 - Mala",
+            3: "3 - Regular",
+            4: "4 - Buena",
+            5: "5 - Excelente"
+        };
+
+        function setRating(value, type) {
+            document.getElementById('rating_' + type).value = value;
+            document.getElementById('ratingText' + (type === 'servicio' ? 'Servicio' : 'Plataforma')).textContent = ratingLabelsPlataforma[value];
+
+            document.querySelectorAll('.star-btn-' + type).forEach(btn => {
+                const starValue = parseInt(btn.dataset.value);
+                btn.classList.toggle('text-yellow-400', starValue <= value);
+                btn.classList.toggle('text-zinc-600', starValue > value);
+            });
+        }
     </script>
     
     <style>
@@ -183,4 +280,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
     </style>
+
+    
 {% endblock %}

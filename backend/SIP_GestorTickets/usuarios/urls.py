@@ -21,6 +21,10 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('logout/', views.logout_view, name='logout'),
+    
+    path('mi-suscripcion/', views.mi_suscripcion_view, name='mi_suscripcion'),
+    path('cambiar-suscripcion/', views.cambiar_suscripcion_view, name='cambiar_suscripcion'),
+
     path('platform-admin/nuevo/', views.crear_platform_admin_view, name='crear_platform_admin'),
     
     path('usuario/<int:pk>/aprobar/', views.aprobar_usuario_view, name='aprobar_usuario'), 
@@ -41,4 +45,6 @@ urlpatterns = [
     path('usuario/<int:pk>/quitar-acceso/', views.quitar_acceso_view, name='quitar_acceso'),
     path('usuario/<int:pk>/confirmar-baja/', views.confirmar_baja_view, name='confirmar_baja'),
     path('ticket/<int:pk>/asignar/', views.asignar_ticket_view, name='asignar_ticket'),
+    path('feedback/plataforma/', views.guardar_feedback_plataforma_general, name='guardar_feedback_plataforma_general'),
+
 ]

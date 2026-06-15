@@ -292,3 +292,8 @@ class TechnicianFeedbackForm(forms.ModelForm):
             'comment': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Comentario opcional'}),
             'problems_found': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Problemas encontrados'}),
         }
+        
+class FeedbackPlatformForm(forms.ModelForm):
+    class Meta:
+        model = FeedbackPlatform
+        fields = ['rating', 'comment', 'category']

@@ -9,21 +9,42 @@ from django.core.mail import send_mail
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from django.utils.crypto import get_random_string
+from datetime import timedelta
 
 from .models import (FeedbackPlatform,FeedbackService,FeedbackSupportInternal,Empresa,
     Usuario,InfoTicket,TicketComentario,TicketHistorial,TicketAsignacion,FAQDeflexion)
 from .forms import (
     LoginForm,SuperAdminPlatformAdminCreateForm,TechnicianFeedbackForm,
-    TicketForm,EmpresaRegisterForm,UserFeedbackForm,AdminUsuarioCreateForm)
+    TicketForm,EmpresaRegisterForm,UserFeedbackForm,AdminUsuarioCreateForm,FeedbackPlatformForm)
 
 # ==========================================
 # FUNCIONES INTERNAS Y UTILIDADES (HELPERS)
 # ==========================================
+def _filtrar_tickets_por_plan(empresa, queryset):
+    """Filtra la cantidad de tickets visibles según el plan de la empresa."""
+    if not empresa:
+        return queryset
+    plan = empresa.plan
+    if plan == 'BASICO':
+        limite = timezone.now() - timedelta(days=90)
+        return queryset.filter(fecha_creacion__gte=limite)
+    elif plan == 'PREMIUM':
+        limite = timezone.now() - timedelta(days=365)
+        return queryset.filter(fecha_creacion__gte=limite)
+    return queryset
+
 def _get_ticket_con_control_empresa(request, pk):
     """Busca un ticket y asegura que pertenezca a la misma empresa del usuario."""
     ticket = get_object_or_404(InfoTicket, pk=pk)
     if ticket.solicitante.empresa != request.user.empresa:
         raise PermissionDenied
+        
+    if request.user.empresa:
+        plan = request.user.empresa.plan
+        if plan == 'BASICO' and ticket.fecha_creacion < (timezone.now() - timedelta(days=90)):
+            raise PermissionDenied("El plan Básico solo permite acceder a tickets de los últimos 3 meses.")
+        elif plan == 'PREMIUM' and ticket.fecha_creacion < (timezone.now() - timedelta(days=365)):
+            raise PermissionDenied("El plan Premium solo permite acceder a tickets de hasta 1 año de antigüedad.")
     return ticket
 
 def _obtener_empleado_controlado(request, pk):
@@ -158,6 +179,15 @@ def crear_platform_admin_view(request):
 def crear_usuario_admin_view(request):
     admin_empresa = _obtener_empleado_controlado(request, request.user.pk)
 
+    cantidad_usuarios = Usuario.objects.filter(empresa=request.user.empresa, is_active=True).count()
+    plan = request.user.empresa.plan
+    if plan == 'GRATIS' and cantidad_usuarios >= 10:
+        messages.error(request, "Tu empresa ha alcanzado el límite de 10 usuarios del plan Gratis. <a href='/mi-suscripcion/' class='underline font-bold text-white'>Mejorá tu plan para agregar más equipo</a>.")
+        return redirect('dashboard')
+    elif plan == 'BASICO' and cantidad_usuarios >= 50:
+        messages.error(request, "Tu empresa ha alcanzado el límite de 50 usuarios del plan Básico. <a href='/mi-suscripcion/' class='underline font-bold text-white'>Mejorá tu plan para agregar más equipo</a>.")
+        return redirect('dashboard')
+
     if request.method == 'POST':
         form = AdminUsuarioCreateForm(request.POST)
         if form.is_valid():
@@ -172,8 +202,9 @@ def crear_usuario_admin_view(request):
                         username=email,email=email,password=password_aleatoria,
                         first_name=first_name,last_name=form.cleaned_data['last_name'],
                         telefono=form.cleaned_data['telefono'],empresa=request.user.empresa,
-                        rol=form.cleaned_data['rol'],autorizado=True
-                        )
+                        rol=form.cleaned_data['rol'],autorizado=True,
+                        require_password_change=True
+                    )
                     
                     if form.cleaned_data.get('rol') == 'soporte':
                         nuevo_user.horario_ingreso = form.cleaned_data.get('horario_ingreso')
@@ -302,7 +333,21 @@ def _dashboard_superadmin (request):
     })
 
 def _dashboard_admin_cliente(request):
-        tickets = InfoTicket.objects.filter(solicitante__empresa=request.user.empresa).order_by('-fecha_creacion')
+        tickets_qs = InfoTicket.objects.filter(solicitante__empresa=request.user.empresa).order_by('-fecha_creacion')
+        hoy = timezone.now()
+        tickets_consumidos = tickets_qs.filter(
+            fecha_creacion__year=hoy.year,
+            fecha_creacion__month=hoy.month
+        ).count()
+        tickets = _filtrar_tickets_por_plan(request.user.empresa, tickets_qs)
+        
+        cantidad_usuarios = Usuario.objects.filter(empresa=request.user.empresa, is_active=True).count()
+        plan = request.user.empresa.plan
+        limite_usuarios_alcanzado = False
+        if plan == 'GRATIS' and cantidad_usuarios >= 10:
+            limite_usuarios_alcanzado = True
+        elif plan == 'BASICO' and cantidad_usuarios >= 50:
+            limite_usuarios_alcanzado = True
         
         cant_faq = FAQDeflexion.objects.filter(empresa=request.user.empresa).count()
         
@@ -313,14 +358,29 @@ def _dashboard_admin_cliente(request):
         'cant_proceso': tickets.filter(estado='EN_PROCESO').count(),      
         'cant_resueltos': tickets.filter(estado__in=['RESUELTO']).count(),   
         'cant_autogestionados': cant_faq
+        'tickets_consumidos': tickets_consumidos,
+        'limite_usuarios_alcanzado': limite_usuarios_alcanzado,
+        'cantidad_usuarios': cantidad_usuarios,
     })
 
 def _dashboard_cliente(request):
     tickets = InfoTicket.objects.filter(solicitante=request.user).order_by('-fecha_creacion')
-    return render(request, 'dashboard_cliente.html', {'tickets': tickets})
+    tickets = _filtrar_tickets_por_plan(request.user.empresa, tickets)
+    hoy = timezone.now()
+    tickets_consumidos = InfoTicket.objects.filter(
+        solicitante__empresa=request.user.empresa,
+        fecha_creacion__year=hoy.year,
+        fecha_creacion__month=hoy.month
+    ).count()
+    
+    return render(request, 'dashboard_cliente.html', {
+        'tickets': tickets,
+        'tickets_consumidos': tickets_consumidos
+    })
 
 def _dashboard_soporte(request):
         tickets = InfoTicket.objects.filter(asignaciones__soporte=request.user, asignaciones__activo=True,solicitante__empresa=request.user.empresa).distinct()
+        tickets = _filtrar_tickets_por_plan(request.user.empresa, tickets)
         hoy = timezone.now().date()
         return render(request, 'dashboard_soporte.html', {
         'tickets': tickets,
@@ -331,22 +391,49 @@ def _dashboard_soporte(request):
 
 def dashboard_jefe_soporte (request):
     tickets = InfoTicket.objects.filter(solicitante__empresa=request.user.empresa)
+    tickets = _filtrar_tickets_por_plan(request.user.empresa, tickets)
+    
     feedback_servicio = FeedbackService.objects.filter(ticket__solicitante__empresa=request.user.empresa)
     feedback_interno = FeedbackSupportInternal.objects.filter(ticket__solicitante__empresa=request.user.empresa)
     
+    # 1. Métricas del OKR 2 (Tasa de Deflexión vía FAQ)
     cant_tickets_humanos = tickets.exclude(estado='RESUELTO_FAQ').count()
     cant_deflexiones = tickets.filter(estado='RESUELTO_FAQ').count()
     volumen_total = cant_tickets_humanos + cant_deflexiones
     
     tasa_deflexion = round((cant_deflexiones / volumen_total) * 100, 1) if volumen_total > 0 else 0
 
-    metricas_tecnico = feedback_servicio.values('technician__username').annotate(promedio=Avg('rating'), cantidad=Count('id')).order_by('technician__username')
+    # 2. Filtros de historial según el Plan de la Empresa
+    plan = request.user.empresa.plan
+    if plan == 'BASICO':
+        limite = timezone.now() - timedelta(days=90)
+        feedback_servicio = feedback_servicio.filter(created_at__gte=limite)
+        feedback_interno = feedback_interno.filter(created_at__gte=limite)
+    elif plan == 'PREMIUM':
+        limite = timezone.now() - timedelta(days=365)
+        feedback_servicio = feedback_servicio.filter(created_at__gte=limite)
+        feedback_interno = feedback_interno.filter(created_at__gte=limite)
+
+    # 3. Cálculo de métricas por técnico (Usa el feedback ya filtrado por plan)
+    if plan != 'GRATIS':
+        metricas_tecnico = feedback_servicio.values(
+            'technician__username'
+        ).annotate(
+            promedio=Avg('rating'),
+            cantidad=Count('id')
+        ).order_by('technician__username')
+    else:
+        metricas_tecnico = []
     
     soportes = Usuario.objects.filter(empresa=request.user.empresa, rol='soporte', is_active=True)
     soportes_stats = []
     for soporte in soportes:
         tickets_activos = TicketAsignacion.objects.filter(soporte=soporte, activo=True, ticket__estado__in=['ABIERTO', 'EN_PROCESO']).count()
-        tickets_resueltos = InfoTicket.objects.filter(asignaciones__soporte=soporte,estado__in=['RESUELTO']).distinct().count()
+        tickets_resueltos_qs = InfoTicket.objects.filter(
+            asignaciones__soporte=soporte,
+            estado__in=['RESUELTO']
+        )
+        tickets_resueltos = _filtrar_tickets_por_plan(request.user.empresa, tickets_resueltos_qs).distinct().count()
         
         feedback_avg = feedback_servicio.filter(technician=soporte).aggregate(Avg('rating'))['rating__avg']
 
@@ -388,6 +475,64 @@ def _dashboard_platform_admin(request):
     })
 
 # ==========================================
+# GESTIÓN DE SUSCRIPCIÓN
+# ==========================================
+def mi_suscripcion_view(request):
+    if not request.user.is_authenticated or request.user.rol != 'admin_cliente':
+        raise PermissionDenied
+    
+    empresa = request.user.empresa
+    cantidad_usuarios = Usuario.objects.filter(empresa=empresa, is_active=True).count()
+    
+    hoy = timezone.now()
+    tickets_consumidos = InfoTicket.objects.filter(
+        solicitante__empresa=empresa,
+        fecha_creacion__year=hoy.year,
+        fecha_creacion__month=hoy.month
+    ).count()
+
+    porcentaje_usuarios = 100
+    if empresa.plan == 'GRATIS':
+        porcentaje_usuarios = min((cantidad_usuarios * 100) // 10, 100)
+    elif empresa.plan == 'BASICO':
+        porcentaje_usuarios = min((cantidad_usuarios * 100) // 50, 100)
+        
+    porcentaje_tickets = 100
+    if empresa.plan == 'GRATIS':
+        porcentaje_tickets = min((tickets_consumidos * 100) // 500, 100)
+
+    return render(request, 'mi_suscripcion.html', {
+        'empresa': empresa,
+        'cantidad_usuarios': cantidad_usuarios,
+        'tickets_consumidos': tickets_consumidos,
+        'porcentaje_usuarios': porcentaje_usuarios,
+        'porcentaje_tickets': porcentaje_tickets,
+    })
+
+def cambiar_suscripcion_view(request):
+    if not request.user.is_authenticated or request.user.rol != 'admin_cliente':
+        raise PermissionDenied
+        
+    if request.method == 'POST':
+        nuevo_plan = request.POST.get('plan')
+        if nuevo_plan in dict(Empresa.PLANES):
+            empresa = request.user.empresa
+            cantidad_usuarios = Usuario.objects.filter(empresa=empresa, is_active=True).count()
+            
+            if nuevo_plan == 'GRATIS' and cantidad_usuarios > 10:
+                messages.error(request, "No podés bajar al plan Gratis porque superás el límite de 10 usuarios. Eliminá cuentas de tu personal primero.")
+                return redirect('mi_suscripcion')
+            elif nuevo_plan == 'BASICO' and cantidad_usuarios > 50:
+                messages.error(request, "No podés bajar al plan Básico porque superás el límite de 50 usuarios. Eliminá cuentas de tu personal primero.")
+                return redirect('mi_suscripcion')
+                
+            empresa.plan = nuevo_plan
+            empresa.save()
+            messages.success(request, f"¡Suscripción actualizada al plan {empresa.get_plan_display()} correctamente!")
+            
+    return redirect('mi_suscripcion')
+
+# ==========================================
 # GESTIÓN DE CASOS Y TICKETS
 # ==========================================
 def crear_ticket(request):
@@ -412,6 +557,18 @@ def crear_ticket(request):
         {"id": 15, "titulo": "Mi perfil muestra información desactualizada", "solucion": "Cerrá tu sesión de usuario por completo, volvé a ingresar con tus credenciales y los cambios se verán reflejados inmediatamente."},
     ]
     
+    # 1. Definimos la cantidad de tickets al principio para que siempre exista (GET o POST)
+    hoy = timezone.now()
+    cantidad_tickets = InfoTicket.objects.filter(
+        solicitante__empresa=request.user.empresa,
+        fecha_creacion__year=hoy.year,
+        fecha_creacion__month=hoy.month
+    ).count()
+    
+    if request.user.empresa.plan == 'GRATIS' and cantidad_tickets >= 500:
+        messages.error(request, "Tu empresa ha alcanzado el límite de 500 tickets mensuales del plan Gratis. Solicitale al administrador de tu empresa que mejore la suscripción.")
+        return redirect('dashboard')
+
     if request.method == 'POST':
         form = TicketForm(request.POST)
         if form.is_valid():
@@ -420,9 +577,15 @@ def crear_ticket(request):
             ticket.save()
             ticket_creado = True
             form = TicketForm()  
+            # Actualizamos la cantidad después de crear uno nuevo
+            cantidad_tickets = InfoTicket.objects.filter(
+                solicitante__empresa=request.user.empresa,
+                fecha_creacion__year=hoy.year,
+                fecha_creacion__month=hoy.month
+            ).count()
     else:
         form = TicketForm()
-    return render(request, 'crear_ticket.html', {'form': form,'ticket_creado': ticket_creado,'faqs': faqs_top15})
+    return render(request, 'crear_ticket.html', {'form': form,'ticket_creado': ticket_creado,'faqs': faqs_top15,'tickets_consumidos': cantidad_tickets})
 
 def registrar_deflexion(request):
     """Registra que el usuario solucionó su problema mediante la FAQ (Suma al KPI de Deflexión)"""
@@ -534,11 +697,31 @@ def guardar_feedback_usuario(request, pk):
         asignacion = ticket.asignaciones.filter(activo=True).first() or ticket.asignaciones.first()
         if form.cleaned_data['feedback_type'] == 'servicio':
             FeedbackService.objects.get_or_create(
-                ticket=ticket,user=request.user,
-                defaults={'rating': form.cleaned_data['rating'], 'comment': form.cleaned_data['comment'], 'category': form.cleaned_data.get('platform_category') or 'OTRO'}
+                ticket=ticket,
+                user=request.user,
+                defaults={
+                    'rating': form.cleaned_data['rating'], 
+                    'comment': form.cleaned_data['comment']
+                }
             )
 
     return redirect('detalle_ticket', pk=pk)
+
+def guardar_feedback_plataforma_general(request):
+    if request.method != 'POST':
+        raise PermissionDenied
+
+    form = FeedbackPlatformForm(request.POST) 
+    
+    if form.is_valid():
+        FeedbackPlatform.objects.create(
+            ticket=None,
+            user=request.user,
+            rating=form.cleaned_data['rating'],
+            comment=form.cleaned_data['comment'],
+            category=form.cleaned_data.get('platform_category', form.cleaned_data.get('category')), 
+        )
+    return redirect('dashboard')
 
 def guardar_feedback_tecnico(request, pk):
     if request.method != 'POST' or request.user.rol != 'soporte':
