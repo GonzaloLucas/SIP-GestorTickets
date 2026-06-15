@@ -57,7 +57,7 @@ class InfoTicket(models.Model):
         ('ABIERTO', 'Abierto'),
         ('EN_PROCESO', 'En proceso'),
         ('RESUELTO', 'Resuelto'),
-        ('CERRADO', 'Cerrado'),
+        ('RESUELTO_FAQ', 'Resuelto vía FAQ'),
     )
 
     PRIORIDAD = (
@@ -236,3 +236,17 @@ class FeedbackSupportInternal(BaseFeedback):
 
     def __str__(self):
         return f"Feedback interno ticket #{self.ticket.id_ticket} - {self.get_difficulty_display()}"
+    
+    
+# ==========================================
+# MODELO: CONTROL DE AUTOGESTIÓN (OKR 2)
+# ==========================================
+class FAQDeflexion(models.Model):
+    id_deflexion = models.AutoField(primary_key=True)
+    usuario = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, blank=True)
+    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='deflexiones')
+    fecha = models.DateTimeField(auto_now_add=True)
+    problema_consultado = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return f"Deflexión exitosa - {self.empresa.nombre} ({self.fecha.strftime('%d/%m/%Y')})"

@@ -37,22 +37,27 @@
 
     <h2 class="text-2xl sm:text-3xl font-bold mb-6">Panel de Control Global (Jefe de Soporte)</h2>
 
-    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
         <div class="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
-            <p class="text-assist-gray">Total de Tickets</p>
-            <strong class="text-2xl text-white">{{ tickets.count }}</strong>
+            <p class="text-assist-gray text-sm uppercase font-semibold tracking-wider">Tickets Humanos</p>
+            <strong class="text-2xl text-white block mt-1">{{ tickets.count }}</strong>
+        </div>
+        <div class="p-6 bg-zinc-900 border border-assist-coral/30 rounded-xl shadow-[0_0_15px_rgba(242,92,84,0.05)]">
+            <p class="text-assist-coral text-sm uppercase font-semibold tracking-wider">Tasa de Deflexión</p>
+            <strong class="text-2xl text-white block mt-1">{{ tasa_deflexion }}%</strong>
+            <span class="text-xs text-assist-gray mt-1 block">{{ cant_autogestionados }} casos vía FAQ</span>
         </div>
         <div class="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
-            <p class="text-assist-gray">Promedio soporte</p>
-            <strong class="text-2xl text-white">{% if promedio_soporte %}{{ promedio_soporte|floatformat:1 }}/5{% else %}-{% endif %}</strong>
+            <p class="text-assist-gray text-sm uppercase font-semibold tracking-wider">Promedio soporte</p>
+            <strong class="text-2xl text-white block mt-1">{% if promedio_soporte %}{{ promedio_soporte|floatformat:1 }}/5{% else %}-{% endif %}</strong>
         </div>
         <div class="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
-            <p class="text-assist-gray">Comentarios recibidos</p>
-            <strong class="text-2xl text-white">{{ feedback_servicio.count }}</strong>
+            <p class="text-assist-gray text-sm uppercase font-semibold tracking-wider">Comentarios</p>
+            <strong class="text-2xl text-white block mt-1">{{ feedback_servicio.count }}</strong>
         </div>
         <div class="p-6 bg-zinc-900 border border-red-900/60 rounded-xl">
-            <p class="text-red-300">Calificaciones bajas</p>
-            <strong class="text-2xl text-red-300">{{ feedback_bajo.count }}</strong>
+            <p class="text-red-300 text-sm uppercase font-semibold tracking-wider">Calificaciones bajas</p>
+            <strong class="text-2xl text-red-300 block mt-1">{{ feedback_bajo.count }}</strong>
         </div>
     </div>
 
@@ -232,7 +237,7 @@
                 <option value="abierto">Abierto</option>
                 <option value="en proceso">En proceso</option>
                 <option value="resuelto">Resuelto</option>
-                <option value="cerrado">Cerrado</option>
+                <option value="resuelto vía faq">Resuelto vía FAQ</option>
             </select>
         </div>
         <div class="w-full md:w-48">
@@ -267,31 +272,34 @@
                     <td class="p-4 ticket-solicitante">{{ ticket.solicitante.username }}</td>
                     <td class="p-4 ticket-titulo">{{ ticket.titulo }}</td>
                     <td class="p-4">
-                        <form method="POST" action="{% url 'cambiar_prioridad' ticket.pk %}" class="inline">
+                        <form method="POST" action="{% url 'cambiar_prioridad' ticket.pk %}" 
+                              class="inline {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ' %}cursor-not-allowed{% endif %}"
+                              {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ' %}title="Ticket finalizado"{% endif %}>
                             {% csrf_token %}
+                            
                             <select name="prioridad" 
                                 onchange="this.form.submit()" 
-                                class="text-xs px-2.5 py-1.5 pr-8 rounded-full font-medium border cursor-pointer transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-blue-500 appearance-none
-                                {% if ticket.prioridad == 'alta' or ticket.prioridad == 'ALTA' %} bg-red-950/40 text-red-400 border-red-800/60 hover:bg-red-950/60
-                                {% elif ticket.prioridad == 'media' or ticket.prioridad == 'MEDIA' %} bg-amber-950/40 text-amber-400 border-amber-800/60 hover:bg-amber-950/60
-                                {% elif ticket.prioridad == 'baja' or ticket.prioridad == 'BAJA' %} bg-emerald-950/40 text-emerald-400 border-emerald-800/60 hover:bg-emerald-950/60
-                                {% else %} bg-zinc-800 text-zinc-400 border-zinc-700/60 hover:bg-zinc-700/50 {% endif %}"
+                                {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ' %}disabled{% endif %}
+                                class="text-xs px-2.5 py-1.5 pr-8 rounded-full font-medium border appearance-none transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-blue-500
+                                {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ' %} pointer-events-none cursor-not-allowed bg-zinc-800/40 text-zinc-500 border-zinc-800/60 opacity-50
+                                {% elif ticket.prioridad == 'alta' or ticket.prioridad == 'ALTA' %} cursor-pointer bg-red-950/40 text-red-400 border-red-800/60 hover:bg-red-950/60
+                                {% elif ticket.prioridad == 'media' or ticket.prioridad == 'MEDIA' %} cursor-pointer bg-amber-950/40 text-amber-400 border-amber-800/60 hover:bg-amber-950/60
+                                {% elif ticket.prioridad == 'baja' or ticket.prioridad == 'BAJA' %} cursor-pointer bg-emerald-950/40 text-emerald-400 border-emerald-800/60 hover:bg-emerald-950/60
+                                {% else %} cursor-pointer bg-zinc-800 text-zinc-400 border-zinc-700/60 hover:bg-zinc-700/50 {% endif %}"
                                 style="background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23a1a1aa%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22></polyline></svg>'); background-size: 12px; background-position: right 10px center; background-repeat: no-repeat;">
                             
-                            <!-- 👁️ Opción por defecto cuando el ticket llega vacío -->
                             <option value="" class="bg-zinc-800 text-zinc-400" {% if not ticket.prioridad %}selected{% endif %} disabled>Sin asignar</option>
-                            
                             <option value="baja" class="bg-zinc-800 text-zinc-300" {% if ticket.prioridad == 'baja' or ticket.prioridad == 'BAJA' %}selected{% endif %}>Baja</option>
                             <option value="media" class="bg-zinc-800 text-zinc-300" {% if ticket.prioridad == 'media' or ticket.prioridad == 'MEDIA' %}selected{% endif %}>Media</option>
                             <option value="alta" class="bg-zinc-800 text-zinc-300" {% if ticket.prioridad == 'alta' or ticket.prioridad == 'ALTA' %}selected{% endif %}>Alta</option>
                         </select>
-                    </form>
+                        </form>
                     </td>
                     <td class="p-4">{{ ticket.get_estado_display }}</td>
                     <td class="p-4">
                         {% with asignacion=ticket.asignaciones.last %}
                             {% if asignacion %}
-                                {% if ticket.estado == 'RESUELTO' or ticket.estado == 'CERRADO' %}
+                                {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ'%}
                                     <span class="text-zinc-500 font-medium cursor-not-allowed" title="Ticket finalizado">{{ asignacion.soporte.first_name }} {{ asignacion.soporte.last_name }}</span>
                                 {% elif asignacion.activo %}
                                     <a href="{% url 'asignar_ticket' ticket.id_ticket %}" class="text-assist-coral hover:underline font-medium" title="Reasignar soporte">{{ asignacion.soporte.first_name }} {{ asignacion.soporte.last_name }}</a>
@@ -299,7 +307,7 @@
                                     <a href="{% url 'asignar_ticket' ticket.id_ticket %}" class="text-red-500 font-medium hover:underline" title="Asignar soporte">Sin asignar</a>
                                 {% endif %}
                             {% else %}
-                                {% if ticket.estado == 'RESUELTO' or ticket.estado == 'CERRADO' %}
+                                {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ'%}
                                     <span class="text-zinc-500 font-medium cursor-not-allowed" title="Ticket finalizado">Sin asignar</span>
                                 {% else %}
                                     <a href="{% url 'asignar_ticket' ticket.id_ticket %}" class="text-red-500 font-medium hover:underline" title="Asignar soporte">Sin asignar</a>
@@ -366,6 +374,7 @@
 </div>
 
 <script>
+    // --- LÓGICA DE MODALES Y FILTRADOS EXACTA A TU RESPALDO ---
     function setServiceModalText(id, value) {
         const element = document.getElementById(id);
         if (element) element.textContent = value || '-';
@@ -391,7 +400,6 @@
         modal.classList.remove('flex');
     }
 
-    // --- FILTRADO DE TICKETS ---
     function filterTable() {
         const searchInput = document.getElementById('searchInput').value.toLowerCase();
         const estadoFilter = document.getElementById('estadoFilter').value.toLowerCase();
@@ -421,17 +429,15 @@
     let sortAsc = true;
     let lastCol = -1;
 
-    // --ORDENAMIENTO--
-
     function sortTable(colIndex) {
         const table = document.getElementById("ticketsTable");
         const tbody = table.querySelector("tbody");
         const rows = Array.from(tbody.querySelectorAll("tr.ticket-row"));
         
         if (lastCol === colIndex) {
-            sortAsc = !sortAsc; // Cambiar orden si es la misma columna
+            sortAsc = !sortAsc;
         } else {
-            sortAsc = true;     // Orden ascendente por defecto
+            sortAsc = true;
             lastCol = colIndex;
         }
         

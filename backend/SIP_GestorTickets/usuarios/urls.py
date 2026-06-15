@@ -30,6 +30,8 @@ urlpatterns = [
     path('cambiar-contrasenia-obligatorio/', views.cambiar_contrasenia_obligatorio_view, name='cambiar_contrasenia_obligatorio'),
     
     path('ticket/nuevo/', views.crear_ticket, name='crear_ticket'),
+    path('ticket/deflexion/', views.registrar_deflexion, name='registrar_deflexion'),
+    
     path('ticket/<int:pk>/', views.detalle_ticket_view, name='detalle_ticket'),
     path('ticket/<int:pk>/eliminar/', views.eliminar_ticket, name='eliminar_ticket'),
     path('ticket/<int:pk>/estado/', views.actualizar_estado, name='actualizar_estado'),

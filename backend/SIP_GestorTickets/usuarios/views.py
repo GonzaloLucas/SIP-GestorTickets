@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.utils.crypto import get_random_string
 
 from .models import (FeedbackPlatform,FeedbackService,FeedbackSupportInternal,Empresa,
-    Usuario,InfoTicket,TicketComentario,TicketHistorial,TicketAsignacion,)
+    Usuario,InfoTicket,TicketComentario,TicketHistorial,TicketAsignacion,FAQDeflexion)
 from .forms import (
     LoginForm,SuperAdminPlatformAdminCreateForm,TechnicianFeedbackForm,
     TicketForm,EmpresaRegisterForm,UserFeedbackForm,AdminUsuarioCreateForm)
@@ -304,12 +304,15 @@ def _dashboard_superadmin (request):
 def _dashboard_admin_cliente(request):
         tickets = InfoTicket.objects.filter(solicitante__empresa=request.user.empresa).order_by('-fecha_creacion')
         
+        cant_faq = FAQDeflexion.objects.filter(empresa=request.user.empresa).count()
+        
         return render(request, 'dashboard_admin_cliente.html', {
         'tickets': tickets,
         'empleados_activos': Usuario.objects.filter(empresa=request.user.empresa, is_active=True).exclude(pk=request.user.pk),
         'cant_abiertos': tickets.filter(estado='ABIERTO').count(),    
         'cant_proceso': tickets.filter(estado='EN_PROCESO').count(),      
-        'cant_resueltos': tickets.filter(estado__in=['RESUELTO', 'CERRADO']).count()   
+        'cant_resueltos': tickets.filter(estado__in=['RESUELTO']).count(),   
+        'cant_autogestionados': cant_faq
     })
 
 def _dashboard_cliente(request):
@@ -323,28 +326,27 @@ def _dashboard_soporte(request):
         'tickets': tickets,
         'pendientes': tickets.filter(estado__in=['ABIERTO', 'EN_PROCESO']).count(),
         'urgencia_alta': tickets.filter(estado__in=['ABIERTO', 'EN_PROCESO'], prioridad__in=['ALTA', 'CRITICA', 'alta', 'critica']).count(),
-        'resueltos_hoy': InfoTicket.objects.filter(asignaciones__soporte=request.user, estado__in=['RESUELTO', 'CERRADO']).filter(Q(fecha_resolucion__date=hoy) | Q(fecha_cierre__date=hoy)).distinct().count()
+        'resueltos_hoy': InfoTicket.objects.filter(asignaciones__soporte=request.user, estado__in='RESUELTO').filter(Q(fecha_resolucion__date=hoy) | Q(fecha_cierre__date=hoy)).distinct().count()
     })
 
 def dashboard_jefe_soporte (request):
     tickets = InfoTicket.objects.filter(solicitante__empresa=request.user.empresa)
     feedback_servicio = FeedbackService.objects.filter(ticket__solicitante__empresa=request.user.empresa)
     feedback_interno = FeedbackSupportInternal.objects.filter(ticket__solicitante__empresa=request.user.empresa)
-    metricas_tecnico = feedback_servicio.values(
-        'technician__username'
-    ).annotate(
-        promedio=Avg('rating'),
-        cantidad=Count('id')
-    ).order_by('technician__username')
+    
+    cant_tickets_humanos = tickets.exclude(estado='RESUELTO_FAQ').count()
+    cant_deflexiones = tickets.filter(estado='RESUELTO_FAQ').count()
+    volumen_total = cant_tickets_humanos + cant_deflexiones
+    
+    tasa_deflexion = round((cant_deflexiones / volumen_total) * 100, 1) if volumen_total > 0 else 0
+
+    metricas_tecnico = feedback_servicio.values('technician__username').annotate(promedio=Avg('rating'), cantidad=Count('id')).order_by('technician__username')
     
     soportes = Usuario.objects.filter(empresa=request.user.empresa, rol='soporte', is_active=True)
     soportes_stats = []
     for soporte in soportes:
         tickets_activos = TicketAsignacion.objects.filter(soporte=soporte, activo=True, ticket__estado__in=['ABIERTO', 'EN_PROCESO']).count()
-        tickets_resueltos = InfoTicket.objects.filter(
-            asignaciones__soporte=soporte,
-            estado__in=['RESUELTO', 'CERRADO']
-        ).distinct().count()
+        tickets_resueltos = InfoTicket.objects.filter(asignaciones__soporte=soporte,estado__in=['RESUELTO']).distinct().count()
         
         feedback_avg = feedback_servicio.filter(technician=soporte).aggregate(Avg('rating'))['rating__avg']
 
@@ -364,6 +366,8 @@ def dashboard_jefe_soporte (request):
         'metricas_tecnico': metricas_tecnico,
         'feedback_bajo': feedback_servicio.filter(is_critical=True),
         'soportes_stats': soportes_stats,
+        'tasa_deflexion': tasa_deflexion,
+        'cant_autogestionados': cant_deflexiones
     })
     
 def _dashboard_platform_admin(request):
@@ -388,6 +392,26 @@ def _dashboard_platform_admin(request):
 # ==========================================
 def crear_ticket(request):
     ticket_creado = False
+    
+    # KR1: Lista con los 15 problemas técnicos más recurrentes sin tecnicismos
+    faqs_top15 = [
+        {"id": 1, "titulo": "Mi computadora no enciende o no da video", "solucion": "Verificá que las conexiones de los cables de alimentación estén firmes. Si usas zapatilla, probá conectando directo a la pared. Mantené presionado el botón de encendido por 15 segundos para liberar estática."},
+        {"id": 2, "titulo": "No tengo conexión a Internet (Wi-Fi o Cable)", "solucion": "Desconectá el módem de la corriente por 30 segundos y volvelo a conectar. Si estás por cable, desconectá y conectá la ficha RJ45 hasta escuchar el 'clic'."},
+        {"id": 3, "titulo": "La plataforma me da error de contraseña o usuario bloqueado", "solucion": "Usá la opción '¿Olvidaste tu contraseña?' en la pantalla de inicio. Recordá que tras 3 intentos fallidos tu usuario puede suspenderse temporalmente por seguridad."},
+        {"id": 4, "titulo": "La impresora no imprime o aparece 'Sin conexión'", "solucion": "Apagá y encendé la impresora. Revisá la cola de impresión de tu sistema, cancelá los documentos trabados y verificá que tenga papel y tinta/tóner suficiente."},
+        {"id": 5, "titulo": "La aplicación o sistema se quedó congelado", "solucion": "Presioná Ctrl + F5 para forzar la actualización del navegador web borrando la memoria caché activa, o reiniciá la pestaña del navegador."},
+        {"id": 6, "titulo": "No me llegan los correos electrónicos de notificación", "solucion": "Revisá las carpetas de 'Spam', 'Correo no deseado' o la pestaña 'Promociones'. Agregá el dominio del sistema a tus remitentes seguros."},
+        {"id": 7, "titulo": "Tengo problemas para cargar un archivo o documento", "solucion": "Asegurate de que el archivo no supere el tamaño permitido (generalmente 5MB) y que esté en formatos estándar como PDF, PNG o JPG."},
+        {"id": 8, "titulo": "El sistema se ve lento o tarda en procesar las solicitudes", "solucion": "Cerrá otras pestañas o programas pesados abiertos en segundo plano. Comprobá tu velocidad de internet ejecutando un test de velocidad básico."},
+        {"id": 9, "titulo": "Falta de permisos para acceder a un módulo específico", "solucion": "Si sos empleado, solicitá al Administrador de tu Empresa que revise tu rol y accesos asignados desde su panel de control."},
+        {"id": 10, "titulo": "Error al descargar reportes en formato Excel o PDF", "solucion": "Verificá si tu navegador web tiene bloqueadas las ventanas emergentes (pop-ups). Permitilas para este sitio en la barra de direcciones."},
+        {"id": 11, "titulo": "No escucho audio en las reuniones o videos del sistema", "solucion": "Revisá la configuración de salida de audio de tu sistema operativo y asegurate de que los auriculares o parlantes estén seleccionados por defecto."},
+        {"id": 12, "titulo": "Los datos del formulario se borraron al enviar", "solucion": "Esto pasa si la sesión expiró por inactividad. Recomendamos copiar textos largos en un bloc de notas antes de enviarlos si vas a tardar mucho tiempo."},
+        {"id": 13, "titulo": "El lector de códigos de barras / tarjetas no responde", "solucion": "Desconectá el cable USB del lector, esperá 5 segundos y reconectalo en otro puerto de la computadora para forzar el reconocimiento del dispositivo."},
+        {"id": 14, "titulo": "Me aparece un cartel de 'Error 500' en pantalla", "solucion": "Es un inconveniente temporal del servidor del sistema. Esperá un minuto y volvé a intentar la acción presionando el botón de recargar."},
+        {"id": 15, "titulo": "Mi perfil muestra información desactualizada", "solucion": "Cerrá tu sesión de usuario por completo, volvé a ingresar con tus credenciales y los cambios se verán reflejados inmediatamente."},
+    ]
+    
     if request.method == 'POST':
         form = TicketForm(request.POST)
         if form.is_valid():
@@ -398,7 +422,35 @@ def crear_ticket(request):
             form = TicketForm()  
     else:
         form = TicketForm()
-    return render(request, 'crear_ticket.html', {'form': form,'ticket_creado': ticket_creado})
+    return render(request, 'crear_ticket.html', {'form': form,'ticket_creado': ticket_creado,'faqs': faqs_top15})
+
+def registrar_deflexion(request):
+    """Registra que el usuario solucionó su problema mediante la FAQ (Suma al KPI de Deflexión)"""
+    if request.method == 'POST' and request.user.is_authenticated:
+        problema = request.POST.get('problema_titulo', 'FAQ General')
+        
+        titulo_ticket = f"FAQ: {problema}"[:25]
+
+        InfoTicket.objects.create(
+            solicitante=request.user,
+            titulo=titulo_ticket,
+            descripcion=f"El usuario solucionó su inconveniente de manera autónoma usando la enciclopedia de soluciones rápidas. Pregunta consultada: {problema}.",
+            categoria='OTRO',
+            estado='RESUELTO_FAQ',
+            solucion_resumen='Caso resuelto exitosamente por el usuario aplicando la guía de la Enciclopedia Interactiva.',
+            fecha_resolucion=timezone.now()
+        )
+        
+        # Guardamos la métrica
+        FAQDeflexion.objects.create(
+            usuario=request.user,
+            empresa=request.user.empresa,
+            problema_consultado=problema
+        )
+        
+        return redirect('dashboard')
+        
+    raise PermissionDenied
 
 def detalle_ticket_view(request, pk):
     ticket = _get_ticket_con_control_empresa(request, pk)
@@ -413,9 +465,9 @@ def detalle_ticket_view(request, pk):
             TicketComentario.objects.create(ticket=ticket, usuario=request.user, comentario=texto)
             return redirect('detalle_ticket', pk=pk)
 
-    puede_dejar_feedback_usuario = (request.user.rol == 'cliente' and ticket.solicitante == request.user and ticket.estado in ['RESUELTO', 'CERRADO'] and not ticket.feedback_servicio.exists() and not ticket.feedback_plataforma.exists())
+    puede_dejar_feedback_usuario = (request.user.rol == 'cliente' and ticket.solicitante == request.user and ticket.estado in ['RESUELTO'] and not ticket.feedback_servicio.exists() and not ticket.feedback_plataforma.exists())
     puede_dejar_feedback_tecnico = (
-        request.user.rol == 'soporte'and ticket.estado in ['RESUELTO', 'CERRADO']
+        request.user.rol == 'soporte'and ticket.estado in ['RESUELTO']
         and ticket.asignaciones.filter(soporte=request.user, activo=True).exists()
         and not ticket.feedback_interno_soporte.filter(technician=request.user).exists()
     )
@@ -443,10 +495,8 @@ def actualizar_estado(request, pk):
 
     if estado_anterior != nuevo_estado:
         ticket.estado = nuevo_estado
-        if nuevo_estado == 'RESUELTO':
+        if nuevo_estado == ['RESUELTO', 'RESUELTO_FAQ']:
             ticket.fecha_resolucion = timezone.now()
-        elif nuevo_estado == 'CERRADO':
-            ticket.fecha_cierre = timezone.now()
         ticket.save()
         
         TicketHistorial.objects.create(
@@ -459,6 +509,11 @@ def cambiar_prioridad(request, pk):
     if request.user.rol == 'cliente':
         raise PermissionDenied    
     ticket = _get_ticket_con_control_empresa(request, pk)
+    
+    if ticket.estado in ['RESUELTO', 'RESUELTO_FAQ']:
+        messages.error(request, "No se puede cambiar la prioridad de un ticket finalizado.")
+        return redirect('dashboard')
+    
     ticket.prioridad = request.POST.get('prioridad')
     ticket.save()
     return redirect('dashboard')
@@ -471,7 +526,7 @@ def guardar_feedback_usuario(request, pk):
         raise PermissionDenied
     ticket = _get_ticket_con_control_empresa(request, pk)
 
-    if request.user.rol != 'cliente' or ticket.solicitante != request.user or ticket.estado not in ['RESUELTO', 'CERRADO']:
+    if request.user.rol != 'cliente' or ticket.solicitante != request.user or ticket.estado not in ['RESUELTO']:
         raise PermissionDenied
     
     form = UserFeedbackForm(request.POST)
@@ -507,6 +562,10 @@ def asignar_ticket_view(request, pk):
         raise PermissionDenied
 
     ticket = _get_ticket_con_control_empresa(request, pk)
+    
+    if ticket.estado in ['RESUELTO', 'RESUELTO_FAQ']:
+        messages.error(request, "No se puede modificar la asignación de un ticket ya resuelto.")
+        return redirect('dashboard')
     
     soportes = Usuario.objects.filter(empresa=request.user.empresa, rol='soporte', is_active=True, autorizado=True)
     hora_actual = timezone.now().strftime("%H:%M")
