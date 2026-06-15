@@ -91,7 +91,12 @@ def registrar_empresa_view(request):
             
             return redirect('login')
     else:
-        form = EmpresaRegisterForm()
+        plan_url = request.GET.get('plan', '').upper()
+        
+        if plan_url not in ['GRATIS', 'BASICO', 'PREMIUM']:
+            plan_url = ''
+            
+        form = EmpresaRegisterForm(initial={'plan': plan_url})
     return render(request, 'register_empresa.html', {'form': form})
 
 def login_view(request):
@@ -660,6 +665,8 @@ def detalle_ticket_view(request, pk):
                 
             return redirect('detalle_ticket', pk=pk)
 
+    asignacion_activa = ticket.asignaciones.filter(activo=True).select_related('soporte').first()
+    
     puede_dejar_feedback_usuario = (request.user.rol == 'cliente' and ticket.solicitante == request.user and ticket.estado in ['RESUELTO'] and not ticket.feedback_servicio.exists() and not ticket.feedback_plataforma.exists())
     puede_dejar_feedback_tecnico = (
         request.user.rol == 'soporte'and ticket.estado in ['RESUELTO']
@@ -670,7 +677,7 @@ def detalle_ticket_view(request, pk):
     return render(request, 'detalle_ticket.html', {
         'ticket': ticket,'comentarios': ticket.comentarios.all().order_by('fecha_comentario'),
         'estados_ticket': InfoTicket.ESTADO,'user_feedback_form': UserFeedbackForm(),'technician_feedback_form': TechnicianFeedbackForm(),
-        'show_user_feedback_modal': puede_dejar_feedback_usuario,'show_technician_feedback_modal': puede_dejar_feedback_tecnico,
+        'show_user_feedback_modal': puede_dejar_feedback_usuario,'show_technician_feedback_modal': puede_dejar_feedback_tecnico, 'asignacion_activa': asignacion_activa,
     })
 
 def eliminar_ticket(request, pk):
