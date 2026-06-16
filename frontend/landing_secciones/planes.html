@@ -1,0 +1,159 @@
+{% load static %}
+<section id="precios" class="bg-[#121212] py-20 text-white md:py-24"
+        style="background: linear-gradient(135deg, #2d1b4e 0%, #1e3a5f 50%, #1a0f2e 100%)">
+    <div class="mx-auto max-w-6xl px-4 md:px-6">
+    <header class="text-center">
+        <p class="text-sm font-medium tracking-wide text-white">Planes</p>
+        <h2 class="mt-3 text-4xl font-bold tracking-tight md:text-5xl">Elige tu plan</h2>
+        <p class="mx-auto mt-4 max-w-2xl text-base text-gray-400 md:text-lg">
+            Selecciona el que mejor se adapte a tu equipo
+        </p>
+    </header>
+
+    <div class="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-6 lg:gap-8">
+        <!-- Plan Gratis -->
+        <article class="relative group flex min-h-full flex-col rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-900 to-black p-5 shadow-xl transition-all duration-300...">
+            <div class="absolute inset-0 rounded-2xl bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true"></div>
+            
+            <div class="relative z-10 flex flex-col flex-1">
+                
+                <div class="flex items-start justify-between gap-4">
+                    <h3 class="text-xl font-semibold capitalize text-white group-hover:text-indigo-400 transition-colors duration-300">
+                        Plan Gratis
+                    </h3>
+                </div>
+                
+                <div class="mt-5">
+                    <p class="text-4xl font-bold leading-none tracking-tight text-white md:text-5xl">$0</p>
+                    <p class="mt-3 text-sm text-zinc-400 font-mono">Free to use</p>
+                </div>
+                
+                <hr class="my-5 border-white/10" />
+                
+                <div class="flex flex-1 flex-col">
+                    <p class="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-400">Incluye:</p>
+                    <ul class="mt-4 flex-1 space-y-3 text-sm text-zinc-300">
+                        <li class="flex gap-2.5">
+                            <span class="shrink-0 text-indigo-400" aria-hidden="true">✓</span>
+                            <span>Hasta 10 usuarios</span>
+                        </li>
+                        <li class="flex gap-2.5">
+                            <span class="shrink-0 text-indigo-400" aria-hidden="true">✓</span>
+                            <span>500 tickets mensuales</span>
+                        </li>
+                        <li class="flex gap-2.5">
+                            <span class="shrink-0 text-indigo-400" aria-hidden="true">✓</span>
+                            <span>Soporte por email</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <a href="{% url 'register_empresa' %}?plan=GRATIS"
+                class="flex items-center justify-center mt-8 w-full bg-[#ff6b35] py-3 text-sm font-semibold text-white rounded-xl transition-all duration-300 hover:brightness-110 hover:shadow-[0_0_20px_rgba(194,65,46,0.3)] text-center">
+                    Comenzar
+                </a>
+            </div>
+        </article>
+            
+
+        <!-- Plan Basico -->
+        <article class="relative group flex min-h-full flex-col rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-900 to-black p-5 shadow-xl transition-all duration-300...">    
+            <div class="absolute inset-0 rounded-2xl bg-[#ff6b35]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true"></div>
+            
+            <div class="relative z-10 flex flex-col flex-1">
+                
+                <div class="flex items-start justify-between gap-4">
+                    <h3 class="text-xl font-semibold capitalize text-white group-hover:text-[#ff6b35] transition-colors duration-300">
+                        Plan Básico
+                    </h3>
+                </div>
+                
+                <div class="mt-5">
+                    <p class="text-4xl font-bold leading-none tracking-tight text-white md:text-5xl">
+                        $80<span class="text-2xl font-semibold text-zinc-400 md:text-3xl">/mo</span>
+                    </p>
+                    <p class="mt-3 text-sm text-zinc-500 font-mono">USD</p>
+                </div>
+                
+                <hr class="my-5 border-white/10" />
+                
+                <div class="flex flex-1 flex-col">
+                    <p class="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-400">Incluye:</p>
+                    <ul class="mt-4 flex-1 space-y-3 text-sm text-zinc-300">
+                        <li class="flex gap-2.5">
+                            <span class="shrink-0 text-[#ff6b35]" aria-hidden="true">✓</span>
+                            <span>Hasta 50 usuarios</span>
+                        </li>
+                        <li class="flex gap-2.5">
+                            <span class="shrink-0 text-[#ff6b35]" aria-hidden="true">✓</span>
+                            <span>Tickets ilimitados</span>
+                        </li>
+                        <li class="flex gap-2.5">
+                            <span class="shrink-0 text-[#ff6b35]" aria-hidden="true">✓</span>
+                            <span>Reportes avanzados</span>
+                        </li>
+                        <li class="flex gap-2.5">
+                            <span class="shrink-0 text-[#ff6b35]" aria-hidden="true">✓</span>
+                            <span>Soporte prioritario</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <a href="{% url 'register_empresa'  %}?plan=BASICO"
+                class="flex items-center justify-center mt-8 w-full bg-[#ff6b35] py-3 text-sm font-semibold text-white rounded-xl transition-all duration-300 hover:brightness-110 hover:shadow-[0_0_20px_rgba(255,107,53,0.3)] text-center">
+                    Comenzar
+                </a>
+            </div>
+        </article>
+        <!-- Plan Premium -->
+        <article class="relative group flex min-h-full flex-col rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-900 to-black p-5 shadow-xl transition-all duration-300...">
+            <div class="absolute inset-0 rounded-2xl bg-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true"></div>
+            
+            <div class="relative z-10 flex flex-col flex-1">
+                
+                <div class="flex items-start justify-between gap-4">
+                    <h3 class="text-xl font-semibold capitalize text-white group-hover:text-purple-400 transition-colors duration-300">
+                        Plan Premium
+                    </h3>
+                </div>
+                
+                <div class="mt-5">
+                    <p class="text-4xl font-bold leading-none tracking-tight text-white md:text-5xl">
+                        $150<span class="text-2xl font-semibold text-zinc-400 md:text-3xl">/mo</span>
+                    </p>
+                    <p class="mt-3 text-sm text-zinc-500 font-mono">USD</p>
+                </div>
+                
+                <hr class="my-5 border-white/10" />
+                
+                <div class="flex flex-1 flex-col">
+                    <p class="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-400">Incluye:</p>
+                    <ul class="mt-4 flex-1 space-y-3 text-sm text-zinc-300">
+                        <li class="flex gap-2.5">
+                            <span class="shrink-0 text-purple-400" aria-hidden="true">✓</span>
+                            <span>Usuarios ilimitados</span>
+                        </li>
+                        <li class="flex gap-2.5">
+                            <span class="shrink-0 text-purple-400" aria-hidden="true">✓</span>
+                            <span>Tickets ilimitados</span>
+                        </li>
+                        <li class="flex gap-2.5">
+                            <span class="shrink-0 text-purple-400" aria-hidden="true">✓</span>
+                            <span>Integraciones custom</span>
+                        </li>
+                        <li class="flex gap-2.5">
+                            <span class="shrink-0 text-purple-400" aria-hidden="true">✓</span>
+                            <span>Soporte prioritario</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <a href="{% url 'register_empresa' %}?plan=PREMIUM"
+                class="flex items-center justify-center mt-8 px-6 py-3 bg-[#ff6b35] py-3 text-sm font-semibold text-white rounded-xl transition-all duration-300 hover:brightness-110 hover:shadow-[0_0_20px_rgba(194,65,46,0.3)] text-center">
+                    Comenzar
+                </a>
+            </div>
+        </article>
+        </div>
+    </div>
+</section>

@@ -1,20 +1,31 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Assistech{% endblock %}</title>
     <link rel="icon" type="image/png" href="{% static 'usuarios/logo-solo.png' %}" />
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ["Inter", "system-ui", "sans-serif"],
+                    },
                     colors: {
                         'assist-black': '#000000',
                         'assist-dark': '#111111',
+                        'assist-charcoal': '#121212',
+                        'assist-slate': '#1a1a1a',
                         'assist-gray': '#AAAAAA',
+                        'assist-body': '#a0a0a0',
                         'assist-white': '#FFFFFF',
                         'assist-coral': '#F25C54',
                     },
@@ -27,9 +38,7 @@
     </script>
     
     <style>
-        form p {
-            margin-bottom: 1.5rem;
-        }
+        form p { margin-bottom: 1.5rem; }
         form label {
             display: block;
             margin-bottom: 0.5rem;
@@ -60,29 +69,29 @@
 </head>
 <body class="bg-[#111827] text-assist-white min-h-screen font-sans flex flex-col overflow-x-hidden">
 
-    {% block navbar %}
-    <nav class="border-b border-white/5 bg-[#121212]/90 backdrop-blur-md px-6 py-4 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
+<nav class="border-b border-white/5 bg-[#121212]/90 backdrop-blur-md px-4 py-4 sm:px-6 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
             
-            <a href="{% url 'landing' %}" class="flex items-center gap-3 hover:opacity-80 transition">
+            <a href="{% url 'landing' %}" class="flex items-center justify-center sm:justify-start gap-3 hover:opacity-80 transition shrink-0">
                 <img src="{% static 'usuarios/logo-solo.png' %}" alt="Logo Assistech" class="h-8 w-8 object-contain">
                 <span class="text-xl font-bold tracking-tight text-white">Assistech</span>
             </a>
 
-            <div class="flex items-center gap-4 text-sm">
-                {% if user.is_authenticated %}
-                    <span class="text-zinc-500 hidden sm:inline">Hola, {{ user.username }}</span>
-                {% endif %}
+            <div class="hidden md:flex justify-center items-center gap-8 text-sm text-zinc-400">
+                {% block navbar_links %}
+                {% endblock %}
             </div>
 
+            <div class="flex items-center justify-center sm:justify-end gap-6 text-sm">
+                <a href="{% url 'register_empresa' %}" class="text-xs sm:text-sm font-semibold text-zinc-400 hover:text-white transition whitespace-nowrap">Registrar Empresa</a>            
+                <a href="{% url 'login' %}" class="text-xs sm:text-sm font-semibold text-zinc-400 hover:text-white transition whitespace-nowrap">Iniciar Sesión</a>
+            </div>
         </div>
     </nav>
-    {% endblock %}
 
     <main class="flex-1 flex flex-col justify-center w-full max-w-full min-w-0">
         {% block content %}
         {% endblock %}
     </main>
-
 </body>
 </html>

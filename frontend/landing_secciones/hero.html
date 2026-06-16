@@ -1,0 +1,38 @@
+{%load static%}
+<section class="border-b border-white/5 bg-assist-charcoal py-16 md:py-24"
+        style="background: linear-gradient(135deg, #2d1b4e 0%, #1e3a5f 50%, #1a0f2e 100%)">
+    <div class="mx-auto grid max-w-7xl items-center gap-12 px-4 md:grid-cols-2 md:px-6">
+        <div>
+            <h1 class="text-4xl font-bold leading-tight tracking-tight md:text-5xl lg:text-6xl">
+                Centraliza tu soporte en un solo lugar
+            </h1>
+            <p class="mt-6 max-w-xl text-lg text-assist-body">
+                Gestiona tickets, equipos y conversaciones desde una plataforma clara. Menos
+                herramientas, más claridad para tu equipo y tus clientes.
+            </p>
+            <div class="mt-8 flex flex-wrap items-center gap-4">
+                <a href="{% url 'register_empresa' %}" class="rounded-md bg-orange-500 px-6 py-3 text-sm font-bold text-assist-white transition hover:brightness-110">
+                    Registrar Empresa
+                </a>
+                
+                <a href="{% url 'login' %}" class="rounded-md bg-orange-500 px-6 py-3 text-sm font-bold text-assist-white transition hover:brightness-110">
+                    Iniciar sesión
+                </a>
+            </div>
+        </div>
+        <div class="flex justify-center md:justify-end md:pr-12">
+            <div class="relative aspect-square w-full max-w-md overflow-hidden rounded-full border border-white/10 bg-assist-charcoal">
+                    
+                <div class="absolute inset-0 bg-assist-charcoal" aria-hidden="true"></div>
+                    
+                <div class="absolute inset-0 flex items-center justify-center z-10">
+                <img src="{% static 'usuarios/logo-sin-fondo.png' %}" 
+                    alt="Logo Assistech" 
+                class="w-5/5 h-5/5 object-contain brightness-110" 
+                />
+                </div>
+                <span class="sr-only">logo</span>
+            </div>
+        </div>
+    </div>
+</section>

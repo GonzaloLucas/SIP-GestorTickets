@@ -11,6 +11,7 @@ from django.contrib import messages
 from django.utils.crypto import get_random_string
 from datetime import timedelta
 
+
 from .models import (FeedbackPlatform,FeedbackService,FeedbackSupportInternal,Empresa,
     Usuario,InfoTicket,TicketComentario,TicketHistorial,TicketAsignacion,FAQDeflexion)
 from .forms import (
@@ -859,3 +860,29 @@ def asignar_ticket_view(request, pk):
             return redirect('dashboard')
 
     return render(request, 'asignar_ticket.html', {'ticket': ticket, 'soportes_info': soportes_info})
+
+
+# Contacto de la landing
+def landing_view(request):
+    if request.method == 'POST' and 'email' in request.POST:
+        nombre = request.POST.get('nombre')
+        email_usuario = request.POST.get('email')
+        mensaje = request.POST.get('mensaje')
+        
+        cuerpo_mail = f"Nombre: {nombre}\nCorreo de contacto: {email_usuario}\n\nMensaje:\n{mensaje}"
+        
+        try:
+            send_mail(
+                subject=f'Nueva consulta de {nombre} desde la Landing',
+                message=cuerpo_mail,
+                from_email='assistech.soporte@gmail.com',
+                recipient_list=['assistech.soporte@gmail.com'], 
+                fail_silently=False,
+            )
+            messages.success(request, '¡Tu mensaje fue enviado con éxito! Nos comunicaremos pronto.')
+        except Exception as e:
+            messages.error(request, 'Hubo un problema al enviar el mail. Intentá más tarde.')
+            
+        return redirect('landing')
+        
+    return render(request, 'assistech-landing.html')

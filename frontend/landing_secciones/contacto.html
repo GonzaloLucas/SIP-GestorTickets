@@ -1,0 +1,30 @@
+{% load static %}
+<section id="contacto" class="py-16 md:py-24 border-t border-white/5"
+style="background: linear-gradient(135deg, #2d1b4e 0%, #1e3a5f 50%, #1a0f2e 100%)">
+    <div class="max-w-md mx-auto relative group flex min-h-full flex-col rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-900 to-black p-5 shadow-xl transition-all duration-300...">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold tracking-tight">Comunicate con nosotros</h2>
+            <p class="mt-2 text-sm text-assist-gray">Dejanos tu consulta y te responderemos a la brevedad</p>
+        </div>
+
+        <form method="POST" action="{% url 'landing' %}" class="space-y-4">
+            {% csrf_token %}
+            <p>
+                <label for="nombre">Nombre</label>
+                <input type="text" id="nombre" name="nombre" required placeholder="Tu nombre">
+            </p>
+            <p>
+                <label for="email">Correo Electrónico</label>
+                <input type="email" id="email" name="email" required placeholder="ejemplo@empresa.com">
+            </p>
+            <p>
+                <label for="mensaje">Mensaje / Consulta</label>
+                <textarea id="mensaje" name="mensaje" rows="4" required placeholder="¿En qué podemos ayudarte?"></textarea>
+            </p>
+            
+                <button type="submit" name="btn_contacto" class="w-full bg-[#ff6b35] text-white font-semibold py-3 rounded-xl hover:bg-opacity-90 transition mt-4 shadow-lg">
+                    Enviar Mensaje
+                </button>
+        </form>
+    </div>
+</section>
