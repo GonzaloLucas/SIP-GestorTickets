@@ -620,7 +620,7 @@ def registrar_deflexion(request):
     if request.method == 'POST' and request.user.is_authenticated:
         problema = request.POST.get('problema_titulo', 'FAQ General')
         
-        titulo_ticket = f"FAQ: {problema}"[:25]
+        titulo_ticket = f"FAQ: {problema}"
 
         InfoTicket.objects.create(
             solicitante=request.user,
