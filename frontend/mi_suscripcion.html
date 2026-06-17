@@ -58,7 +58,7 @@
             {% if empresa.plan == 'GRATIS' %}
                 <button disabled class="w-full py-3 rounded-xl bg-assist-coral/20 text-assist-coral font-bold cursor-not-allowed border border-assist-coral/30">Plan Actual</button>
             {% else %}
-                <button type="button" class="w-full py-3 rounded-xl border border-white/20 text-white font-bold hover:bg-white/5 transition" onclick="openPlanModal('GRATIS', '¿Estás seguro que querés bajar al plan Gratis? Tus límites se reducirán.')">Elegir Gratis</button>
+                <button type="button" class="w-full py-3 rounded-xl border border-white/20 text-white font-bold hover:bg-white/5 transition" onclick="openPlanModal('GRATIS', '¿Confirmás el cambio al plan Gratis? Recordá que se limitará la cantidad de usuarios a 10 y perderás funcionalidades avanzadas.')">Elegir Gratis</button>
             {% endif %}
         </article>
 
@@ -77,7 +77,13 @@
             {% if empresa.plan == 'BASICO' %}
                 <button disabled class="w-full py-3 rounded-xl bg-assist-coral/20 text-assist-coral font-bold cursor-not-allowed border border-assist-coral/30">Plan Actual</button>
             {% else %}
-                <button type="button" class="w-full py-3 rounded-xl {% if empresa.plan == 'GRATIS' %}bg-assist-coral text-white hover:brightness-110{% else %}border border-white/20 text-white hover:bg-white/5{% endif %} font-bold transition" onclick="openPlanModal('BASICO', '¿Confirmás el cambio al plan Básico? Disfrutarás de más beneficios.')">Elegir Básico</button>
+                <button type="button" 
+                        class="w-full py-3 rounded-xl {% if empresa.plan == 'GRATIS' %}bg-assist-coral text-white hover:brightness-110{% else %}border border-white/20 text-white hover:bg-white/5{% endif %} font-bold transition" 
+                        data-plan="BASICO"
+                        data-message="{% if empresa.plan == 'PREMIUM' %}¿Confirmás el cambio al plan Básico? Recordá que se limitará la cantidad de usuarios permitidos a 50.{% else %}¿Confirmás el cambio al plan Básico? Disfrutarás de más beneficios.{% endif %}"
+                        onclick="openPlanModal(this.dataset.plan, this.dataset.message)">
+                    Elegir Básico
+                </button>
             {% endif %}
         </article>
 
