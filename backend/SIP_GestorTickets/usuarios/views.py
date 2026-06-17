@@ -387,9 +387,15 @@ def _dashboard_cliente(request):
 def _dashboard_soporte(request):
         tickets = InfoTicket.objects.filter(asignaciones__soporte=request.user, asignaciones__activo=True,solicitante__empresa=request.user.empresa).distinct()
         tickets = _filtrar_tickets_por_plan(request.user.empresa, tickets)
+        
+        promedio = FeedbackService.objects.filter(
+        ticket__asignaciones__soporte=request.user,ticket__asignaciones__activo=True).aggregate(Avg('rating'))['rating__avg']
+    
+        promedio_formateado = round(promedio, 1) if promedio else 0.0
+    
         hoy = timezone.now().date()
         return render(request, 'dashboard_soporte.html', {
-        'tickets': tickets,
+        'tickets': tickets,'promedio_rating': promedio_formateado,
         'pendientes': tickets.filter(estado__in=['ABIERTO', 'EN_PROCESO']).count(),
         'urgencia_alta': tickets.filter(estado__in=['ABIERTO', 'EN_PROCESO'], prioridad__in=['ALTA', 'CRITICA', 'alta', 'critica']).count(),
         'resueltos_hoy': InfoTicket.objects.filter(asignaciones__soporte=request.user, estado__in='RESUELTO').filter(Q(fecha_resolucion__date=hoy) | Q(fecha_cierre__date=hoy)).distinct().count()
