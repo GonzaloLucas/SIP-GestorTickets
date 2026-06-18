@@ -74,9 +74,16 @@
         
         <a href="{% url 'landing' %}" class="flex items-center justify-center sm:justify-start gap-3 hover:opacity-80 transition shrink-0">
             <img src="{% static 'usuarios/logo-solo.png' %}" alt="Logo Assistech" class="h-8 w-8 object-contain">
-            <span class="text-xl font-bold tracking-tight text-white">Assistech</span>
+            <div class="flex items-center gap-2">
+                <span class="text-xl font-bold tracking-tight text-white">Assistech</span>
+                
+                {% if request.user.is_authenticated and request.user.empresa %}
+                    <span class="text-xs bg-assist-coral/10 text-assist-coral font-medium px-2 py-0.5 rounded-md border border-assist-coral/20 uppercase tracking-wider">
+                        {{ request.user.empresa.nombre }}
+                    </span>
+                {% endif %}
+            </div>
         </a>
-
         <div class="hidden md:flex justify-center items-center gap-8 text-sm text-zinc-400">
             {% block navbar_links %}
             {% endblock %}
