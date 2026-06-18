@@ -44,6 +44,26 @@
             <p class="text-assist-gray text-sm">Resueltos hoy</p>
             <p class="text-4xl font-bold mt-2 text-emerald-400">{{ resueltos_hoy }}</p>
         </div>
+
+        <div class="bg-assist-dark p-6 rounded-2xl border border-white/5 flex flex-col justify-between">
+            <div>
+                <p class="text-assist-gray text-sm">Mi Promedio</p>
+                <p class="text-4xl font-bold mt-2 text-white">
+                    {{ promedio_rating|floatformat:1 }} <span class="text-xs font-normal text-assist-gray">/ 5.0</span>
+                </p>
+            </div>
+            <div class="mt-2 text-xs font-bold uppercase tracking-wider 
+                {% if promedio_rating >= 4.0 %}text-emerald-400
+                {% elif promedio_rating >= 3.0 %}text-amber-400
+                {% elif promedio_rating > 0 %}text-red-400
+                {% else %}text-zinc-600{% endif %}">
+                {% if promedio_rating > 0 %}
+                    ★ Excelente servicio
+                {% else %}
+                    Sin calificaciones
+                {% endif %}
+            </div>
+        </div>
     </div>
 
     <div class="flex space-x-2 border-b border-white/10 mb-6">

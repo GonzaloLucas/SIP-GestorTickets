@@ -387,9 +387,15 @@ def _dashboard_cliente(request):
 def _dashboard_soporte(request):
         tickets = InfoTicket.objects.filter(asignaciones__soporte=request.user, asignaciones__activo=True,solicitante__empresa=request.user.empresa).distinct()
         tickets = _filtrar_tickets_por_plan(request.user.empresa, tickets)
+        
+        promedio = FeedbackService.objects.filter(
+        ticket__asignaciones__soporte=request.user,ticket__asignaciones__activo=True).aggregate(Avg('rating'))['rating__avg']
+    
+        promedio_formateado = round(promedio, 1) if promedio else 0.0
+    
         hoy = timezone.now().date()
         return render(request, 'dashboard/roles/dashboard_soporte.html', {
-        'tickets': tickets,
+        'tickets': tickets,'promedio_rating': promedio_formateado,
         'pendientes': tickets.filter(estado__in=['ABIERTO', 'EN_PROCESO']).count(),
         'urgencia_alta': tickets.filter(estado__in=['ABIERTO', 'EN_PROCESO'], prioridad__in=['ALTA', 'CRITICA', 'alta', 'critica']).count(),
         'resueltos_hoy': InfoTicket.objects.filter(asignaciones__soporte=request.user, estado__in='RESUELTO').filter(Q(fecha_resolucion__date=hoy) | Q(fecha_cierre__date=hoy)).distinct().count()
@@ -533,9 +539,18 @@ def cambiar_suscripcion_view(request):
                 messages.error(request, "No podés bajar al plan Básico porque superás el límite de 50 usuarios. Eliminá cuentas de tu personal primero.")
                 return redirect('mi_suscripcion')
                 
+            plan_anterior = empresa.plan
             empresa.plan = nuevo_plan
             empresa.save()
-            messages.success(request, f"¡Suscripción actualizada al plan {empresa.get_plan_display()} correctamente!")
+            
+            if nuevo_plan in ['BASICO', 'PREMIUM'] and plan_anterior == 'GRATIS':
+                messages.success(request, f"¡Tu plan ha sido mejorado a {empresa.get_plan_display()}! Ahora podés disfrutar de más beneficios y funcionalidades.")
+            elif nuevo_plan == 'GRATIS' and plan_anterior in ['BASICO', 'PREMIUM']:
+                messages.warning(request, "Has cambiado tu suscripción al plan Gratis. Recordá que algunas funcionalidades avanzadas ya no estarán disponibles.")
+            elif nuevo_plan == 'BASICO' and plan_anterior == 'PREMIUM':
+                messages.warning(request, "Has cambiado tu suscripción al plan Básico. Recordá que se limitará la cantidad de usuarios permitidos.")
+            else:
+                messages.success(request, f"¡Suscripción actualizada al plan {empresa.get_plan_display()} correctamente!")
             
     return redirect('mi_suscripcion')
 
@@ -620,7 +635,7 @@ def registrar_deflexion(request):
     if request.method == 'POST' and request.user.is_authenticated:
         problema = request.POST.get('problema_titulo', 'FAQ General')
         
-        titulo_ticket = f"FAQ: {problema}"[:25]
+        titulo_ticket = f"FAQ: {problema}"
 
         InfoTicket.objects.create(
             solicitante=request.user,
