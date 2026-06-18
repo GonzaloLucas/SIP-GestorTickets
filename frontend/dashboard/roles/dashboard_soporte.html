@@ -57,8 +57,15 @@
                 {% elif promedio_rating >= 3.0 %}text-amber-400
                 {% elif promedio_rating > 0 %}text-red-400
                 {% else %}text-zinc-600{% endif %}">
-                {% if promedio_rating > 0 %}
+                
+                {% if promedio_rating >= 4.5 %}
                     ★ Excelente servicio
+                {% elif promedio_rating >= 4.0 %}
+                    ★ Muy buen servicio
+                {% elif promedio_rating >= 3.0 %}
+                    ★ Servicio regular
+                {% elif promedio_rating > 0 %}
+                    ⚠️ Requiere atención
                 {% else %}
                     Sin calificaciones
                 {% endif %}
