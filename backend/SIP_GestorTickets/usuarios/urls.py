@@ -17,23 +17,23 @@ urlpatterns = [
     path('password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(template_name='dashboard/cuenta/resetear_contraseña/password_reset_complete.html'), name='password_reset_complete'),
 
     path('', views.landing_view, name='landing'),
-    path('dashboard/cuenta/register_empresa/', views.registrar_empresa_view, name='dashboard/cuenta/register_empresa'),
+    path('register_empresa/', views.registrar_empresa_view, name='register_empresa'),
     path('login/', views.login_view, name='login'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('logout/', views.logout_view, name='logout'),
     
-    path('mi-suscripcion/', views.mi_suscripcion_view, name='dashboard/cuenta/mi_suscripcion'),
+    path('mi-suscripcion/', views.mi_suscripcion_view, name='mi_suscripcion'),
     path('cambiar-suscripcion/', views.cambiar_suscripcion_view, name='cambiar_suscripcion'),
 
-    path('platform-admin/nuevo/', views.crear_platform_admin_view, name='dashboard/cuenta/crear_platform_admin'),
+    path('platform-admin/nuevo/', views.crear_platform_admin_view, name='crear_platform_admin'),
     
     path('usuario/<int:pk>/aprobar/', views.aprobar_usuario_view, name='aprobar_usuario'), 
     path('usuario/<int:pk>/eliminar-definitivo/', views.eliminar_usuario_definitivo_view, name='eliminar_usuario_definitivo'),
     
-    path('usuario/nuevo-admin/', views.crear_usuario_admin_view, name='dashboard/cuenta/crear_usuario_admin'),
-    path('cambiar-contrasenia-obligatorio/', views.cambiar_contrasenia_obligatorio_view, name='dashboard/cuenta/cambiar_contrasenia_obligatorio'),
+    path('usuario/nuevo-admin/', views.crear_usuario_admin_view, name='crear_usuario_admin'),
+    path('cambiar-contrasenia-obligatorio/', views.cambiar_contrasenia_obligatorio_view, name='cambiar_contrasenia_obligatorio'),
     
-    path('ticket/nuevo/', views.crear_ticket, name='dashboard/tickets/crear_ticket'),
+    path('ticket/nuevo/', views.crear_ticket, name='crear_ticket'),
     path('ticket/deflexion/', views.registrar_deflexion, name='registrar_deflexion'),
     
     path('ticket/<int:pk>/', views.detalle_ticket_view, name='detalle_ticket'),

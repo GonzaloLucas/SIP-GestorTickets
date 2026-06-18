@@ -137,7 +137,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'assistech.soporte@gmail.com' 
 
 # 🔴 PEGÁ ACÁ LAS 16 LETRAS QUE TE DIO GOOGLE (Todo junto, sin los espacios)
-EMAIL_HOST_PASSWORD = 'eetn oicn exly amul' 
+EMAIL_HOST_PASSWORD = 'rhvf inpg steo mxab' 
 
 # Esto es lo que va a figurar como remitente en la bandeja de entrada de los clientes
 DEFAULT_FROM_EMAIL = 'Assistech Soporte <assistech.soporte@gmail.com>'
