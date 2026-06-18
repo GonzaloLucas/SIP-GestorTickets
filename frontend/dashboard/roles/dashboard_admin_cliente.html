@@ -195,7 +195,7 @@
                             {% elif ticket.estado == 'RESUELTO_FAQ' %}bg-purple-500/10 text-purple-400 border border-purple-500/20{% endif %}">
                             {{ ticket.get_estado_display }}
                         </span>
-                        <a href="{% url 'detalle_ticket' ticket.pk %}" class="text-sm text-white font-medium hover:underline whitespace-nowrap">Ver detalles →</a>
+                        <a href="{% url 'dashboard/cuenta/detalle_ticket' ticket.pk %}" class="text-sm text-white font-medium hover:underline whitespace-nowrap">Ver detalles →</a>
                     </div>
                 </div>
             {% empty %}

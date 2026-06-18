@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Assistech — Centraliza tu soporte{% endblock %}
+
+{% block navbar_links %}
+    <a href="#producto" class="transition hover:text-white">Producto</a>
+    <a href="#funciones" class="transition hover:text-white">Funciones</a>
+    <a href="#precios" class="transition hover:text-white">Precios</a>
+{% endblock %}
+
+{% block content %}
+    {% include 'public/landing_secciones/hero.html' %}
+    {% include 'public/landing_secciones/producto.html' %}
+    {% include 'public/landing_secciones/ventajas.html' %}
+    {% include 'public/landing_secciones/proceso.html' %}
+    {% include 'public/landing_secciones/planes.html' %}
+    {% include 'public/landing_secciones/testimonios.html' %}
+    {% include 'public/landing_secciones/preguntas.html' %}
+    {% include 'public/landing_secciones/comenzar_ya.html' %}
+    {% include 'public/landing_secciones/contacto.html' %}
+
+
+    {% include 'componentes/footer.html' %}
+{% endblock %}
+
+{% block extra_head %}
+
+{% endblock %}

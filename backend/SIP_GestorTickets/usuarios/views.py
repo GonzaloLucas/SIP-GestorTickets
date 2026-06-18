@@ -77,7 +77,7 @@ def _verificar_horario_laboral(soporte, hora_actual, dia_actual):
 # VISTAS DE AUTENTICACIÓN Y REGISTRO
 # ==========================================
 def landing_view(request):
-    return render(request, 'assistech-landing.html')
+    return render(request, 'public/assistech-landing.html')
 
 def registrar_empresa_view(request):
     if request.method == 'POST':
@@ -98,7 +98,7 @@ def registrar_empresa_view(request):
             plan_url = ''
             
         form = EmpresaRegisterForm(initial={'plan': plan_url})
-    return render(request, 'register_empresa.html', {'form': form})
+    return render(request, 'dashboard/cuenta/register_empresa.html', {'form': form})
 
 def login_view(request):
     if request.user.is_authenticated:
@@ -127,7 +127,7 @@ def login_view(request):
         except Usuario.DoesNotExist:
             error = "No existe ninguna cuenta con ese email."
 
-    return render(request, 'login.html', {'form': form, 'error': error})
+    return render(request, 'dashboard/cuenta/login.html', {'form': form, 'error': error})
 
 def logout_view(request):
     logout(request)
@@ -159,7 +159,7 @@ def cambiar_contrasenia_obligatorio_view(request):
             except Exception as e:
                 error = e.messages[0] if hasattr(e, 'messages') else str(e)
 
-    return render(request, 'cambiar_contrasenia_obligatorio.html', {'error': error})
+    return render(request, 'dashboard/cuenta/cambiar_contrasenia_obligatorio.html', {'error': error})
 
 # ==========================================
 # GESTIÓN DE PERSONAL DE PLATAFORMA Y EMPRESAS
@@ -180,7 +180,7 @@ def crear_platform_admin_view(request):
             return redirect('dashboard')
     else:
         form = SuperAdminPlatformAdminCreateForm()
-    return render(request, 'crear_platform_admin.html', {'form': form})
+    return render(request, 'dashboard/cuenta/crear_platform_admin.html', {'form': form})
 
 def crear_usuario_admin_view(request):
     admin_empresa = _obtener_empleado_controlado(request, request.user.pk)
@@ -233,7 +233,7 @@ def crear_usuario_admin_view(request):
                 )
     else:
         form = AdminUsuarioCreateForm()
-    return render(request, 'crear_usuario_admin.html', {'form': form})
+    return render(request, 'dashboard/cuenta/crear_usuario_admin.html', {'form': form})
 
 def quitar_acceso_view(request, pk):
     empleado = _obtener_empleado_controlado(request, pk)    
@@ -275,7 +275,7 @@ def confirmar_baja_view(request, pk):
             messages.success(request, f'Horarios de {empleado.first_name} actualizados correctamente.')
             return redirect('dashboard')
             
-    return render(request, 'confirmar_baja.html', {'empleado': empleado, 'horarios': horarios, 'dias_semana': dias_semana, 'dias_actuales': dias_actuales})
+    return render(request, 'dashboard/cuenta/confirmar_baja.html', {'empleado': empleado, 'horarios': horarios, 'dias_semana': dias_semana, 'dias_actuales': dias_actuales})
 
 # ==========================================
 # SISTEMA DISTRIBUIDO DE DASHBOARDS
@@ -330,7 +330,7 @@ def _dashboard_superadmin (request):
         feedback_servicio = feedback_servicio.filter(filtro_comun | Q(technician__username__icontains=busqueda) | Q(technician__email__icontains=busqueda))
         feedback_plataforma = feedback_plataforma.filter(filtro_comun | Q(category__icontains=busqueda))
 
-    return render(request, 'dashboard_superadmin.html', {
+    return render(request, 'dashboard/roles/dashboard_superadmin.html', {
         'feedback_servicio': feedback_servicio, 'feedback_plataforma': feedback_plataforma,
         'promedio_soporte': feedback_servicio.aggregate(p=Avg('rating'))['p'], 'promedio_plataforma': feedback_plataforma.aggregate(p=Avg('rating'))['p'],
         'feedback_servicio_critico': feedback_servicio.filter(is_critical=True), 'feedback_plataforma_critico': feedback_plataforma.filter(is_critical=True),
@@ -357,7 +357,7 @@ def _dashboard_admin_cliente(request):
         
         cant_faq = FAQDeflexion.objects.filter(empresa=request.user.empresa).count()
         
-        return render(request, 'dashboard_admin_cliente.html', {
+        return render(request, 'dashboard/roles/dashboard_admin_cliente.html', {
         'tickets': tickets,
         'empleados_activos': Usuario.objects.filter(empresa=request.user.empresa, is_active=True).exclude(pk=request.user.pk),
         'cant_abiertos': tickets.filter(estado='ABIERTO').count(),    
@@ -379,7 +379,7 @@ def _dashboard_cliente(request):
         fecha_creacion__month=hoy.month
     ).count()
     
-    return render(request, 'dashboard_cliente.html', {
+    return render(request, 'dashboard/roles/dashboard_cliente.html', {
         'tickets': tickets,
         'tickets_consumidos': tickets_consumidos
     })
@@ -388,7 +388,7 @@ def _dashboard_soporte(request):
         tickets = InfoTicket.objects.filter(asignaciones__soporte=request.user, asignaciones__activo=True,solicitante__empresa=request.user.empresa).distinct()
         tickets = _filtrar_tickets_por_plan(request.user.empresa, tickets)
         hoy = timezone.now().date()
-        return render(request, 'dashboard_soporte.html', {
+        return render(request, 'dashboard/roles/dashboard_soporte.html', {
         'tickets': tickets,
         'pendientes': tickets.filter(estado__in=['ABIERTO', 'EN_PROCESO']).count(),
         'urgencia_alta': tickets.filter(estado__in=['ABIERTO', 'EN_PROCESO'], prioridad__in=['ALTA', 'CRITICA', 'alta', 'critica']).count(),
@@ -451,7 +451,7 @@ def dashboard_jefe_soporte (request):
             'dias_formateados': _formatear_dias(soporte.dias_laborales),
         })
 
-    return render(request, 'dashboard_jefe_soporte.html', {
+    return render(request, 'dashboard/roles/dashboard_jefe_soporte.html', {
         'tickets': tickets,
         'cant_tickets_humanos': cant_tickets_humanos,
         'feedback_servicio': feedback_servicio,
@@ -471,7 +471,7 @@ def _dashboard_platform_admin(request):
         promedio=Avg('rating')
     ).order_by('category')
 
-    return render(request, 'dashboard_platform_admin.html', {
+    return render(request, 'dashboard/roles/dashboard_platform_admin.html', {
         'feedback_plataforma': feedback_plataforma,
         'promedio_plataforma': feedback_plataforma.aggregate(promedio=Avg('rating'))['promedio'],
         'feedback_critico': feedback_plataforma.filter(is_critical=True),
@@ -508,7 +508,7 @@ def mi_suscripcion_view(request):
     if empresa.plan == 'GRATIS':
         porcentaje_tickets = min((tickets_consumidos * 100) // 500, 100)
 
-    return render(request, 'mi_suscripcion.html', {
+    return render(request, 'dashboard/cuenta/mi_suscripcion.html', {
         'empresa': empresa,
         'cantidad_usuarios': cantidad_usuarios,
         'tickets_consumidos': tickets_consumidos,
@@ -613,7 +613,7 @@ def crear_ticket(request):
             ).count()
     else:
         form = TicketForm()
-    return render(request, 'crear_ticket.html', {'form': form,'ticket_creado': ticket_creado,'faqs': faqs_top15,'tickets_consumidos': cantidad_tickets})
+    return render(request, 'dashboard/tickets/crear_ticket.html', {'form': form,'ticket_creado': ticket_creado,'faqs': faqs_top15,'tickets_consumidos': cantidad_tickets})
 
 def registrar_deflexion(request):
     """Registra que el usuario solucionó su problema mediante la FAQ (Suma al KPI de Deflexión)"""
@@ -675,7 +675,7 @@ def detalle_ticket_view(request, pk):
         and not ticket.feedback_interno_soporte.filter(technician=request.user).exists()
     )
 
-    return render(request, 'detalle_ticket.html', {
+    return render(request, 'dashboard/tickets/detalle_ticket.html', {
         'ticket': ticket,'comentarios': ticket.comentarios.all().order_by('fecha_comentario'),
         'estados_ticket': InfoTicket.ESTADO,'user_feedback_form': UserFeedbackForm(),'technician_feedback_form': TechnicianFeedbackForm(),
         'show_user_feedback_modal': puede_dejar_feedback_usuario,'show_technician_feedback_modal': puede_dejar_feedback_tecnico, 'asignacion_activa': asignacion_activa,
@@ -859,7 +859,7 @@ def asignar_ticket_view(request, pk):
                 
             return redirect('dashboard')
 
-    return render(request, 'asignar_ticket.html', {'ticket': ticket, 'soportes_info': soportes_info})
+    return render(request, 'dashboard/tickets/asignar_ticket.html', {'ticket': ticket, 'soportes_info': soportes_info})
 
 
 # Contacto de la landing
@@ -885,4 +885,4 @@ def landing_view(request):
             
         return redirect('landing')
         
-    return render(request, 'assistech-landing.html')
+    return render(request, 'public/assistech-landing.html')
