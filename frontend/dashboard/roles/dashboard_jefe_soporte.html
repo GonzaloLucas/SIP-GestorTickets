@@ -58,10 +58,17 @@
             <p class="text-assist-gray text-sm uppercase font-semibold tracking-wider">Promedio soporte</p>
             <strong class="text-2xl text-white block mt-1">{% if promedio_soporte %}{{ promedio_soporte|floatformat:1 }}/5{% else %}-{% endif %}</strong>
         </div>
+
+        <div class="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
+            <p class="text-assist-gray text-sm uppercase font-semibold tracking-wider">Tiempo Promedio Resolución</p>
+            <strong class="text-2xl text-white block mt-1">{{ promedio_resolucion_tiempo|default:"-" }}</strong>
+        </div>
+
         <div class="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
             <p class="text-assist-gray text-sm uppercase font-semibold tracking-wider">Comentarios</p>
             <strong class="text-2xl text-white block mt-1">{{ feedback_servicio.count }}</strong>
         </div>
+
         <div class="p-6 bg-zinc-900 border border-red-900/60 rounded-xl">
             <p class="text-red-300 text-sm uppercase font-semibold tracking-wider">Calificaciones bajas</p>
             <strong class="text-2xl text-red-300 block mt-1">{{ feedback_bajo.count }}</strong>
@@ -278,22 +285,26 @@
                     <th class="p-4 cursor-pointer hover:text-white select-none transition" onclick="sortTable(2)" title="Ordenar por Título">Título <span class="text-xs opacity-50 ml-1">↕</span></th>
                     <th class="p-4 cursor-pointer hover:text-white select-none transition" onclick="sortTable(3)" title="Ordenar por Prioridad">Prioridad <span class="text-xs opacity-50 ml-1">↕</span></th>
                     <th class="p-4 cursor-pointer hover:text-white select-none transition" onclick="sortTable(4)" title="Ordenar por Estado">Estado <span class="text-xs opacity-50 ml-1">↕</span></th>
-                    <th class="p-4 cursor-pointer hover:text-white select-none transition" onclick="sortTable(5)" title="Ordenar por Asignado">Asignado a <span class="text-xs opacity-50 ml-1">↕</span></th>
+                    <th class="p-4 cursor-pointer hover:text-white select-none transition" onclick="sortTable(5)" title="Ordenar por Tiempo">Tiempo Transcurrido <span class="text-xs opacity-50 ml-1">↕</span></th>
+                    <th class="p-4 cursor-pointer hover:text-white select-none transition" onclick="sortTable(6)" title="Ordenar por Asignado">Asignado a <span class="text-xs opacity-50 ml-1">↕</span></th>
                     <th class="p-4">Acciones</th>
                 </tr>
             </thead>
             <tbody class="text-assist-white">
                 {% for ticket in tickets %}
                 <tr class="border-t border-zinc-800 hover:bg-zinc-800/30 transition ticket-row" data-estado="{{ ticket.get_estado_display|default:'' }}" data-prioridad="{{ ticket.prioridad|default:'Sin asignar'|title }}">
-                    <td class="p-4 ticket-id">#{{ ticket.numero_ticket_empresa}}</td>
+                    
+                    <td class="p-4 ticket-id">#{{ ticket.numero_ticket_empresa }}</td>
+                    
                     <td class="p-4 ticket-solicitante">{{ ticket.solicitante.username }}</td>
+                    
                     <td class="p-4 ticket-titulo">{{ ticket.titulo }}</td>
+                    
                     <td class="p-4">
                         <form method="POST" action="{% url 'cambiar_prioridad' ticket.pk %}" 
                               class="inline {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ' %}cursor-not-allowed{% endif %}"
                               {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ' %}title="Ticket finalizado"{% endif %}>
                             {% csrf_token %}
-                            
                             <select name="prioridad" 
                                 onchange="this.form.submit()" 
                                 {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ' %}disabled{% endif %}
@@ -304,19 +315,30 @@
                                 {% elif ticket.prioridad == 'baja' or ticket.prioridad == 'BAJA' %} cursor-pointer bg-emerald-950/40 text-emerald-400 border-emerald-800/60 hover:bg-emerald-950/60
                                 {% else %} cursor-pointer bg-zinc-800 text-zinc-400 border-zinc-700/60 hover:bg-zinc-700/50 {% endif %}"
                                 style="background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23a1a1aa%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22></polyline></svg>'); background-size: 12px; background-position: right 10px center; background-repeat: no-repeat;">
-                            
-                            <option value="" class="bg-zinc-800 text-zinc-400" {% if not ticket.prioridad %}selected{% endif %} disabled>Sin asignar</option>
-                            <option value="baja" class="bg-zinc-800 text-zinc-300" {% if ticket.prioridad == 'baja' or ticket.prioridad == 'BAJA' %}selected{% endif %}>Baja</option>
-                            <option value="media" class="bg-zinc-800 text-zinc-300" {% if ticket.prioridad == 'media' or ticket.prioridad == 'MEDIA' %}selected{% endif %}>Media</option>
-                            <option value="alta" class="bg-zinc-800 text-zinc-300" {% if ticket.prioridad == 'alta' or ticket.prioridad == 'ALTA' %}selected{% endif %}>Alta</option>
-                        </select>
+                                <option value="" class="bg-zinc-800 text-zinc-400" {% if not ticket.prioridad %}selected{% endif %} disabled>Sin asignar</option>
+                                <option value="baja" class="bg-zinc-800 text-zinc-300" {% if ticket.prioridad == 'baja' or ticket.prioridad == 'BAJA' %}selected{% endif %}>Baja</option>
+                                <option value="media" class="bg-zinc-800 text-zinc-300" {% if ticket.prioridad == 'media' or ticket.prioridad == 'MEDIA' %}selected{% endif %}>Media</option>
+                                <option value="alta" class="bg-zinc-800 text-zinc-300" {% if ticket.prioridad == 'alta' or ticket.prioridad == 'ALTA' %}selected{% endif %}>Alta</option>
+                            </select>
                         </form>
                     </td>
-                    <td class="p-4">{{ ticket.get_estado_display }}</td>
+                    
+                    <td class="p-4 font-medium">{{ ticket.get_estado_display }}</td>
+                    
+                    <td class="p-4 text-sm">
+                        {% if request.user.empresa.plan != 'GRATIS' %}
+                            <span class="text-zinc-300 font-mono bg-zinc-800/60 px-2 py-1 rounded border border-white/5">
+                                {{ ticket.tiempo_en_pantalla|default:"-" }}
+                            </span>
+                        {% else %}
+                            <span class="text-zinc-600 italic">No disponible</span>
+                        {% endif %}
+                    </td>
+                    
                     <td class="p-4">
                         {% with asignacion=ticket.asignaciones.last %}
                             {% if asignacion %}
-                                {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ'%}
+                                {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ' %}
                                     <span class="text-zinc-500 font-medium cursor-not-allowed" title="Ticket finalizado">{{ asignacion.soporte.first_name }} {{ asignacion.soporte.last_name }}</span>
                                 {% elif asignacion.activo %}
                                     <a href="{% url 'asignar_ticket' ticket.id_ticket %}" class="text-assist-coral hover:underline font-medium" title="Reasignar soporte">{{ asignacion.soporte.first_name }} {{ asignacion.soporte.last_name }}</a>
@@ -324,7 +346,7 @@
                                     <a href="{% url 'asignar_ticket' ticket.id_ticket %}" class="text-red-500 font-medium hover:underline" title="Asignar soporte">Sin asignar</a>
                                 {% endif %}
                             {% else %}
-                                {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ'%}
+                                {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ' %}
                                     <span class="text-zinc-500 font-medium cursor-not-allowed" title="Ticket finalizado">Sin asignar</span>
                                 {% else %}
                                     <a href="{% url 'asignar_ticket' ticket.id_ticket %}" class="text-red-500 font-medium hover:underline" title="Asignar soporte">Sin asignar</a>
@@ -332,13 +354,14 @@
                             {% endif %}
                         {% endwith %}
                     </td>
+                    
                     <td class="p-4">
                         <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="text-assist-coral hover:underline">Ver / Cambiar estado</a>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7" class="p-12 text-center text-assist-gray">No hay tickets en el sistema.</td>
+                    <td colspan="8" class="p-12 text-center text-assist-gray">No hay tickets en el sistema.</td>
                 </tr>
                 {% endfor %}
             </tbody>

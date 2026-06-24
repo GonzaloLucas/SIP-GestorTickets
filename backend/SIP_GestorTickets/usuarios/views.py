@@ -426,6 +426,60 @@ def dashboard_jefe_soporte (request):
         feedback_servicio = feedback_servicio.filter(created_at__gte=limite)
         feedback_interno = feedback_interno.filter(created_at__gte=limite)
 
+    promedio_resolucion_tiempo = None
+    if plan != 'GRATIS':
+        total_segundos_acumulados = 0
+        contador_tickets_resueltos = 0
+
+        for ticket in tickets:
+            # --- 1. CÁLCULO INDIVIDUAL PARA CADA FILA DE LA TABLA ---
+            if ticket.estado == 'RESUELTO_FAQ':
+                ticket.tiempo_en_pantalla = "-"
+            else:
+                inicio = ticket.fecha_creacion
+                fin = ticket.fecha_resolucion if (ticket.estado == 'RESUELTO' and ticket.fecha_resolucion) else timezone.now()
+
+                # Normalización estricta de zonas horarias
+                if timezone.is_aware(inicio) and timezone.is_naive(fin):
+                    inicio = timezone.make_naive(inicio)
+                elif timezone.is_naive(inicio) and timezone.is_aware(fin):
+                    fin = timezone.make_naive(fin)
+
+                delta = fin - inicio
+                total_segundos = max(delta.total_seconds(), 0)
+
+                dias = int(total_segundos // 86400)
+                horas = int((total_segundos % 86400) // 3600)
+                minutos = int((total_segundos % 3600) // 60)
+
+                if dias > 0:
+                    ticket.tiempo_en_pantalla = f"{dias}d {horas}h {minutos}m"
+                elif horas > 0:
+                    ticket.tiempo_en_pantalla = f"{horas}h {minutos}m"
+                else:
+                    ticket.tiempo_en_pantalla = f"{minutos}m"
+
+                # --- 2. ACUMULADOR EXCLUSIVO PARA LA TARJETA DE PROMEDIO GLOBAL ---
+                if ticket.estado == 'RESUELTO' and ticket.fecha_resolucion:
+                    total_segundos_acumulados += total_segundos
+                    contador_tickets_resueltos += 1
+
+        # --- 3. CÁLCULO FINAL DEL PROMEDIO GLOBAL ---
+        if contador_tickets_resueltos > 0:
+            promedio_segundos = total_segundos_acumulados / contador_tickets_resueltos
+            p_dias = int(promedio_segundos // 86400)
+            p_horas = int((promedio_segundos % 86400) // 3600)
+            p_minutos = int((promedio_segundos % 3600) // 60)
+
+            if p_dias > 0:
+                promedio_resolucion_tiempo = f"{p_dias}d {p_horas}h {p_minutos}m"
+            elif p_horas > 0:
+                promedio_resolucion_tiempo = f"{p_horas}h {p_minutos}m"
+            else:
+                promedio_resolucion_tiempo = f"{p_minutos}m"
+        else:
+            promedio_resolucion_tiempo = "Sin datos"
+            
     # 3. Cálculo de métricas por técnico (Usa el feedback ya filtrado por plan)
     if plan != 'GRATIS':
         metricas_tecnico = feedback_servicio.values(
@@ -467,7 +521,8 @@ def dashboard_jefe_soporte (request):
         'feedback_bajo': feedback_servicio.filter(is_critical=True),
         'soportes_stats': soportes_stats,
         'tasa_deflexion': tasa_deflexion,
-        'cant_autogestionados': cant_deflexiones
+        'cant_autogestionados': cant_deflexiones,
+        'promedio_resolucion_tiempo': promedio_resolucion_tiempo
     })
     
 def _dashboard_platform_admin(request):
