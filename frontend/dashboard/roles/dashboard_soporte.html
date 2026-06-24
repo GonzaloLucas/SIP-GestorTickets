@@ -31,47 +31,57 @@
         <a href="{% url 'logout' %}" class="inline-block mt-2 text-sm text-red-400 hover:underline">Cerrar Sesión</a>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
-        <div class="bg-assist-dark p-6 rounded-2xl border border-white/5">
-            <p class="text-assist-gray text-sm">Tickets Pendientes</p>
-            <p class="text-4xl font-bold mt-2">{{ pendientes }}</p>
-        </div>
-        <div class="bg-assist-dark p-6 rounded-2xl border border-white/5">
-            <p class="text-assist-gray text-sm">Urgencia Alta</p>
-            <p class="text-4xl font-bold mt-2 text-assist-coral">{{ urgencia_alta }}</p>
-        </div>
-        <div class="bg-assist-dark p-6 rounded-2xl border border-white/5">
-            <p class="text-assist-gray text-sm">Resueltos hoy</p>
-            <p class="text-4xl font-bold mt-2 text-emerald-400">{{ resueltos_hoy }}</p>
-        </div>
+    <details class="group mb-8 [&_summary::-webkit-details-marker]:hidden" open>
+        <summary class="flex items-center gap-2 cursor-pointer select-none text-assist-gray hover:text-white transition w-fit mb-4">
+            <span class="text-xs uppercase tracking-widest font-semibold">Métricas de rendimiento</span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" 
+                 class="w-3.5 h-3.5 transition-transform duration-300 group-open:rotate-180 text-assist-coral">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+            </svg>
+        </summary>
 
-        <div class="bg-assist-dark p-6 rounded-2xl border border-white/5 flex flex-col justify-between">
-            <div>
-                <p class="text-assist-gray text-sm">Mi Promedio</p>
-                <p class="text-4xl font-bold mt-2 text-white">
-                    {{ promedio_rating|floatformat:1 }} <span class="text-xs font-normal text-assist-gray">/ 5.0</span>
-                </p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10 animate-[fadeIn_0.2s_ease-in-out]">
+            <div class="bg-assist-dark p-6 rounded-2xl border border-white/5">
+                <p class="text-assist-gray text-sm">Tickets Pendientes</p>
+                <p class="text-4xl font-bold mt-2">{{ pendientes }}</p>
             </div>
-            <div class="mt-2 text-xs font-bold uppercase tracking-wider 
-                {% if promedio_rating >= 4.0 %}text-emerald-400
-                {% elif promedio_rating >= 3.0 %}text-amber-400
-                {% elif promedio_rating > 0 %}text-red-400
-                {% else %}text-zinc-600{% endif %}">
-                
-                {% if promedio_rating >= 4.5 %}
-                    ★ Excelente servicio
-                {% elif promedio_rating >= 4.0 %}
-                    ★ Muy buen servicio
-                {% elif promedio_rating >= 3.0 %}
-                    ★ Servicio regular
-                {% elif promedio_rating > 0 %}
-                    ⚠️ Requiere atención
-                {% else %}
-                    Sin calificaciones
-                {% endif %}
+            <div class="bg-assist-dark p-6 rounded-2xl border border-white/5">
+                <p class="text-assist-gray text-sm">Urgencia Alta</p>
+                <p class="text-4xl font-bold mt-2 text-assist-coral">{{ urgencia_alta }}</p>
+            </div>
+            <div class="bg-assist-dark p-6 rounded-2xl border border-white/5">
+                <p class="text-assist-gray text-sm">Resueltos hoy</p>
+                <p class="text-4xl font-bold mt-2 text-emerald-400">{{ resueltos_hoy }}</p>
+            </div>
+
+            <div class="bg-assist-dark p-6 rounded-2xl border border-white/5 flex flex-col justify-between">
+                <div>
+                    <p class="text-assist-gray text-sm">Mi Promedio</p>
+                    <p class="text-4xl font-bold mt-2 text-white">
+                        {{ promedio_rating|floatformat:1 }} <span class="text-xs font-normal text-assist-gray">/ 5.0</span>
+                    </p>
+                </div>
+                <div class="mt-2 text-xs font-bold uppercase tracking-wider 
+                    {% if promedio_rating >= 4.0 %}text-emerald-400
+                    {% elif promedio_rating >= 3.0 %}text-amber-400
+                    {% elif promedio_rating > 0 %}text-red-400
+                    {% else %}text-zinc-600{% endif %}">
+                    
+                    {% if promedio_rating >= 4.5 %}
+                        ★ Excelente servicio
+                    {% elif promedio_rating >= 4.0 %}
+                        ★ Muy buen servicio
+                    {% elif promedio_rating >= 3.0 %}
+                        ★ Servicio regular
+                    {% elif promedio_rating > 0 %}
+                        ⚠️ Requiere atención
+                    {% else %}
+                        Sin calificaciones
+                    {% endif %}
+                </div>
             </div>
         </div>
-    </div>
+    </details>
 
     <div class="flex space-x-2 border-b border-white/10 mb-6">
         <button id="btn-asignados" onclick="switchTab('asignados')" class="px-6 py-3 text-sm font-bold border-b-2 border-assist-coral text-white transition-all duration-300">
