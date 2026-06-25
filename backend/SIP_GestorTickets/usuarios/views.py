@@ -372,6 +372,37 @@ def _dashboard_admin_cliente(request):
 def _dashboard_cliente(request):
     tickets = InfoTicket.objects.filter(solicitante=request.user).order_by('-fecha_creacion')
     tickets = _filtrar_tickets_por_plan(request.user.empresa, tickets)
+    
+    # --- CÁLCULO DE TIEMPO EN PANTALLA POR TICKET ---
+    plan = request.user.empresa.plan
+    if plan != 'GRATIS':
+        for ticket in tickets:
+            if ticket.estado == 'RESUELTO_FAQ':
+                ticket.tiempo_en_pantalla = "-"
+            else:
+                inicio = ticket.fecha_creacion
+                fin = ticket.fecha_resolucion if (ticket.estado == 'RESUELTO' and ticket.fecha_resolucion) else timezone.now()
+
+                # Normalización de zonas horarias
+                if timezone.is_aware(inicio) and timezone.is_naive(fin):
+                    inicio = timezone.make_naive(inicio)
+                elif timezone.is_naive(inicio) and timezone.is_aware(fin):
+                    fin = timezone.make_naive(fin)
+
+                delta = fin - inicio
+                total_segundos = max(delta.total_seconds(), 0)
+
+                dias = int(total_segundos // 86400)
+                horas = int((total_segundos % 86400) // 3600)
+                minutos = int((total_segundos % 3600) // 60)
+
+                if dias > 0:
+                    ticket.tiempo_en_pantalla = f"{dias}d {horas}h {minutos}m"
+                elif horas > 0:
+                    ticket.tiempo_en_pantalla = f"{horas}h {minutos}m"
+                else:
+                    ticket.tiempo_en_pantalla = f"{minutos}m"
+
     hoy = timezone.now()
     tickets_consumidos = InfoTicket.objects.filter(
         solicitante__empresa=request.user.empresa,
@@ -384,18 +415,51 @@ def _dashboard_cliente(request):
         'tickets_consumidos': tickets_consumidos
     })
 
+
 def _dashboard_soporte(request):
-        tickets = InfoTicket.objects.filter(asignaciones__soporte=request.user, asignaciones__activo=True,solicitante__empresa=request.user.empresa).distinct()
-        tickets = _filtrar_tickets_por_plan(request.user.empresa, tickets)
-        
-        promedio = FeedbackService.objects.filter(
-        ticket__asignaciones__soporte=request.user,ticket__asignaciones__activo=True).aggregate(Avg('rating'))['rating__avg']
+    tickets = InfoTicket.objects.filter(asignaciones__soporte=request.user, asignaciones__activo=True, solicitante__empresa=request.user.empresa).distinct()
+    tickets = _filtrar_tickets_por_plan(request.user.empresa, tickets)
     
-        promedio_formateado = round(promedio, 1) if promedio else 0.0
-    
-        hoy = timezone.now().date()
-        return render(request, 'dashboard/roles/dashboard_soporte.html', {
-        'tickets': tickets,'promedio_rating': promedio_formateado,
+    # --- CÁLCULO DE TIEMPO EN PANTALLA POR TICKET ---
+    plan = request.user.empresa.plan
+    if plan != 'GRATIS':
+        for ticket in tickets:
+            if ticket.estado == 'RESUELTO_FAQ':
+                ticket.tiempo_en_pantalla = "-"
+            else:
+                inicio = ticket.fecha_creacion
+                fin = ticket.fecha_resolucion if (ticket.estado == 'RESUELTO' and ticket.fecha_resolucion) else timezone.now()
+
+                # Normalización de zonas horarias
+                if timezone.is_aware(inicio) and timezone.is_naive(fin):
+                    inicio = timezone.make_naive(inicio)
+                elif timezone.is_naive(inicio) and timezone.is_aware(fin):
+                    fin = timezone.make_naive(fin)
+
+                delta = fin - inicio
+                total_segundos = max(delta.total_seconds(), 0)
+
+                dias = int(total_segundos // 86400)
+                horas = int((total_segundos % 86400) // 3600)
+                minutos = int((total_segundos % 3600) // 60)
+
+                if dias > 0:
+                    ticket.tiempo_en_pantalla = f"{dias}d {horas}h {minutos}m"
+                elif horas > 0:
+                    ticket.tiempo_en_pantalla = f"{horas}h {minutos}m"
+                else:
+                    ticket.tiempo_en_pantalla = f"{minutos}m"
+                    
+    promedio = FeedbackService.objects.filter(
+        ticket__asignaciones__soporte=request.user, ticket__asignaciones__activo=True
+    ).aggregate(Avg('rating'))['rating__avg']
+
+    promedio_formateado = round(promedio, 1) if promedio else 0.0
+
+    hoy = timezone.now().date()
+    return render(request, 'dashboard/roles/dashboard_soporte.html', {
+        'tickets': tickets, 
+        'promedio_rating': promedio_formateado,
         'pendientes': tickets.filter(estado__in=['ABIERTO', 'EN_PROCESO']).count(),
         'urgencia_alta': tickets.filter(estado__in=['ABIERTO', 'EN_PROCESO'], prioridad__in=['ALTA', 'CRITICA', 'alta', 'critica']).count(),
         'resueltos_hoy': InfoTicket.objects.filter(asignaciones__soporte=request.user, estado__in='RESUELTO').filter(Q(fecha_resolucion__date=hoy) | Q(fecha_cierre__date=hoy)).distinct().count()

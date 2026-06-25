@@ -78,6 +78,7 @@
                             <th class="p-4 text-sm font-semibold text-assist-gray">Categoría</th>
                             <th class="p-4 text-sm font-semibold text-assist-gray">Estado</th>
                             <th class="p-4 text-sm font-semibold text-assist-gray">Última Actualización</th>
+                            <th class="p-4 text-sm font-semibold text-assist-gray">Tiempo Transcurrido</th>
                             <th class="p-4 text-sm font-semibold text-assist-gray text-right">Acción</th>
                         </tr>
                     </thead>
@@ -96,6 +97,17 @@
                                     {% endif %}
                                 </td>
                                 <td class="p-4 text-sm text-assist-gray">{{ ticket.fecha_actualizacion|date:"d/m/Y H:i" }}</td>
+
+                                <td class="p-4 text-sm">
+                                    {% if request.user.empresa.plan != 'GRATIS' %}
+                                        <span class="text-zinc-300 font-mono bg-black/20 px-2 py-1 rounded border border-white/5">
+                                            {{ ticket.tiempo_en_pantalla|default:"-" }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-zinc-600 italic text-xs">No disponible</span>
+                                    {% endif %}
+                                </td>
+
                                 <td class="p-4 text-right">
                                     <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="text-assist-coral text-sm font-medium hover:underline">Ver detalle</a>
                                 </td>
@@ -121,6 +133,7 @@
                             <th class="p-4 text-sm font-semibold text-assist-gray">Categoría</th>
                             <th class="p-4 text-sm font-semibold text-assist-gray">Estado</th>
                             <th class="p-4 text-sm font-semibold text-assist-gray">Última Actualización</th>
+                            <th class="p-4 text-sm font-semibold text-assist-gray">Tiempo Transcurrido</th>
                             <th class="p-4 text-sm font-semibold text-assist-gray text-right">Acción</th>
                         </tr>
                     </thead>
@@ -139,6 +152,17 @@
                                     {% endif %}
                                 </td>
                                 <td class="p-4 text-sm text-assist-gray">{{ ticket.fecha_actualizacion|date:"d/m/Y H:i" }}</td>
+
+                                <td class="p-4 text-sm">
+                                    {% if request.user.empresa.plan != 'GRATIS' %}
+                                        <span class="text-zinc-300 font-mono bg-black/20 px-2 py-1 rounded border border-white/5">
+                                            {{ ticket.tiempo_en_pantalla|default:"-" }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-zinc-600 italic text-xs">No disponible</span>
+                                    {% endif %}
+                                </td>
+
                                 <td class="p-4 text-right">
                                     <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="text-assist-coral text-sm font-medium hover:underline">Ver detalle</a>
                                 </td>

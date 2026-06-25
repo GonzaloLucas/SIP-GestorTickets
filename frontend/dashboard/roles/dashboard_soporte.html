@@ -102,6 +102,7 @@
                         <th class="p-4 font-semibold border-b border-white/5">Ticket</th>
                         <th class="p-4 font-semibold border-b border-white/5">Usuario</th>
                         <th class="p-4 font-semibold border-b border-white/5">Estado</th>
+                        <th class="p-4 font-semibold border-b border-white/5">Tiempo Transcurrido</th>
                         <th class="p-4 font-semibold border-b border-white/5 text-right">Acción</th>
                     </tr>
                 </thead>
@@ -126,6 +127,17 @@
                             </td>
                             <td class="p-4 text-sm">{{ ticket.solicitante.username }}</td>
                             <td class="p-4 text-sm">{{ ticket.get_estado_display }}</td>
+
+                            <td class="p-4 text-sm">
+                            {% if request.user.empresa.plan != 'GRATIS' %}
+                                <span class="text-zinc-300 font-mono bg-black/20 px-2 py-1 rounded border border-white/5">
+                                    {{ ticket.tiempo_en_pantalla|default:"-" }}
+                                </span>
+                            {% else %}
+                                <span class="text-zinc-600 italic">No disponible</span>
+                            {% endif %}
+                            </td>
+
                             <td class="p-4 text-right">
                                 <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="bg-white text-assist-black px-4 py-2 rounded-lg text-xs font-bold hover:bg-assist-gray transition whitespace-nowrap">
                                     Ver Ticket
@@ -152,6 +164,7 @@
                         <th class="p-4 font-semibold border-b border-white/5">Ticket</th>
                         <th class="p-4 font-semibold border-b border-white/5">Usuario</th>
                         <th class="p-4 font-semibold border-b border-white/5">Estado</th>
+                        <th class="p-4 font-semibold border-b border-white/5">Tiempo Transcurrido</th>
                         <th class="p-4 font-semibold border-b border-white/5 text-right">Acción</th>
                     </tr>
                 </thead>
@@ -176,6 +189,17 @@
                             </td>
                             <td class="p-4 text-sm">{{ ticket.solicitante.username }}</td>
                             <td class="p-4 text-sm">{{ ticket.get_estado_display }}</td>
+    
+                            <td class="p-4 text-sm">
+                            {% if request.user.empresa.plan != 'GRATIS' %}
+                                <span class="text-zinc-300 font-mono bg-black/20 px-2 py-1 rounded border border-white/5">
+                                    {{ ticket.tiempo_en_pantalla|default:"-" }}
+                                </span>
+                            {% else %}
+                                <span class="text-zinc-600 italic">No disponible</span>
+                            {% endif %}
+                            </td>
+
                             <td class="p-4 text-right">
                                 <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="bg-white text-assist-black px-4 py-2 rounded-lg text-xs font-bold hover:bg-assist-gray transition whitespace-nowrap">
                                     Ver Ticket
