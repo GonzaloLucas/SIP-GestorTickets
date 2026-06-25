@@ -20,118 +20,151 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full">
-    <div class="mb-8">
-        <h1 class="text-2xl sm:text-3xl font-bold">Panel SuperAdmin</h1>
-        <p class="text-sm sm:text-base text-assist-gray mt-1">Vista global y privada de feedbacks del sistema.</p>
-        <a href="{% url 'crear_platform_admin' %}" class="mt-4 inline-flex rounded-lg bg-assist-coral px-4 py-2 text-sm font-bold text-white transition hover:brightness-110">
+    
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-bold">Panel SuperAdmin</h1>
+            <p class="text-sm sm:text-base text-assist-gray mt-1">Vista global y privada de feedbacks del sistema.</p>
+        </div>
+        <a href="{% url 'crear_platform_admin' %}" class="inline-flex items-center justify-center gap-2 rounded-xl bg-assist-coral px-6 py-3 text-sm font-bold text-white transition hover:brightness-110 shadow-lg shadow-assist-coral/20">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
             Crear Platform Admin
         </a>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
-        <div class="p-6 bg-zinc-900 border border-assist-coral/40 rounded-xl">
-            <p class="text-assist-gray">Feedbacks soporte</p>
-            <strong class="text-2xl text-white">{{ feedback_servicio.count }}</strong>
-        </div>
-        <div class="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
-            <p class="text-assist-gray">Promedio soporte</p>
-            <strong class="text-2xl text-white">{% if promedio_soporte %}{{ promedio_soporte|floatformat:1 }}/5{% else %}-{% endif %}</strong>
-        </div>
-        <div class="p-6 bg-zinc-900 border border-red-900/60 rounded-xl">
-            <p class="text-red-300">Soporte crítico</p>
-            <strong class="text-2xl text-red-300">{{ feedback_servicio_critico.count }}</strong>
-        </div>
-        <div class="p-6 bg-zinc-900 border border-sky-500/40 rounded-xl">
-            <p class="text-assist-gray">Feedbacks plataforma</p>
-            <strong class="text-2xl text-white">{{ feedback_plataforma.count }}</strong>
+    <div class="flex space-x-2 border-b border-white/10 mb-6 overflow-x-auto">
+        <button id="btn-metricas" onclick="switchTab('metricas')" class="px-6 py-3 text-sm font-bold border-b-2 border-assist-coral text-white transition-all duration-300 whitespace-nowrap">
+            Métricas Globales
+        </button>
+        <button id="btn-feedbacks" onclick="switchTab('feedbacks')" class="px-6 py-3 text-sm font-bold border-b-2 border-transparent text-assist-gray hover:text-white transition-all duration-300 whitespace-nowrap">
+            Buscador y Tablas
+        </button>
+    </div>
+
+    <div id="tab-metricas" class="block animate-[fadeIn_0.3s_ease-in-out]">
+        <div class="bg-assist-charcoal border border-white/5 rounded-2xl w-full p-6 mb-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                <div class="bg-black/20 p-6 rounded-xl border border-white/5 flex items-center justify-between shadow-inner">
+                    <div>
+                        <p class="text-xs font-semibold text-assist-gray uppercase tracking-wider">Feedbacks soporte</p>
+                        <h3 class="text-3xl font-bold text-white mt-1">{{ feedback_servicio.count }}</h3>
+                    </div>
+                </div>
+
+                <div class="bg-black/20 p-6 rounded-xl border border-white/5 flex items-center justify-between shadow-inner">
+                    <div>
+                        <p class="text-xs font-semibold text-assist-gray uppercase tracking-wider">Promedio soporte</p>
+                        <h3 class="text-3xl font-bold text-white mt-1">{% if promedio_soporte %}{{ promedio_soporte|floatformat:1 }}/5{% else %}-{% endif %}</h3>
+                    </div>
+                </div>
+
+                <div class="bg-black/20 p-6 rounded-xl border border-red-500/20 flex items-center justify-between shadow-inner">
+                    <div>
+                        <p class="text-xs font-semibold text-red-400 uppercase tracking-wider">Soporte crítico</p>
+                        <h3 class="text-3xl font-bold text-red-400 mt-1">{{ feedback_servicio_critico.count }}</h3>
+                    </div>
+                </div>
+
+                <div class="bg-black/20 p-6 rounded-xl border border-sky-500/20 flex items-center justify-between shadow-inner">
+                    <div>
+                        <p class="text-xs font-semibold text-sky-400 uppercase tracking-wider">Feedbacks plataforma</p>
+                        <h3 class="text-3xl font-bold text-sky-400 mt-1">{{ feedback_plataforma.count }}</h3>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 
-    <form method="GET" class="mb-8 rounded-xl border border-zinc-800 bg-zinc-900 p-4 shadow-lg">
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div>
-                <label for="empresa" class="block text-xs font-medium text-assist-gray mb-1">Empresa</label>
-                <select id="empresa" name="empresa" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral">
-                    <option value="">Todas</option>
-                    {% for empresa in empresas %}
-                        <option value="{{ empresa.id_empresa }}" {% if empresa.id_empresa|stringformat:"s" == filtros.empresa %}selected{% endif %}>{{ empresa.nombre }}</option>
-                    {% endfor %}
-                </select>
+    <div id="tab-feedbacks" class="hidden animate-[fadeIn_0.3s_ease-in-out]">
+        
+        <form method="GET" class="mb-8 rounded-2xl border border-white/5 bg-assist-charcoal p-6 shadow-lg">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div>
+                    <label for="empresa" class="block text-xs font-medium text-assist-gray mb-1">Empresa</label>
+                    <select id="empresa" name="empresa" class="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral cursor-pointer">
+                        <option value="">Todas</option>
+                        {% for empresa in empresas %}
+                            <option value="{{ empresa.id_empresa }}" {% if empresa.id_empresa|stringformat:"s" == filtros.empresa %}selected{% endif %}>{{ empresa.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="tipo" class="block text-xs font-medium text-assist-gray mb-1">Tipo</label>
+                    <select id="tipo" name="tipo" class="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral cursor-pointer">
+                        <option value="todos" {% if filtros.tipo == 'todos' %}selected{% endif %}>Todos</option>
+                        <option value="soporte" {% if filtros.tipo == 'soporte' %}selected{% endif %}>Soporte</option>
+                        <option value="plataforma" {% if filtros.tipo == 'plataforma' %}selected{% endif %}>Plataforma</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="rating" class="block text-xs font-medium text-assist-gray mb-1">Calificación</label>
+                    <select id="rating" name="rating" class="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral cursor-pointer">
+                        <option value="">Todas</option>
+                        <option value="5" {% if filtros.rating == '5' %}selected{% endif %}>5 estrellas</option>
+                        <option value="4" {% if filtros.rating == '4' %}selected{% endif %}>4 estrellas</option>
+                        <option value="3" {% if filtros.rating == '3' %}selected{% endif %}>3 estrellas</option>
+                        <option value="2" {% if filtros.rating == '2' %}selected{% endif %}>2 estrellas</option>
+                        <option value="1" {% if filtros.rating == '1' %}selected{% endif %}>1 estrella</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="critico" class="block text-xs font-medium text-assist-gray mb-1">Criticidad</label>
+                    <select id="critico" name="critico" class="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral cursor-pointer">
+                        <option value="" {% if not filtros.critico %}selected{% endif %}>Todos</option>
+                        <option value="1" {% if filtros.critico == '1' %}selected{% endif %}>Solo críticos</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="q" class="block text-xs font-medium text-assist-gray mb-1">Buscar</label>
+                    <input id="q" name="q" value="{{ filtros.q }}" type="text" placeholder="Ticket, usuario, técnico..." class="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral">
+                </div>
             </div>
-            <div>
-                <label for="tipo" class="block text-xs font-medium text-assist-gray mb-1">Tipo</label>
-                <select id="tipo" name="tipo" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral">
-                    <option value="todos" {% if filtros.tipo == 'todos' %}selected{% endif %}>Todos</option>
-                    <option value="soporte" {% if filtros.tipo == 'soporte' %}selected{% endif %}>Soporte</option>
-                    <option value="plataforma" {% if filtros.tipo == 'plataforma' %}selected{% endif %}>Plataforma</option>
-                </select>
+            <div class="mt-6 flex flex-wrap gap-3">
+                <button type="submit" class="rounded-lg bg-assist-coral px-6 py-2.5 text-sm font-bold text-white transition hover:brightness-110 shadow-lg shadow-assist-coral/20">Aplicar filtros</button>
+                <a href="{% url 'dashboard' %}" class="rounded-lg border border-white/10 px-6 py-2.5 text-sm font-bold text-assist-gray transition hover:text-white bg-white/5">Limpiar</a>
             </div>
-            <div>
-                <label for="rating" class="block text-xs font-medium text-assist-gray mb-1">Calificación</label>
-                <select id="rating" name="rating" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral">
-                    <option value="">Todas</option>
-                    <option value="5" {% if filtros.rating == '5' %}selected{% endif %}>5 estrellas</option>
-                    <option value="4" {% if filtros.rating == '4' %}selected{% endif %}>4 estrellas</option>
-                    <option value="3" {% if filtros.rating == '3' %}selected{% endif %}>3 estrellas</option>
-                    <option value="2" {% if filtros.rating == '2' %}selected{% endif %}>2 estrellas</option>
-                    <option value="1" {% if filtros.rating == '1' %}selected{% endif %}>1 estrella</option>
-                </select>
-            </div>
-            <div>
-                <label for="critico" class="block text-xs font-medium text-assist-gray mb-1">Criticidad</label>
-                <select id="critico" name="critico" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral">
-                    <option value="" {% if not filtros.critico %}selected{% endif %}>Todos</option>
-                    <option value="1" {% if filtros.critico == '1' %}selected{% endif %}>Solo críticos</option>
-                </select>
-            </div>
-            <div>
-                <label for="q" class="block text-xs font-medium text-assist-gray mb-1">Buscar</label>
-                <input id="q" name="q" value="{{ filtros.q }}" type="text" placeholder="Ticket, usuario, técnico..." class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral">
-            </div>
-        </div>
-        <div class="mt-4 flex flex-wrap gap-3">
-            <button type="submit" class="rounded-lg bg-assist-coral px-4 py-2 text-sm font-bold text-white transition hover:brightness-110">Aplicar filtros</button>
-            <a href="{% url 'dashboard' %}" class="rounded-lg border border-white/10 px-4 py-2 text-sm font-bold text-assist-gray transition hover:text-white">Limpiar</a>
-        </div>
-    </form>
+        </form>
 
-    {% if mostrar_soporte %}
-    <section class="rounded-xl border border-assist-coral/40 bg-zinc-900/50 p-6 mb-8">
-        <div class="mb-4 flex flex-col gap-1">
-            <div class="flex flex-wrap items-center gap-3">
-                <h2 class="text-xl font-semibold text-white">Feedbacks de soporte</h2>
-                <span class="rounded-full border border-assist-coral/40 bg-assist-coral/10 px-3 py-1 text-xs font-bold text-assist-coral">Soporte</span>
+        {% if mostrar_soporte %}
+        <div class="bg-assist-charcoal border border-white/5 rounded-2xl overflow-x-auto w-full mb-8">
+            <div class="px-6 py-4 border-b border-white/5 bg-assist-slate flex flex-col gap-1">
+                <div class="flex flex-wrap items-center gap-3">
+                    <h2 class="text-lg font-semibold text-white">Feedbacks de soporte</h2>
+                    <span class="rounded-full border border-assist-coral/40 bg-assist-coral/10 px-3 py-1 text-[10px] uppercase font-bold text-assist-coral tracking-wider">Soporte</span>
+                </div>
+                <p class="text-xs text-assist-gray">Comentarios sobre atención, tiempos, resolución y desempeño técnico.</p>
             </div>
-        <p class="text-sm text-assist-gray">Comentarios sobre atención, tiempos, resolución y desempeño técnico.</p>
-        </div>
-        <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-zinc-800/50 text-assist-gray text-sm">
-                        <th class="p-4">Empresa</th>
-                        <th class="p-4">Ticket</th>
-                    <th class="p-4">Quién lo hizo</th>
-                    <th class="p-4">Cuándo</th>
-                    <th class="p-4">Quién trabajó</th>
-                    <th class="p-4">Calificación</th>
-                    <th class="p-4">Acción</th>
+                    <tr class="bg-white/5 text-assist-gray text-xs uppercase tracking-wider">
+                        <th class="p-4 font-semibold border-b border-white/5">Empresa</th>
+                        <th class="p-4 font-semibold border-b border-white/5">Ticket</th>
+                        <th class="p-4 font-semibold border-b border-white/5">Quién lo hizo</th>
+                        <th class="p-4 font-semibold border-b border-white/5">Cuándo</th>
+                        <th class="p-4 font-semibold border-b border-white/5">Quién trabajó</th>
+                        <th class="p-4 font-semibold border-b border-white/5">Calificación</th>
+                        <th class="p-4 font-semibold border-b border-white/5">Acción</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-zinc-800">
+                <tbody class="divide-y divide-white/5 text-white">
                     {% for feedback in feedback_servicio %}
-                    <tr class="hover:bg-zinc-800/30 transition">
-                        <td class="p-4">{{ feedback.ticket.solicitante.empresa.nombre|default:"Sin empresa" }}</td>
+                    <tr class="hover:bg-white/5 transition">
+                        <td class="p-4 text-sm">{{ feedback.ticket.solicitante.empresa.nombre|default:"Sin empresa" }}</td>
                         <td class="p-4">
-                            <span class="text-assist-coral">#{{ feedback.ticket.numero_ticket_empresa }}</span>
-                            <p class="text-xs text-assist-gray">{{ feedback.ticket.titulo }}</p>
+                            <span class="text-assist-coral font-mono">#{{ feedback.ticket.numero_ticket_empresa }}</span>
+                            <p class="text-xs text-assist-gray mt-1">{{ feedback.ticket.titulo }}</p>
                         </td>
-                        <td class="p-4">{{ feedback.user.username }}</td>
+                        <td class="p-4 text-sm">{{ feedback.user.username }}</td>
                         <td class="p-4 text-sm text-assist-gray">{{ feedback.created_at|date:"d/m/Y H:i" }}</td>
-                        <td class="p-4">{{ feedback.technician.username|default:"Sin asignar" }}</td>
-                        <td class="p-4 {% if feedback.is_critical %}text-red-300 font-bold{% endif %}">{{ feedback.rating }}/5</td>
+                        <td class="p-4 text-sm">{{ feedback.technician.username|default:"Sin asignar" }}</td>
+                        <td class="p-4 text-sm font-bold {% if feedback.is_critical %}text-red-400{% endif %}">{{ feedback.rating }}/5</td>
                         <td class="p-4">
                             <button type="button"
-                                class="rounded-lg border border-assist-coral/40 px-3 py-2 text-xs font-bold text-assist-coral transition hover:bg-assist-coral hover:text-white"
+                                class="rounded-lg border border-assist-coral/40 bg-assist-coral/10 px-3 py-1.5 text-xs font-bold text-assist-coral transition hover:bg-assist-coral hover:text-white"
                                 data-kind="Soporte"
                                 data-company="{{ feedback.ticket.solicitante.empresa.nombre|default:'Sin empresa'|escape }}"
                                 data-ticket="#{{ feedback.ticket.numero_ticket_empresa }} - {{ feedback.ticket.titulo|escape }}"
@@ -155,46 +188,44 @@
                 </tbody>
             </table>
         </div>
-    </section>
-    {% endif %}
+        {% endif %}
 
-    {% if mostrar_plataforma %}
-    <section class="rounded-xl border border-sky-500/40 bg-zinc-900/50 p-6">
-        <div class="mb-4 flex flex-col gap-1">
-            <div class="flex flex-wrap items-center gap-3">
-                <h2 class="text-xl font-semibold text-white">Feedbacks de plataforma</h2>
-                <span class="rounded-full border border-sky-500/40 bg-sky-500/10 px-3 py-1 text-xs font-bold text-sky-300">Plataforma</span>
+        {% if mostrar_plataforma %}
+        <div class="bg-assist-charcoal border border-white/5 rounded-2xl overflow-x-auto w-full mb-8">
+            <div class="px-6 py-4 border-b border-white/5 bg-assist-slate flex flex-col gap-1">
+                <div class="flex flex-wrap items-center gap-3">
+                    <h2 class="text-lg font-semibold text-white">Feedbacks de plataforma</h2>
+                    <span class="rounded-full border border-sky-500/40 bg-sky-500/10 px-3 py-1 text-[10px] uppercase font-bold text-sky-400 tracking-wider">Plataforma</span>
+                </div>
+                <p class="text-xs text-assist-gray">Comentarios sobre bugs, UX/UI, rendimiento y funcionalidades faltantes.</p>
             </div>
-            <p class="text-sm text-assist-gray">Comentarios sobre bugs, UX/UI, rendimiento y funcionalidades faltantes.</p>
-        </div>
-        <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-zinc-800/50 text-assist-gray text-sm">
-                        <th class="p-4">Empresa</th>
-                        <th class="p-4">Ticket</th>
-                        <th class="p-4">Usuario</th>
-                    <th class="p-4">Cuándo</th>
-                    <th class="p-4">Categoría</th>
-                    <th class="p-4">Calificación</th>
-                    <th class="p-4">Acción</th>
+                    <tr class="bg-white/5 text-assist-gray text-xs uppercase tracking-wider">
+                        <th class="p-4 font-semibold border-b border-white/5">Empresa</th>
+                        <th class="p-4 font-semibold border-b border-white/5">Ticket</th>
+                        <th class="p-4 font-semibold border-b border-white/5">Usuario</th>
+                        <th class="p-4 font-semibold border-b border-white/5">Cuándo</th>
+                        <th class="p-4 font-semibold border-b border-white/5">Categoría</th>
+                        <th class="p-4 font-semibold border-b border-white/5">Calificación</th>
+                        <th class="p-4 font-semibold border-b border-white/5">Acción</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-zinc-800">
+                <tbody class="divide-y divide-white/5 text-white">
                     {% for feedback in feedback_plataforma %}
-                    <tr class="hover:bg-zinc-800/30 transition">
-                        <td class="p-4">{{ feedback.ticket.solicitante.empresa.nombre|default:"Sin empresa" }}</td>
+                    <tr class="hover:bg-white/5 transition">
+                        <td class="p-4 text-sm">{{ feedback.ticket.solicitante.empresa.nombre|default:"Sin empresa" }}</td>
                         <td class="p-4">
-                            <span class="text-sky-300">#{{ feedback.ticket.numero_ticket_empresa }}</span>
-                            <p class="text-xs text-assist-gray">{{ feedback.ticket.titulo }}</p>
+                            <span class="text-sky-400 font-mono">#{{ feedback.ticket.numero_ticket_empresa }}</span>
+                            <p class="text-xs text-assist-gray mt-1">{{ feedback.ticket.titulo }}</p>
                         </td>
-                        <td class="p-4">{{ feedback.user.username }}</td>
+                        <td class="p-4 text-sm">{{ feedback.user.username }}</td>
                         <td class="p-4 text-sm text-assist-gray">{{ feedback.created_at|date:"d/m/Y H:i" }}</td>
-                        <td class="p-4">{{ feedback.get_category_display }}</td>
-                        <td class="p-4 {% if feedback.is_critical %}text-red-300 font-bold{% endif %}">{{ feedback.rating }}/5</td>
+                        <td class="p-4 text-sm">{{ feedback.get_category_display }}</td>
+                        <td class="p-4 text-sm font-bold {% if feedback.is_critical %}text-red-400{% endif %}">{{ feedback.rating }}/5</td>
                         <td class="p-4">
                             <button type="button"
-                                class="rounded-lg border border-sky-500/40 px-3 py-2 text-xs font-bold text-sky-300 transition hover:bg-sky-500 hover:text-white"
+                                class="rounded-lg border border-sky-500/40 bg-sky-500/10 px-3 py-1.5 text-xs font-bold text-sky-400 transition hover:bg-sky-500 hover:text-white"
                                 data-kind="Plataforma"
                                 data-company="{{ feedback.ticket.solicitante.empresa.nombre|default:'Sin empresa'|escape }}"
                                 data-ticket="#{{ feedback.ticket.numero_ticket_empresa }} - {{ feedback.ticket.titulo|escape }}"
@@ -218,63 +249,93 @@
                 </tbody>
             </table>
         </div>
-    </section>
-    {% endif %}
+        {% endif %}
+    </div>
 </div>
 
 <div id="feedbackModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 px-4">
-    <section class="w-full max-w-2xl rounded-xl border border-zinc-700 bg-zinc-900 p-6 shadow-2xl">
+    <section class="w-full max-w-2xl rounded-xl border border-white/10 bg-assist-charcoal p-6 shadow-2xl">
         <div class="flex items-start justify-between gap-4">
             <div>
-                <p id="modalKind" class="text-xs font-bold uppercase tracking-wider text-assist-coral"></p>
-                <h2 class="mt-1 text-xl font-semibold">Detalle del feedback</h2>
+                <p id="modalKind" class="text-[10px] font-bold uppercase tracking-wider text-assist-coral"></p>
+                <h2 class="mt-1 text-xl font-semibold text-white">Detalle del feedback</h2>
             </div>
-            <button type="button" class="rounded-lg border border-white/10 px-3 py-1 text-sm text-assist-gray hover:text-white" onclick="closeFeedbackModal()">Cerrar</button>
+            <button type="button" class="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-sm text-assist-gray hover:text-white transition" onclick="closeFeedbackModal()">Cerrar</button>
         </div>
 
         <dl class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-                <dt class="text-xs uppercase tracking-wider text-assist-gray">Empresa</dt>
-                <dd id="modalCompany" class="mt-1 font-medium text-white"></dd>
+            <div class="bg-black/20 p-3 rounded-lg border border-white/5">
+                <dt class="text-[10px] font-bold uppercase tracking-wider text-assist-gray">Empresa</dt>
+                <dd id="modalCompany" class="mt-1 text-sm font-medium text-white"></dd>
             </div>
-            <div>
-                <dt class="text-xs uppercase tracking-wider text-assist-gray">Ticket</dt>
-                <dd id="modalTicket" class="mt-1 font-medium text-white"></dd>
+            <div class="bg-black/20 p-3 rounded-lg border border-white/5">
+                <dt class="text-[10px] font-bold uppercase tracking-wider text-assist-gray">Ticket</dt>
+                <dd id="modalTicket" class="mt-1 text-sm font-medium text-white"></dd>
             </div>
-            <div>
-            <dt class="text-xs uppercase tracking-wider text-assist-gray">Quién lo hizo</dt>
-                <dd id="modalUser" class="mt-1 font-medium text-white"></dd>
+            <div class="bg-black/20 p-3 rounded-lg border border-white/5">
+                <dt class="text-[10px] font-bold uppercase tracking-wider text-assist-gray">Quién lo hizo</dt>
+                <dd id="modalUser" class="mt-1 text-sm font-medium text-white"></dd>
             </div>
-            <div>
-            <dt class="text-xs uppercase tracking-wider text-assist-gray">Cuándo</dt>
-                <dd id="modalCreated" class="mt-1 font-medium text-white"></dd>
+            <div class="bg-black/20 p-3 rounded-lg border border-white/5">
+                <dt class="text-[10px] font-bold uppercase tracking-wider text-assist-gray">Cuándo</dt>
+                <dd id="modalCreated" class="mt-1 text-sm font-medium text-white"></dd>
             </div>
-            <div>
-            <dt class="text-xs uppercase tracking-wider text-assist-gray">Quién trabajó</dt>
-                <dd id="modalWorker" class="mt-1 font-medium text-white"></dd>
+            <div class="bg-black/20 p-3 rounded-lg border border-white/5">
+                <dt class="text-[10px] font-bold uppercase tracking-wider text-assist-gray">Quién trabajó</dt>
+                <dd id="modalWorker" class="mt-1 text-sm font-medium text-white"></dd>
             </div>
-            <div>
-            <dt class="text-xs uppercase tracking-wider text-assist-gray">Calificación</dt>
-                <dd id="modalRating" class="mt-1 font-medium text-white"></dd>
+            <div class="bg-black/20 p-3 rounded-lg border border-white/5">
+                <dt class="text-[10px] font-bold uppercase tracking-wider text-assist-gray">Calificación</dt>
+                <dd id="modalRating" class="mt-1 text-sm font-bold text-white"></dd>
             </div>
-            <div>
-            <dt class="text-xs uppercase tracking-wider text-assist-gray">Categoría</dt>
-                <dd id="modalCategory" class="mt-1 font-medium text-white"></dd>
+            <div class="bg-black/20 p-3 rounded-lg border border-white/5">
+                <dt class="text-[10px] font-bold uppercase tracking-wider text-assist-gray">Categoría</dt>
+                <dd id="modalCategory" class="mt-1 text-sm font-medium text-white"></dd>
             </div>
-            <div>
-            <dt class="text-xs uppercase tracking-wider text-assist-gray">Crítico</dt>
-                <dd id="modalCritical" class="mt-1 font-medium text-white"></dd>
+            <div class="bg-black/20 p-3 rounded-lg border border-white/5">
+                <dt class="text-[10px] font-bold uppercase tracking-wider text-assist-gray">Crítico</dt>
+                <dd id="modalCritical" class="mt-1 text-sm font-medium text-white"></dd>
             </div>
         </dl>
 
-        <div class="mt-6 rounded-xl border border-white/10 bg-white/5 p-4">
-            <h3 class="text-sm font-semibold text-assist-gray">Comentario completo</h3>
-            <p id="modalComment" class="mt-3 whitespace-pre-line break-words text-sm leading-6 text-white"></p>
+        <div class="mt-4 rounded-xl border border-white/5 bg-black/20 p-4">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-assist-gray">Comentario completo</h3>
+            <p id="modalComment" class="mt-2 whitespace-pre-line break-words text-sm leading-6 text-white"></p>
         </div>
     </section>
 </div>
 
 <script>
+    // --- LÓGICA DE TABS DINÁMICA ---
+    function switchTab(tabId) {
+        const tabs = ['metricas', 'feedbacks'];
+        
+        tabs.forEach(t => {
+            const content = document.getElementById('tab-' + t);
+            const btn = document.getElementById('btn-' + t);
+            
+            if (t === tabId) {
+                content.classList.remove('hidden');
+                content.classList.add('block');
+                btn.classList.remove('border-transparent', 'text-assist-gray');
+                btn.classList.add('border-assist-coral', 'text-white');
+            } else {
+                content.classList.remove('block');
+                content.classList.add('hidden');
+                btn.classList.remove('border-assist-coral', 'text-white');
+                btn.classList.add('border-transparent', 'text-assist-gray');
+            }
+        });
+    }
+
+    // UX: Si hay filtros en la URL, abrimos directamente la pestaña de Tablas
+    document.addEventListener("DOMContentLoaded", function() {
+        if (window.location.search.length > 0) {
+            switchTab('feedbacks');
+        }
+    });
+
+    // --- LÓGICA DEL MODAL ---
     function setModalText(id, value) {
         const element = document.getElementById(id);
         if (element) element.textContent = value || '-';
@@ -303,4 +364,11 @@
         modal.classList.remove('flex');
     }
 </script>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
 {% endblock %}

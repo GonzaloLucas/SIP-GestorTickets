@@ -43,49 +43,115 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 {% if request.user.empresa.plan != 'GRATIS' %}sm:grid-cols-4{% endif %} gap-4 mb-8">
-        <div class="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
-            <p class="text-assist-gray text-sm uppercase font-semibold tracking-wider">Tickets Humanos</p>
-            <strong class="text-2xl text-white block mt-1">{{ cant_tickets_humanos }}</strong>
-        </div>
-        <div class="p-6 bg-zinc-900 border border-assist-coral/30 rounded-xl shadow-[0_0_15px_rgba(242,92,84,0.05)]">
-            <p class="text-assist-coral text-sm uppercase font-semibold tracking-wider">Tasa de Deflexión</p>
-            <strong class="text-2xl text-white block mt-1">{{ tasa_deflexion }}%</strong>
-            <span class="text-xs text-assist-gray mt-1 block">{{ cant_autogestionados }} casos vía FAQ</span>
-        </div>
-        {% if request.user.empresa.plan != 'GRATIS' %}
-        <div class="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
-            <p class="text-assist-gray text-sm uppercase font-semibold tracking-wider">Promedio soporte</p>
-            <strong class="text-2xl text-white block mt-1">{% if promedio_soporte %}{{ promedio_soporte|floatformat:1 }}/5{% else %}-{% endif %}</strong>
-        </div>
-        <div class="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
-            <p class="text-assist-gray text-sm uppercase font-semibold tracking-wider">Comentarios</p>
-            <strong class="text-2xl text-white block mt-1">{{ feedback_servicio.count }}</strong>
-        </div>
-        <div class="p-6 bg-zinc-900 border border-red-900/60 rounded-xl">
-            <p class="text-red-300 text-sm uppercase font-semibold tracking-wider">Calificaciones bajas</p>
-            <strong class="text-2xl text-red-300 block mt-1">{{ feedback_bajo.count }}</strong>
-        </div>
-        {% endif %}
+    <div class="flex space-x-2 border-b border-white/10 mb-6 overflow-x-auto">
+        <button id="btn-metricas" onclick="switchTab('metricas')" class="px-6 py-3 text-sm font-bold border-b-2 border-assist-coral text-white transition-all duration-300 whitespace-nowrap">
+            Métricas y Desempeño
+        </button>
+        <button id="btn-equipo" onclick="switchTab('equipo')" class="px-6 py-3 text-sm font-bold border-b-2 border-transparent text-assist-gray hover:text-white transition-all duration-300 whitespace-nowrap">
+            Equipo de Soporte
+        </button>
+        <button id="btn-feedback" onclick="switchTab('feedback')" class="px-6 py-3 text-sm font-bold border-b-2 border-transparent text-assist-gray hover:text-white transition-all duration-300 whitespace-nowrap">
+            Feedback y Reportes
+        </button>
+        <button id="btn-tickets" onclick="switchTab('tickets')" class="px-6 py-3 text-sm font-bold border-b-2 border-transparent text-assist-gray hover:text-white transition-all duration-300 whitespace-nowrap">
+            Todos los Tickets
+        </button>
     </div>
 
-    <section class="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 mb-8">
-        <h3 class="text-xl font-semibold mb-4 text-assist-gray">Equipo de Soporte</h3>
-        <div class="overflow-x-auto rounded-xl border border-zinc-800">
+    <div id="tab-metricas" class="block animate-[fadeIn_0.3s_ease-in-out]">
+        <div class="grid grid-cols-1 {% if request.user.empresa.plan != 'GRATIS' %}sm:grid-cols-4{% endif %} gap-4 mb-8">
+            <div class="p-6 bg-assist-charcoal border border-white/5 rounded-xl shadow-lg">
+                <p class="text-assist-gray text-sm uppercase font-semibold tracking-wider">Tickets Humanos</p>
+                <strong class="text-2xl text-white block mt-1">{{ cant_tickets_humanos }}</strong>
+            </div>
+            <div class="p-6 bg-assist-charcoal border border-assist-coral/30 rounded-xl shadow-[0_0_15px_rgba(242,92,84,0.05)]">
+                <p class="text-assist-coral text-sm uppercase font-semibold tracking-wider">Tasa de Deflexión</p>
+                <strong class="text-2xl text-white block mt-1">{{ tasa_deflexion }}%</strong>
+                <span class="text-xs text-assist-gray mt-1 block">{{ cant_autogestionados }} casos vía FAQ</span>
+            </div>
+            {% if request.user.empresa.plan != 'GRATIS' %}
+            <div class="p-6 bg-assist-charcoal border border-white/5 rounded-xl shadow-lg">
+                <p class="text-assist-gray text-sm uppercase font-semibold tracking-wider">Promedio soporte</p>
+                <strong class="text-2xl text-white block mt-1">{% if promedio_soporte %}{{ promedio_soporte|floatformat:1 }}/5{% else %}-{% endif %}</strong>
+            </div>
+
+            <div class="p-6 bg-assist-charcoal border border-white/5 rounded-xl shadow-lg">
+                <p class="text-assist-gray text-sm uppercase font-semibold tracking-wider">T. Promedio Resolución</p>
+                <strong class="text-2xl text-white block mt-1">{{ promedio_resolucion_tiempo|default:"-" }}</strong>
+            </div>
+
+            <div class="p-6 bg-assist-charcoal border border-white/5 rounded-xl shadow-lg">
+                <p class="text-assist-gray text-sm uppercase font-semibold tracking-wider">Comentarios</p>
+                <strong class="text-2xl text-white block mt-1">{{ feedback_servicio.count }}</strong>
+            </div>
+
+            <div class="p-6 bg-assist-charcoal border border-red-900/60 rounded-xl shadow-lg">
+                <p class="text-red-400 text-sm uppercase font-semibold tracking-wider">Calificaciones bajas</p>
+                <strong class="text-2xl text-red-400 block mt-1">{{ feedback_bajo.count }}</strong>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {% if request.user.empresa.plan != 'GRATIS' %}
+            <div class="rounded-2xl border border-white/5 bg-assist-charcoal p-6 w-full">
+                <h3 class="text-xl font-semibold mb-4 text-white">Métricas por técnico</h3>
+                <div class="space-y-3">
+                    {% for metrica in metricas_tecnico %}
+                    <div class="flex items-center justify-between rounded-lg border border-white/5 bg-white/5 p-4">
+                        <span class="font-medium text-white">{{ metrica.technician__username|default:"Sin técnico asignado" }}</span>
+                        <span class="text-sm text-assist-gray">{{ metrica.promedio|floatformat:1 }}/5 · {{ metrica.cantidad }} feedback</span>
+                    </div>
+                    {% empty %}
+                    <p class="text-sm text-assist-gray p-4 text-center">Aún no hay feedback de servicio.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-red-900/60 bg-red-950/20 p-6 w-full">
+                <h3 class="text-xl font-semibold mb-4 text-red-400">Tickets con calificación baja</h3>
+                <div class="space-y-3">
+                    {% for feedback in feedback_bajo %}
+                    <article class="rounded-lg border border-red-500/30 bg-red-500/10 p-4">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <span class="font-semibold text-white">Ticket #{{ feedback.ticket.numero_ticket_empresa }}</span>
+                            <span class="text-sm font-bold text-red-400">{{ feedback.rating }}/5</span>
+                        </div>
+                        <p class="mt-2 text-sm text-red-200/80">{{ feedback.comment|default:"Sin comentario" }}</p>
+                    </article>
+                    {% empty %}
+                    <p class="text-sm text-assist-gray p-4 text-center">No hay feedback crítico de servicio.</p>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="lg:col-span-2 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-8 text-center">
+                <h3 class="text-xl font-bold mb-2 text-amber-400">Métricas Avanzadas Bloqueadas</h3>
+                <p class="text-amber-100/80 mb-4 max-w-2xl mx-auto">Tu empresa se encuentra en el plan <strong>Gratis</strong>. Este plan no incluye acceso a métricas de rendimiento por técnico ni reportes de calificaciones bajas. Actualizá tu plan a <strong>Básico</strong> o <strong>Premium</strong> para desbloquear estas herramientas y gestionar mejor a tu equipo.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div id="tab-equipo" class="hidden animate-[fadeIn_0.3s_ease-in-out]">
+        <div class="bg-assist-charcoal border border-white/5 rounded-2xl overflow-x-auto w-full mb-8">
+            <div class="px-6 py-4 border-b border-white/5 bg-assist-slate">
+                <h3 class="font-semibold text-white">Equipo de Soporte</h3>
+            </div>
             <table class="w-full text-left text-sm border-collapse">
-                <thead class="bg-zinc-800/50 text-assist-gray">
+                <thead class="bg-white/5 text-assist-gray">
                     <tr>
-                        <th class="p-4 font-medium border-b border-zinc-800">Técnico</th>
-                        <th class="p-4 font-medium border-b border-zinc-800">Estado</th>
-                        <th class="p-4 font-medium border-b border-zinc-800">Horario y Días</th>
-                        <th class="p-4 font-medium border-b border-zinc-800 text-center">Activos</th>
-                        <th class="p-4 font-medium border-b border-zinc-800 text-center">Resueltos</th>
-                        <th class="p-4 font-medium border-b border-zinc-800 text-center">Calificación</th>
+                        <th class="p-4 font-medium border-b border-white/5">Técnico</th>
+                        <th class="p-4 font-medium border-b border-white/5">Estado</th>
+                        <th class="p-4 font-medium border-b border-white/5">Horario y Días</th>
+                        <th class="p-4 font-medium border-b border-white/5 text-center">Activos</th>
+                        <th class="p-4 font-medium border-b border-white/5 text-center">Resueltos</th>
+                        <th class="p-4 font-medium border-b border-white/5 text-center">Calificación</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-zinc-800 text-white bg-zinc-900/30">
+                <tbody class="divide-y divide-white/5 text-white">
                     {% for stats in soportes_stats %}
-                    <tr class="hover:bg-zinc-800/50 transition">
+                    <tr class="hover:bg-white/5 transition">
                         <td class="p-4">
                             <div class="font-bold text-white">{{ stats.soporte.first_name }} {{ stats.soporte.last_name }}</div>
                             <div class="text-xs text-assist-gray mt-0.5">{{ stats.soporte.email }}</div>
@@ -106,7 +172,7 @@
                             {% endif %}
                         </td>
                         <td class="p-4 text-center">
-                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-zinc-800 text-white font-bold text-xs">{{ stats.tickets_activos }}</span>
+                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-zinc-800 text-white font-bold text-xs border border-white/10">{{ stats.tickets_activos }}</span>
                         </td>
                         <td class="p-4 text-center text-zinc-300 font-medium">{{ stats.tickets_resueltos }}</td>
                         <td class="p-4 text-center">
@@ -117,88 +183,48 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="p-8 text-center text-assist-gray">No hay técnicos de soporte registrados.</td>
+                        <td colspan="6" class="p-12 text-center text-assist-gray">No hay técnicos de soporte registrados.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-    </section>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {% if request.user.empresa.plan != 'GRATIS' %}
-        <section class="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
-        <h3 class="text-xl font-semibold mb-4 text-assist-gray">Métricas por técnico</h3>
-            <div class="space-y-3">
-                {% for metrica in metricas_tecnico %}
-                <div class="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 p-4">
-                <span class="font-medium text-white">{{ metrica.technician__username|default:"Sin técnico asignado" }}</span>
-                    <span class="text-sm text-assist-gray">{{ metrica.promedio|floatformat:1 }}/5 · {{ metrica.cantidad }} feedback</span>
-                </div>
-                {% empty %}
-            <p class="text-sm text-assist-gray">Aún no hay feedback de servicio.</p>
-                {% endfor %}
-            </div>
-        </section>
-
-        <section class="rounded-xl border border-red-900/60 bg-red-950/20 p-6">
-        <h3 class="text-xl font-semibold mb-4 text-red-200">Tickets con calificación baja</h3>
-            <div class="space-y-3">
-                {% for feedback in feedback_bajo %}
-                <article class="rounded-lg border border-red-500/30 bg-red-500/10 p-4">
-                    <div class="flex flex-wrap items-center justify-between gap-3">
-                        <span class="font-semibold text-white">Ticket #{{ feedback.ticket.numero_ticket_empresa }}</span>
-                        <span class="text-sm font-bold text-red-200">{{ feedback.rating }}/5</span>
-                    </div>
-                    <p class="mt-2 text-sm text-red-100/80">{{ feedback.comment|default:"Sin comentario" }}</p>
-                </article>
-                {% empty %}
-            <p class="text-sm text-assist-gray">No hay feedback crítico de servicio.</p>
-                {% endfor %}
-            </div>
-        </section>
-        {% else %}
-        <section class="lg:col-span-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-8 text-center">
-            <h3 class="text-xl font-bold mb-2 text-amber-200">Métricas Avanzadas Bloqueadas</h3>
-            <p class="text-amber-100/80 mb-4 max-w-2xl mx-auto">Tu empresa se encuentra en el plan <strong>Gratis</strong>. Este plan no incluye acceso a métricas de rendimiento por técnico ni reportes de calificaciones bajas. Actualizá tu plan a <strong>Básico</strong> o <strong>Premium</strong> para desbloquear estas herramientas y gestionar mejor a tu equipo.</p>
-        </section>
-        {% endif %}
     </div>
 
-    {% if request.user.empresa.plan != 'GRATIS' %}
-    <section class="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 mb-8">
-        <div class="mb-4 flex flex-col gap-1">
-            <h3 class="text-xl font-semibold text-assist-gray">Feedbacks</h3>
-            <p class="text-sm text-assist-gray">Comentarios enviados al area de soporte.</p>
-        </div>
-        <div class="overflow-x-auto">
+    <div id="tab-feedback" class="hidden animate-[fadeIn_0.3s_ease-in-out]">
+        {% if request.user.empresa.plan != 'GRATIS' %}
+        <div class="bg-assist-charcoal border border-white/5 rounded-2xl overflow-x-auto w-full mb-8">
+            <div class="px-6 py-4 border-b border-white/5 bg-assist-slate flex flex-col gap-1">
+                <h3 class="font-semibold text-white">Feedbacks de Servicio</h3>
+                <p class="text-xs text-assist-gray">Comentarios enviados por los clientes al cerrar un ticket.</p>
+            </div>
             <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-zinc-800/50 text-assist-gray text-sm">
-                        <th class="p-4">Ticket</th>
-                    <th class="p-4">Quién lo hizo</th>
-                    <th class="p-4">Cuándo</th>
-                    <th class="p-4">Quién trabajó</th>
-                    <th class="p-4">Calificación</th>
-                        <th class="p-4">Comentario</th>
-                    <th class="p-4">Acción</th>
+                <thead class="bg-white/5 text-assist-gray text-sm">
+                    <tr>
+                        <th class="p-4 font-medium border-b border-white/5">Ticket</th>
+                        <th class="p-4 font-medium border-b border-white/5">Quién lo hizo</th>
+                        <th class="p-4 font-medium border-b border-white/5">Cuándo</th>
+                        <th class="p-4 font-medium border-b border-white/5">Quién trabajó</th>
+                        <th class="p-4 font-medium border-b border-white/5">Calificación</th>
+                        <th class="p-4 font-medium border-b border-white/5">Comentario</th>
+                        <th class="p-4 font-medium border-b border-white/5">Acción</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-zinc-800">
+                <tbody class="divide-y divide-white/5 text-white">
                     {% for feedback in feedback_servicio %}
-                    <tr class="hover:bg-zinc-800/30 transition">
+                    <tr class="hover:bg-white/5 transition">
                         <td class="p-4">
-                            <a href="{% url 'detalle_ticket' feedback.ticket.id_ticket %}" class="text-assist-coral hover:underline">#{{ feedback.ticket.numero_ticket_empresa }}</a>
-                            <p class="text-xs text-assist-gray">{{ feedback.ticket.titulo }}</p>
+                            <a href="{% url 'detalle_ticket' feedback.ticket.id_ticket %}" class="text-assist-coral hover:underline font-mono">#{{ feedback.ticket.numero_ticket_empresa }}</a>
+                            <p class="text-xs text-assist-gray mt-1">{{ feedback.ticket.titulo }}</p>
                         </td>
-                        <td class="p-4">{{ feedback.user.username }}</td>
+                        <td class="p-4 text-sm">{{ feedback.user.username }}</td>
                         <td class="p-4 text-sm text-assist-gray">{{ feedback.created_at|date:"d/m/Y H:i" }}</td>
-                        <td class="p-4">{{ feedback.technician.username|default:"Sin asignar" }}</td>
-                        <td class="p-4 {% if feedback.is_critical %}text-red-300 font-bold{% endif %}">{{ feedback.rating }}/5</td>
-                        <td class="p-4 text-sm text-assist-gray">{{ feedback.comment|default:"Sin comentario" }}</td>
+                        <td class="p-4 text-sm">{{ feedback.technician.username|default:"Sin asignar" }}</td>
+                        <td class="p-4 text-sm font-bold {% if feedback.is_critical %}text-red-400{% endif %}">{{ feedback.rating }}/5</td>
+                        <td class="p-4 text-sm text-assist-gray truncate max-w-xs">{{ feedback.comment|default:"Sin comentario" }}</td>
                         <td class="p-4">
                             <button type="button"
-                                class="rounded-lg border border-assist-coral/40 px-3 py-2 text-xs font-bold text-assist-coral transition hover:bg-assist-coral hover:text-white"
+                                class="rounded-lg border border-assist-coral/40 bg-assist-coral/10 px-3 py-1.5 text-xs font-bold text-assist-coral transition hover:bg-assist-coral hover:text-white"
                                 data-ticket="#{{ feedback.ticket.numero_ticket_empresa }} - {{ feedback.ticket.titulo|escape }}"
                                 data-user="{{ feedback.user.username|escape }}"
                                 data-created="{{ feedback.created_at|date:'d/m/Y H:i' }}"
@@ -213,185 +239,230 @@
                     </tr>
                     {% empty %}
                     <tr>
-                    <td colspan="7" class="p-12 text-center text-assist-gray">Aún no hay feedbacks de soporte.</td>
+                        <td colspan="7" class="p-12 text-center text-assist-gray">Aún no hay feedbacks de soporte.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-    </section>
 
-    <section class="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 mb-8">
-        <h3 class="text-xl font-semibold mb-4 text-assist-gray">Feedback interno de técnicos</h3>
-        <div class="space-y-3">
-            {% for feedback in feedback_interno %}
-            <article class="rounded-lg border border-white/10 bg-white/5 p-4">
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                    <span class="font-semibold text-white">Ticket #{{ feedback.ticket.numero_ticket_empresa }} · {{ feedback.technician.username }}</span>
-                    <span class="text-sm text-assist-gray">Dificultad {{ feedback.get_difficulty_display }}</span>
-                </div>
-                <p class="mt-2 text-sm text-assist-gray">{{ feedback.comment|default:"Sin comentario de proceso" }}</p>
-                <p class="mt-2 text-sm text-assist-gray">Problemas: {{ feedback.problems_found|default:"Sin problemas registrados" }}</p>
-            </article>
-            {% empty %}
-            <p class="text-sm text-assist-gray">Aún no hay feedback interno.</p>
-            {% endfor %}
+        <div class="bg-assist-charcoal border border-white/5 rounded-2xl overflow-x-auto w-full mb-8">
+            <div class="px-6 py-4 border-b border-white/5 bg-assist-slate">
+                <h3 class="font-semibold text-white">Feedback interno de técnicos</h3>
+            </div>
+            <div class="p-6 space-y-3">
+                {% for feedback in feedback_interno %}
+                <article class="rounded-lg border border-white/5 bg-black/20 p-4 shadow-inner">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <span class="font-semibold text-white">Ticket <span class="text-assist-coral font-mono">#{{ feedback.ticket.numero_ticket_empresa }}</span> · {{ feedback.technician.username }}</span>
+                        <span class="text-sm font-medium text-assist-gray bg-white/5 px-2 py-1 rounded">Dificultad {{ feedback.get_difficulty_display }}</span>
+                    </div>
+                    <p class="mt-3 text-sm text-assist-body">{{ feedback.comment|default:"Sin comentario de proceso" }}</p>
+                    <p class="mt-2 text-sm text-assist-gray"><strong class="text-white">Problemas:</strong> {{ feedback.problems_found|default:"Sin problemas registrados" }}</p>
+                </article>
+                {% empty %}
+                <p class="text-sm text-assist-gray text-center p-4">Aún no hay feedback interno reportado por los técnicos.</p>
+                {% endfor %}
+            </div>
         </div>
-    </section>
-    {% endif %}
-
-    <h3 class="text-xl font-semibold mb-4 text-assist-gray">Todos los Tickets del Sistema</h3>
-
-    <div class="flex flex-col md:flex-row gap-4 mb-6 bg-zinc-900 p-4 rounded-xl border border-zinc-800 shadow-lg">
-        <div class="flex-1">
-            <label for="searchInput" class="block text-xs font-medium text-assist-gray mb-1">Buscar</label>
-            <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Buscar por título, ID o solicitante..." class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral transition">
+        {% else %}
+        <div class="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-12 text-center w-full mb-8">
+            <h3 class="text-2xl font-bold mb-2 text-amber-400">Sección Bloqueada</h3>
+            <p class="text-amber-100/80 max-w-2xl mx-auto">Tu empresa se encuentra en el plan <strong>Gratis</strong>. Actualizá tu plan para acceder al historial completo de feedbacks de clientes y reportes internos de los técnicos.</p>
         </div>
-        <div class="w-full md:w-48">
-            <label for="estadoFilter" class="block text-xs font-medium text-assist-gray mb-1">Estado</label>
-            <select id="estadoFilter" onchange="filterTable()" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral transition cursor-pointer">
-                <option value="">Todos</option>
-                <option value="abierto">Abierto</option>
-                <option value="en proceso">En proceso</option>
-                <option value="resuelto">Resuelto</option>
-                <option value="resuelto vía faq">Resuelto vía FAQ</option>
-            </select>
-        </div>
-        <div class="w-full md:w-48">
-            <label for="prioridadFilter" class="block text-xs font-medium text-assist-gray mb-1">Prioridad</label>
-            <select id="prioridadFilter" onchange="filterTable()" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral transition cursor-pointer">
-                <option value="">Todas</option>
-                <option value="alta">Alta</option>
-                <option value="media">Media</option>
-                <option value="baja">Baja</option>
-                <option value="sin asignar">Sin asignar</option>
-            </select>
-        </div>
+        {% endif %}
     </div>
 
-    <div class="overflow-x-auto rounded-xl border border-zinc-800 w-full">
-        <table class="w-full text-left border-collapse bg-zinc-900/50" id="ticketsTable">
-            <thead>
-                <tr class="bg-zinc-800/50 text-assist-gray text-sm">
-                    <th class="p-4 cursor-pointer hover:text-white select-none transition" onclick="sortTable(0)" title="Ordenar por ID">ID <span class="text-xs opacity-50 ml-1">↕</span></th>
-                    <th class="p-4 cursor-pointer hover:text-white select-none transition" onclick="sortTable(1)" title="Ordenar por Solicitante">Solicitante <span class="text-xs opacity-50 ml-1">↕</span></th>
-                    <th class="p-4 cursor-pointer hover:text-white select-none transition" onclick="sortTable(2)" title="Ordenar por Título">Título <span class="text-xs opacity-50 ml-1">↕</span></th>
-                    <th class="p-4 cursor-pointer hover:text-white select-none transition" onclick="sortTable(3)" title="Ordenar por Prioridad">Prioridad <span class="text-xs opacity-50 ml-1">↕</span></th>
-                    <th class="p-4 cursor-pointer hover:text-white select-none transition" onclick="sortTable(4)" title="Ordenar por Estado">Estado <span class="text-xs opacity-50 ml-1">↕</span></th>
-                    <th class="p-4 cursor-pointer hover:text-white select-none transition" onclick="sortTable(5)" title="Ordenar por Asignado">Asignado a <span class="text-xs opacity-50 ml-1">↕</span></th>
-                    <th class="p-4">Acciones</th>
-                </tr>
-            </thead>
-            <tbody class="text-assist-white">
-                {% for ticket in tickets %}
-                <tr class="border-t border-zinc-800 hover:bg-zinc-800/30 transition ticket-row" data-estado="{{ ticket.get_estado_display|default:'' }}" data-prioridad="{{ ticket.prioridad|default:'Sin asignar'|title }}">
-                    <td class="p-4 ticket-id">#{{ ticket.numero_ticket_empresa}}</td>
-                    <td class="p-4 ticket-solicitante">{{ ticket.solicitante.username }}</td>
-                    <td class="p-4 ticket-titulo">{{ ticket.titulo }}</td>
-                    <td class="p-4">
-                        <form method="POST" action="{% url 'cambiar_prioridad' ticket.pk %}" 
-                              class="inline {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ' %}cursor-not-allowed{% endif %}"
-                              {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ' %}title="Ticket finalizado"{% endif %}>
-                            {% csrf_token %}
-                            
-                            <select name="prioridad" 
-                                onchange="this.form.submit()" 
-                                {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ' %}disabled{% endif %}
-                                class="text-xs px-2.5 py-1.5 pr-8 rounded-full font-medium border appearance-none transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-blue-500
-                                {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ' %} pointer-events-none cursor-not-allowed bg-zinc-800/40 text-zinc-500 border-zinc-800/60 opacity-50
-                                {% elif ticket.prioridad == 'alta' or ticket.prioridad == 'ALTA' %} cursor-pointer bg-red-950/40 text-red-400 border-red-800/60 hover:bg-red-950/60
-                                {% elif ticket.prioridad == 'media' or ticket.prioridad == 'MEDIA' %} cursor-pointer bg-amber-950/40 text-amber-400 border-amber-800/60 hover:bg-amber-950/60
-                                {% elif ticket.prioridad == 'baja' or ticket.prioridad == 'BAJA' %} cursor-pointer bg-emerald-950/40 text-emerald-400 border-emerald-800/60 hover:bg-emerald-950/60
-                                {% else %} cursor-pointer bg-zinc-800 text-zinc-400 border-zinc-700/60 hover:bg-zinc-700/50 {% endif %}"
-                                style="background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23a1a1aa%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22></polyline></svg>'); background-size: 12px; background-position: right 10px center; background-repeat: no-repeat;">
-                            
-                            <option value="" class="bg-zinc-800 text-zinc-400" {% if not ticket.prioridad %}selected{% endif %} disabled>Sin asignar</option>
-                            <option value="baja" class="bg-zinc-800 text-zinc-300" {% if ticket.prioridad == 'baja' or ticket.prioridad == 'BAJA' %}selected{% endif %}>Baja</option>
-                            <option value="media" class="bg-zinc-800 text-zinc-300" {% if ticket.prioridad == 'media' or ticket.prioridad == 'MEDIA' %}selected{% endif %}>Media</option>
-                            <option value="alta" class="bg-zinc-800 text-zinc-300" {% if ticket.prioridad == 'alta' or ticket.prioridad == 'ALTA' %}selected{% endif %}>Alta</option>
-                        </select>
-                        </form>
-                    </td>
-                    <td class="p-4">{{ ticket.get_estado_display }}</td>
-                    <td class="p-4">
-                        {% with asignacion=ticket.asignaciones.last %}
-                            {% if asignacion %}
-                                {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ'%}
-                                    <span class="text-zinc-500 font-medium cursor-not-allowed" title="Ticket finalizado">{{ asignacion.soporte.first_name }} {{ asignacion.soporte.last_name }}</span>
-                                {% elif asignacion.activo %}
-                                    <a href="{% url 'asignar_ticket' ticket.id_ticket %}" class="text-assist-coral hover:underline font-medium" title="Reasignar soporte">{{ asignacion.soporte.first_name }} {{ asignacion.soporte.last_name }}</a>
-                                {% else %}
-                                    <a href="{% url 'asignar_ticket' ticket.id_ticket %}" class="text-red-500 font-medium hover:underline" title="Asignar soporte">Sin asignar</a>
-                                {% endif %}
+    <div id="tab-tickets" class="hidden animate-[fadeIn_0.3s_ease-in-out]">
+        <div class="flex flex-col md:flex-row gap-4 mb-6 bg-assist-charcoal p-4 rounded-xl border border-white/5 shadow-lg">
+            <div class="flex-1">
+                <label for="searchInput" class="block text-xs font-medium text-assist-gray mb-1">Buscar</label>
+                <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Buscar por título, ID o solicitante..." class="w-full bg-zinc-900 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral transition">
+            </div>
+            <div class="w-full md:w-48">
+                <label for="estadoFilter" class="block text-xs font-medium text-assist-gray mb-1">Estado</label>
+                <select id="estadoFilter" onchange="filterTable()" class="w-full bg-zinc-900 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral transition cursor-pointer">
+                    <option value="">Todos</option>
+                    <option value="abierto">Abierto</option>
+                    <option value="en proceso">En proceso</option>
+                    <option value="resuelto">Resuelto</option>
+                    <option value="resuelto vía faq">Resuelto vía FAQ</option>
+                </select>
+            </div>
+            <div class="w-full md:w-48">
+                <label for="prioridadFilter" class="block text-xs font-medium text-assist-gray mb-1">Prioridad</label>
+                <select id="prioridadFilter" onchange="filterTable()" class="w-full bg-zinc-900 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral transition cursor-pointer">
+                    <option value="">Todas</option>
+                    <option value="alta">Alta</option>
+                    <option value="media">Media</option>
+                    <option value="baja">Baja</option>
+                    <option value="sin asignar">Sin asignar</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="bg-assist-charcoal border border-white/5 rounded-2xl overflow-x-auto w-full mb-8">
+            <table class="w-full text-left border-collapse" id="ticketsTable">
+                <thead class="bg-white/5 text-assist-gray text-sm">
+                    <tr>
+                        <th class="p-4 cursor-pointer hover:text-white select-none transition border-b border-white/5" onclick="sortTable(0)" title="Ordenar por ID">ID <span class="text-xs opacity-50 ml-1">↕</span></th>
+                        <th class="p-4 cursor-pointer hover:text-white select-none transition border-b border-white/5" onclick="sortTable(1)" title="Ordenar por Solicitante">Solicitante <span class="text-xs opacity-50 ml-1">↕</span></th>
+                        <th class="p-4 cursor-pointer hover:text-white select-none transition border-b border-white/5" onclick="sortTable(2)" title="Ordenar por Título">Título <span class="text-xs opacity-50 ml-1">↕</span></th>
+                        <th class="p-4 cursor-pointer hover:text-white select-none transition border-b border-white/5" onclick="sortTable(3)" title="Ordenar por Prioridad">Prioridad <span class="text-xs opacity-50 ml-1">↕</span></th>
+                        <th class="p-4 cursor-pointer hover:text-white select-none transition border-b border-white/5" onclick="sortTable(4)" title="Ordenar por Estado">Estado <span class="text-xs opacity-50 ml-1">↕</span></th>
+                        <th class="p-4 cursor-pointer hover:text-white select-none transition border-b border-white/5" onclick="sortTable(5)" title="Ordenar por Tiempo">Tiempo Transcurrido <span class="text-xs opacity-50 ml-1">↕</span></th>
+                        <th class="p-4 cursor-pointer hover:text-white select-none transition border-b border-white/5" onclick="sortTable(6)" title="Ordenar por Asignado">Asignado a <span class="text-xs opacity-50 ml-1">↕</span></th>
+                        <th class="p-4 border-b border-white/5">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5 text-white">
+                    {% for ticket in tickets %}
+                    <tr class="hover:bg-white/5 transition ticket-row" data-estado="{{ ticket.get_estado_display|default:'' }}" data-prioridad="{{ ticket.prioridad|default:'Sin asignar'|title }}">
+                        
+                        <td class="p-4 font-mono text-assist-coral ticket-id">#{{ ticket.numero_ticket_empresa }}</td>
+                        <td class="p-4 text-sm ticket-solicitante">{{ ticket.solicitante.username }}</td>
+                        <td class="p-4 text-sm font-medium ticket-titulo">{{ ticket.titulo }}</td>
+                        
+                        <td class="p-4">
+                            <form method="POST" action="{% url 'cambiar_prioridad' ticket.pk %}" 
+                                class="inline {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ' %}cursor-not-allowed{% endif %}"
+                                {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ' %}title="Ticket finalizado"{% endif %}>
+                                {% csrf_token %}
+                                <select name="prioridad" 
+                                    onchange="this.form.submit()" 
+                                    {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ' %}disabled{% endif %}
+                                    class="text-xs px-2.5 py-1.5 pr-8 rounded-full font-medium border appearance-none transition-colors duration-200 focus:outline-none cursor-pointer
+                                    {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ' %} pointer-events-none bg-zinc-800/40 text-zinc-500 border-white/5 opacity-50
+                                    {% elif ticket.prioridad == 'alta' or ticket.prioridad == 'ALTA' %} bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20
+                                    {% elif ticket.prioridad == 'media' or ticket.prioridad == 'MEDIA' %} bg-amber-500/10 text-amber-400 border-amber-500/20 hover:bg-amber-500/20
+                                    {% elif ticket.prioridad == 'baja' or ticket.prioridad == 'BAJA' %} bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20
+                                    {% else %} bg-zinc-800 text-zinc-400 border-white/10 hover:bg-zinc-700 {% endif %}"
+                                    style="background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23a1a1aa%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22></polyline></svg>'); background-size: 12px; background-position: right 10px center; background-repeat: no-repeat;">
+                                    <option value="" class="bg-zinc-800 text-zinc-400" {% if not ticket.prioridad %}selected{% endif %} disabled>Sin asignar</option>
+                                    <option value="baja" class="bg-zinc-800 text-zinc-300" {% if ticket.prioridad == 'baja' or ticket.prioridad == 'BAJA' %}selected{% endif %}>Baja</option>
+                                    <option value="media" class="bg-zinc-800 text-zinc-300" {% if ticket.prioridad == 'media' or ticket.prioridad == 'MEDIA' %}selected{% endif %}>Media</option>
+                                    <option value="alta" class="bg-zinc-800 text-zinc-300" {% if ticket.prioridad == 'alta' or ticket.prioridad == 'ALTA' %}selected{% endif %}>Alta</option>
+                                </select>
+                            </form>
+                        </td>
+                        
+                        <td class="p-4 text-sm font-medium">{{ ticket.get_estado_display }}</td>
+                        
+                        <td class="p-4 text-sm">
+                            {% if request.user.empresa.plan != 'GRATIS' %}
+                                <span class="text-zinc-300 font-mono bg-black/20 px-2 py-1 rounded border border-white/5">
+                                    {{ ticket.tiempo_en_pantalla|default:"-" }}
+                                </span>
                             {% else %}
-                                {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ'%}
-                                    <span class="text-zinc-500 font-medium cursor-not-allowed" title="Ticket finalizado">Sin asignar</span>
-                                {% else %}
-                                    <a href="{% url 'asignar_ticket' ticket.id_ticket %}" class="text-red-500 font-medium hover:underline" title="Asignar soporte">Sin asignar</a>
-                                {% endif %}
+                                <span class="text-zinc-600 italic">No disponible</span>
                             {% endif %}
-                        {% endwith %}
-                    </td>
-                    <td class="p-4">
-                        <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="text-assist-coral hover:underline">Ver / Cambiar estado</a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="7" class="p-12 text-center text-assist-gray">No hay tickets en el sistema.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                        </td>
+                        
+                        <td class="p-4 text-sm">
+                            {% with asignacion=ticket.asignaciones.last %}
+                                {% if asignacion %}
+                                    {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ' %}
+                                        <span class="text-zinc-500 font-medium cursor-not-allowed" title="Ticket finalizado">{{ asignacion.soporte.first_name }} {{ asignacion.soporte.last_name }}</span>
+                                    {% elif asignacion.activo %}
+                                        <a href="{% url 'asignar_ticket' ticket.id_ticket %}" class="text-assist-coral hover:underline font-medium" title="Reasignar soporte">{{ asignacion.soporte.first_name }} {{ asignacion.soporte.last_name }}</a>
+                                    {% else %}
+                                        <a href="{% url 'asignar_ticket' ticket.id_ticket %}" class="text-red-400 font-medium hover:underline" title="Asignar soporte">Sin asignar</a>
+                                    {% endif %}
+                                {% else %}
+                                    {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ' %}
+                                        <span class="text-zinc-500 font-medium cursor-not-allowed" title="Ticket finalizado">Sin asignar</span>
+                                    {% else %}
+                                        <a href="{% url 'asignar_ticket' ticket.id_ticket %}" class="text-red-400 font-medium hover:underline" title="Asignar soporte">Sin asignar</a>
+                                    {% endif %}
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+                        
+                        <td class="p-4">
+                            <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="text-xs font-bold bg-white text-assist-black px-3 py-1.5 rounded-lg hover:bg-assist-gray transition whitespace-nowrap">Ver / Cambiar</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="p-12 text-center text-assist-gray">No hay tickets en el sistema.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <div id="serviceFeedbackModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 px-4">
-    <section class="w-full max-w-2xl rounded-xl border border-zinc-700 bg-zinc-900 p-6 shadow-2xl">
+    <section class="w-full max-w-2xl rounded-xl border border-white/10 bg-assist-charcoal p-6 shadow-2xl">
         <div class="flex items-start justify-between gap-4">
             <div>
                 <p class="text-xs font-bold uppercase tracking-wider text-assist-coral">Soporte</p>
-                <h2 class="mt-1 text-xl font-semibold">Detalle del feedback</h2>
+                <h2 class="mt-1 text-xl font-semibold text-white">Detalle del feedback</h2>
             </div>
-            <button type="button" class="rounded-lg border border-white/10 px-3 py-1 text-sm text-assist-gray hover:text-white" onclick="closeServiceFeedbackModal()">Cerrar</button>
+            <button type="button" class="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-sm text-assist-gray hover:text-white transition" onclick="closeServiceFeedbackModal()">Cerrar</button>
         </div>
 
         <dl class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-                <dt class="text-xs uppercase tracking-wider text-assist-gray">Ticket</dt>
-                <dd id="serviceModalTicket" class="mt-1 font-medium text-white"></dd>
+            <div class="bg-black/20 p-3 rounded-lg border border-white/5">
+                <dt class="text-[10px] font-bold uppercase tracking-wider text-assist-gray">Ticket</dt>
+                <dd id="serviceModalTicket" class="mt-1 text-sm font-medium text-white"></dd>
             </div>
-            <div>
-                <dt class="text-xs uppercase tracking-wider text-assist-gray">Quién lo hizo</dt>
-                <dd id="serviceModalUser" class="mt-1 font-medium text-white"></dd>
+            <div class="bg-black/20 p-3 rounded-lg border border-white/5">
+                <dt class="text-[10px] font-bold uppercase tracking-wider text-assist-gray">Quién lo hizo</dt>
+                <dd id="serviceModalUser" class="mt-1 text-sm font-medium text-white"></dd>
             </div>
-            <div>
-                <dt class="text-xs uppercase tracking-wider text-assist-gray">Cuándo</dt>
-                <dd id="serviceModalCreated" class="mt-1 font-medium text-white"></dd>
+            <div class="bg-black/20 p-3 rounded-lg border border-white/5">
+                <dt class="text-[10px] font-bold uppercase tracking-wider text-assist-gray">Cuándo</dt>
+                <dd id="serviceModalCreated" class="mt-1 text-sm font-medium text-white"></dd>
             </div>
-            <div>
-                <dt class="text-xs uppercase tracking-wider text-assist-gray">Quién trabajó</dt>
-                <dd id="serviceModalWorker" class="mt-1 font-medium text-white"></dd>
+            <div class="bg-black/20 p-3 rounded-lg border border-white/5">
+                <dt class="text-[10px] font-bold uppercase tracking-wider text-assist-gray">Quién trabajó</dt>
+                <dd id="serviceModalWorker" class="mt-1 text-sm font-medium text-white"></dd>
             </div>
-            <div>
-                <dt class="text-xs uppercase tracking-wider text-assist-gray">Calificación</dt>
-                <dd id="serviceModalRating" class="mt-1 font-medium text-white"></dd>
+            <div class="bg-black/20 p-3 rounded-lg border border-white/5">
+                <dt class="text-[10px] font-bold uppercase tracking-wider text-assist-gray">Calificación</dt>
+                <dd id="serviceModalRating" class="mt-1 text-sm font-bold text-assist-coral"></dd>
             </div>
-            <div>
-                <dt class="text-xs uppercase tracking-wider text-assist-gray">Crítico</dt>
-                <dd id="serviceModalCritical" class="mt-1 font-medium text-white"></dd>
+            <div class="bg-black/20 p-3 rounded-lg border border-white/5">
+                <dt class="text-[10px] font-bold uppercase tracking-wider text-assist-gray">Crítico</dt>
+                <dd id="serviceModalCritical" class="mt-1 text-sm font-medium text-white"></dd>
             </div>
         </dl>
 
-        <div class="mt-6 rounded-xl border border-white/10 bg-white/5 p-4">
-            <h3 class="text-sm font-semibold text-assist-gray">Comentario completo</h3>
-            <p id="serviceModalComment" class="mt-3 whitespace-pre-line break-words text-sm leading-6 text-white"></p>
+        <div class="mt-4 rounded-xl border border-white/5 bg-black/20 p-4">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-assist-gray">Comentario completo</h3>
+            <p id="serviceModalComment" class="mt-2 whitespace-pre-line break-words text-sm leading-6 text-white"></p>
         </div>
     </section>
 </div>
 
 <script>
-    // --- LÓGICA DE MODALES Y FILTRADOS EXACTA A TU RESPALDO ---
+    // --- LÓGICA DE TABS DINÁMICA ---
+    function switchTab(tabId) {
+        const tabs = ['metricas', 'equipo', 'feedback', 'tickets'];
+        
+        tabs.forEach(t => {
+            const content = document.getElementById('tab-' + t);
+            const btn = document.getElementById('btn-' + t);
+            
+            if (t === tabId) {
+                // Mostrar panel y activar botón
+                content.classList.remove('hidden');
+                content.classList.add('block');
+                btn.classList.remove('border-transparent', 'text-assist-gray');
+                btn.classList.add('border-assist-coral', 'text-white');
+            } else {
+                // Ocultar panel y desactivar botón
+                content.classList.remove('block');
+                content.classList.add('hidden');
+                btn.classList.remove('border-assist-coral', 'text-white');
+                btn.classList.add('border-transparent', 'text-assist-gray');
+            }
+        });
+    }
+
+    // --- LÓGICA DE MODALES Y FILTRADOS ---
     function setServiceModalText(id, value) {
         const element = document.getElementById(id);
         if (element) element.textContent = value || '-';
@@ -470,4 +541,11 @@
         rows.forEach(row => tbody.appendChild(row));
     }
 </script>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
 {% endblock %}

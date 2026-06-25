@@ -25,139 +25,222 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full">
-    <div class="mb-8">
-        <h1 class="text-2xl sm:text-3xl font-bold">Panel de Plataforma</h1>
-        <p class="text-sm sm:text-base text-assist-gray mt-1">Feedback privado sobre bugs, UX/UI, rendimiento y mejoras.</p>
-    </div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
-        <div class="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
-            <p class="text-assist-gray">Promedio plataforma</p>
-            <strong class="text-2xl text-white">{% if promedio_plataforma %}{{ promedio_plataforma|floatformat:1 }}/5{% else %}-{% endif %}</strong>
-        </div>
-        <div class="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
-            <p class="text-assist-gray">Feedback total</p>
-            <strong class="text-2xl text-white">{{ feedback_plataforma.count }}</strong>
-        </div>
-        <div class="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
-            <p class="text-assist-gray">Bugs reportados</p>
-            <strong class="text-2xl text-white">{{ reportes_bugs.count }}</strong>
-        </div>
-        <div class="p-6 bg-zinc-900 border border-red-900/60 rounded-xl">
-            <p class="text-red-300">Críticos</p>
-            <strong class="text-2xl text-red-300">{{ feedback_critico.count }}</strong>
+    
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-bold">Panel de Plataforma</h1>
+            <p class="text-sm sm:text-base text-assist-gray mt-1">Feedback privado sobre bugs, UX/UI, rendimiento y mejoras.</p>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <section class="rounded-xl border border-red-900/60 bg-red-950/20 p-6">
-        <h2 class="text-xl font-semibold mb-4 text-red-200">Feedback crítico</h2>
-            <div class="space-y-3">
-                {% for feedback in feedback_critico %}
-                <article class="rounded-lg border border-red-500/30 bg-red-500/10 p-4">
-                    <div class="flex flex-wrap items-center justify-between gap-3">
-                        <span class="font-semibold text-white">Ticket #{{ feedback.ticket.numero_ticket_empresa }}</span>
-                        <span class="text-sm font-bold text-red-200">{{ feedback.rating }}/5</span>
+    <div class="flex space-x-2 border-b border-white/10 mb-6 overflow-x-auto">
+        <button id="btn-resumen" onclick="switchTab('resumen')" class="px-6 py-3 text-sm font-bold border-b-2 border-assist-coral text-white transition-all duration-300 whitespace-nowrap">
+            Resumen Global
+        </button>
+        <button id="btn-categorias" onclick="switchTab('categorias')" class="px-6 py-3 text-sm font-bold border-b-2 border-transparent text-assist-gray hover:text-white transition-all duration-300 whitespace-nowrap">
+            Reportes por Categoría
+        </button>
+        <button id="btn-historial" onclick="switchTab('historial')" class="px-6 py-3 text-sm font-bold border-b-2 border-transparent text-assist-gray hover:text-white transition-all duration-300 whitespace-nowrap">
+            Historial Completo
+        </button>
+    </div>
+
+    <div id="tab-resumen" class="block animate-[fadeIn_0.3s_ease-in-out]">
+        
+        <div class="bg-assist-charcoal border border-white/5 rounded-2xl w-full p-6 mb-8">
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <div class="bg-black/20 p-6 rounded-xl border border-white/5 flex items-center justify-between shadow-inner">
+                    <div>
+                        <p class="text-xs font-semibold text-assist-gray uppercase tracking-wider">Promedio plataforma</p>
+                        <h3 class="text-3xl font-bold text-white mt-1">{% if promedio_plataforma %}{{ promedio_plataforma|floatformat:1 }}/5{% else %}-{% endif %}</h3>
                     </div>
-                    <p class="mt-2 text-sm text-red-100/80">{{ feedback.get_category_display }} - {{ feedback.comment|default:"Sin comentario" }}</p>
-                </article>
-                {% empty %}
-            <p class="text-sm text-assist-gray">No hay feedback crítico de plataforma.</p>
-                {% endfor %}
-            </div>
-        </section>
-
-        <section class="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
-        <h2 class="text-xl font-semibold mb-4 text-assist-gray">Estadísticas por categoría</h2>
-            <div class="space-y-3">
-                {% for estadistica in estadisticas_categoria %}
-                <div class="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 p-4">
-                    <span class="font-medium text-white">{{ estadistica.category }}</span>
-                    <span class="text-sm text-assist-gray">{{ estadistica.promedio|floatformat:1 }}/5 - {{ estadistica.cantidad }} feedback</span>
                 </div>
-                {% empty %}
-            <p class="text-sm text-assist-gray">Aún no hay estadísticas disponibles.</p>
-                {% endfor %}
+                <div class="bg-black/20 p-6 rounded-xl border border-white/5 flex items-center justify-between shadow-inner">
+                    <div>
+                        <p class="text-xs font-semibold text-assist-gray uppercase tracking-wider">Feedback total</p>
+                        <h3 class="text-3xl font-bold text-white mt-1">{{ feedback_plataforma.count }}</h3>
+                    </div>
+                </div>
+                <div class="bg-black/20 p-6 rounded-xl border border-white/5 flex items-center justify-between shadow-inner">
+                    <div>
+                        <p class="text-xs font-semibold text-assist-gray uppercase tracking-wider">Bugs reportados</p>
+                        <h3 class="text-3xl font-bold text-white mt-1">{{ reportes_bugs.count }}</h3>
+                    </div>
+                </div>
+                <div class="bg-black/20 p-6 rounded-xl border border-red-500/20 flex items-center justify-between shadow-inner">
+                    <div>
+                        <p class="text-xs font-semibold text-red-400 uppercase tracking-wider">Críticos</p>
+                        <h3 class="text-3xl font-bold text-red-400 mt-1">{{ feedback_critico.count }}</h3>
+                    </div>
+                </div>
             </div>
-        </section>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            
+            <div class="bg-assist-charcoal border border-red-900/60 rounded-2xl p-6 w-full shadow-lg">
+                <h2 class="text-xl font-semibold mb-4 text-red-400">Feedback crítico</h2>
+                <div class="space-y-3">
+                    {% for feedback in feedback_critico %}
+                    <article class="rounded-lg border border-red-500/30 bg-red-500/10 p-4">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <span class="font-semibold text-white">Ticket <span class="text-red-400 font-mono">#{{ feedback.ticket.numero_ticket_empresa }}</span></span>
+                            <span class="text-sm font-bold text-red-400">{{ feedback.rating }}/5</span>
+                        </div>
+                        <p class="mt-2 text-sm text-red-200/80"><span class="font-bold text-white">{{ feedback.get_category_display }}</span> - {{ feedback.comment|default:"Sin comentario" }}</p>
+                    </article>
+                    {% empty %}
+                    <p class="text-sm text-assist-gray text-center p-4">No hay feedback crítico de plataforma.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="bg-assist-charcoal border border-white/5 rounded-2xl p-6 w-full shadow-lg">
+                <h2 class="text-xl font-semibold mb-4 text-white">Estadísticas por categoría</h2>
+                <div class="space-y-3">
+                    {% for estadistica in estadisticas_categoria %}
+                    <div class="flex items-center justify-between rounded-lg border border-white/5 bg-black/20 p-4 shadow-inner">
+                        <span class="font-medium text-white">{{ estadistica.category }}</span>
+                        <span class="text-sm text-assist-gray"><strong class="text-white">{{ estadistica.promedio|floatformat:1 }}/5</strong> - {{ estadistica.cantidad }} feedback</span>
+                    </div>
+                    {% empty %}
+                    <p class="text-sm text-assist-gray text-center p-4">Aún no hay estadísticas disponibles.</p>
+                    {% endfor %}
+                </div>
+            </div>
+            
+        </div>
     </div>
 
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
-        <section class="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
-            <h2 class="text-xl font-semibold mb-4 text-assist-gray">Reportes de bugs</h2>
-            <div class="space-y-3">
-                {% for feedback in reportes_bugs %}
-                <article class="rounded-lg border border-white/10 bg-white/5 p-4">
-                    <p class="text-sm font-semibold text-white">Ticket #{{ feedback.ticket.numero_ticket_empresa }} - {{ feedback.rating }}/5</p>
-                    <p class="mt-2 text-sm text-assist-gray">{{ feedback.comment|default:"Sin comentario" }}</p>
-                </article>
-                {% empty %}
-                <p class="text-sm text-assist-gray">No hay bugs reportados.</p>
-                {% endfor %}
+    <div id="tab-categorias" class="hidden animate-[fadeIn_0.3s_ease-in-out]">
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
+            
+            <div class="bg-assist-charcoal border border-white/5 rounded-2xl p-6 w-full shadow-lg">
+                <h2 class="text-lg font-semibold mb-4 text-white">Reportes de bugs</h2>
+                <div class="space-y-3">
+                    {% for feedback in reportes_bugs %}
+                    <article class="rounded-lg border border-white/5 bg-black/20 p-4 shadow-inner">
+                        <div class="flex justify-between items-center">
+                            <p class="text-sm font-semibold text-white">Ticket <span class="text-assist-coral font-mono">#{{ feedback.ticket.numero_ticket_empresa }}</span></p>
+                            <span class="text-xs font-bold text-assist-gray">{{ feedback.rating }}/5</span>
+                        </div>
+                        <p class="mt-2 text-sm text-assist-gray">{{ feedback.comment|default:"Sin comentario" }}</p>
+                    </article>
+                    {% empty %}
+                    <p class="text-sm text-assist-gray text-center p-4">No hay bugs reportados.</p>
+                    {% endfor %}
+                </div>
             </div>
-        </section>
 
-        <section class="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
-            <h2 class="text-xl font-semibold mb-4 text-assist-gray">Sugerencias de mejora</h2>
-            <div class="space-y-3">
-                {% for feedback in sugerencias_mejora %}
-                <article class="rounded-lg border border-white/10 bg-white/5 p-4">
-                    <p class="text-sm font-semibold text-white">Ticket #{{ feedback.ticket.numero_ticket_empresa }} - {{ feedback.rating }}/5</p>
-                    <p class="mt-2 text-sm text-assist-gray">{{ feedback.comment|default:"Sin comentario" }}</p>
-                </article>
-                {% empty %}
-                <p class="text-sm text-assist-gray">No hay sugerencias cargadas.</p>
-                {% endfor %}
+            <div class="bg-assist-charcoal border border-white/5 rounded-2xl p-6 w-full shadow-lg">
+                <h2 class="text-lg font-semibold mb-4 text-white">Sugerencias de mejora</h2>
+                <div class="space-y-3">
+                    {% for feedback in sugerencias_mejora %}
+                    <article class="rounded-lg border border-white/5 bg-black/20 p-4 shadow-inner">
+                        <div class="flex justify-between items-center">
+                            <p class="text-sm font-semibold text-white">Ticket <span class="text-assist-coral font-mono">#{{ feedback.ticket.numero_ticket_empresa }}</span></p>
+                            <span class="text-xs font-bold text-assist-gray">{{ feedback.rating }}/5</span>
+                        </div>
+                        <p class="mt-2 text-sm text-assist-gray">{{ feedback.comment|default:"Sin comentario" }}</p>
+                    </article>
+                    {% empty %}
+                    <p class="text-sm text-assist-gray text-center p-4">No hay sugerencias cargadas.</p>
+                    {% endfor %}
+                </div>
             </div>
-        </section>
 
-        <section class="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
-            <h2 class="text-xl font-semibold mb-4 text-assist-gray">Feedback UX/UI</h2>
-            <div class="space-y-3">
-                {% for feedback in feedback_ux_ui %}
-                <article class="rounded-lg border border-white/10 bg-white/5 p-4">
-                    <p class="text-sm font-semibold text-white">Ticket #{{ feedback.ticket.numero_ticket_empresa }} - {{ feedback.rating }}/5</p>
-                    <p class="mt-2 text-sm text-assist-gray">{{ feedback.comment|default:"Sin comentario" }}</p>
-                </article>
-                {% empty %}
-                <p class="text-sm text-assist-gray">No hay feedback UX/UI.</p>
-                {% endfor %}
+            <div class="bg-assist-charcoal border border-white/5 rounded-2xl p-6 w-full shadow-lg">
+                <h2 class="text-lg font-semibold mb-4 text-white">Feedback UX/UI</h2>
+                <div class="space-y-3">
+                    {% for feedback in feedback_ux_ui %}
+                    <article class="rounded-lg border border-white/5 bg-black/20 p-4 shadow-inner">
+                        <div class="flex justify-between items-center">
+                            <p class="text-sm font-semibold text-white">Ticket <span class="text-assist-coral font-mono">#{{ feedback.ticket.numero_ticket_empresa }}</span></p>
+                            <span class="text-xs font-bold text-assist-gray">{{ feedback.rating }}/5</span>
+                        </div>
+                        <p class="mt-2 text-sm text-assist-gray">{{ feedback.comment|default:"Sin comentario" }}</p>
+                    </article>
+                    {% empty %}
+                    <p class="text-sm text-assist-gray text-center p-4">No hay feedback UX/UI.</p>
+                    {% endfor %}
+                </div>
             </div>
-        </section>
+            
+        </div>
     </div>
 
-    <section class="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
-        <h2 class="text-xl font-semibold mb-4 text-assist-gray">Historial de feedback de plataforma</h2>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left">
+    <div id="tab-historial" class="hidden animate-[fadeIn_0.3s_ease-in-out]">
+        <div class="bg-assist-charcoal border border-white/5 rounded-2xl overflow-x-auto w-full mb-8">
+            <div class="px-6 py-4 border-b border-white/5 bg-assist-slate">
+                <h3 class="font-semibold text-white">Historial de feedback de plataforma</h3>
+            </div>
+            <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="text-sm text-assist-gray border-b border-zinc-800">
-                        <th class="py-3 pr-4">Ticket</th>
-                        <th class="py-3 pr-4">Usuario</th>
-                    <th class="py-3 pr-4">Categoría</th>
-                    <th class="py-3 pr-4">Calificación</th>
-                        <th class="py-3 pr-4">Comentario</th>
-                        <th class="py-3 pr-4">Fecha</th>
+                    <tr class="bg-white/5 text-assist-gray text-xs uppercase tracking-wider">
+                        <th class="p-4 font-semibold border-b border-white/5">Ticket</th>
+                        <th class="p-4 font-semibold border-b border-white/5">Usuario</th>
+                        <th class="p-4 font-semibold border-b border-white/5">Categoría</th>
+                        <th class="p-4 font-semibold border-b border-white/5">Calificación</th>
+                        <th class="p-4 font-semibold border-b border-white/5">Comentario</th>
+                        <th class="p-4 font-semibold border-b border-white/5">Fecha</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-zinc-800">
+                <tbody class="divide-y divide-white/5 text-white">
                     {% for feedback in feedback_plataforma %}
-                    <tr>
-                        <td class="py-3 pr-4">#{{ feedback.ticket.numero_ticket_empresa }}</td>
-                        <td class="py-3 pr-4">{{ feedback.user.username }}</td>
-                        <td class="py-3 pr-4">{{ feedback.get_category_display }}</td>
-                        <td class="py-3 pr-4 {% if feedback.is_critical %}text-red-300 font-bold{% endif %}">{{ feedback.rating }}/5</td>
-                        <td class="py-3 pr-4 text-sm text-assist-gray">{{ feedback.comment|default:"Sin comentario" }}</td>
-                        <td class="py-3 pr-4 text-sm text-assist-gray">{{ feedback.created_at|date:"d/m/Y H:i" }}</td>
+                    <tr class="hover:bg-white/5 transition">
+                        <td class="p-4 text-assist-coral font-mono text-sm">#{{ feedback.ticket.numero_ticket_empresa }}</td>
+                        <td class="p-4 text-sm">{{ feedback.user.username }}</td>
+                        <td class="p-4 text-sm">{{ feedback.get_category_display }}</td>
+                        <td class="p-4 text-sm {% if feedback.is_critical %}text-red-400 font-bold{% endif %}">{{ feedback.rating }}/5</td>
+                        <td class="p-4 text-sm text-assist-gray truncate max-w-xs">{{ feedback.comment|default:"Sin comentario" }}</td>
+                        <td class="p-4 text-sm text-assist-gray">{{ feedback.created_at|date:"d/m/Y H:i" }}</td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="py-8 text-center text-assist-gray">Aún no hay feedback de plataforma.</td>
+                        <td colspan="6" class="p-12 text-center text-assist-gray">Aún no hay feedback de plataforma.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-    </section>
+    </div>
+
 </div>
+
+<script>
+    function switchTab(tabId) {
+        // Array con todos los IDs de las pestañas en este dashboard
+        const tabs = ['resumen', 'categorias', 'historial'];
+        
+        tabs.forEach(t => {
+            const content = document.getElementById('tab-' + t);
+            const btn = document.getElementById('btn-' + t);
+            
+            if (t === tabId) {
+                // Activar Pestaña
+                content.classList.remove('hidden');
+                content.classList.add('block');
+                
+                // Estilos Botón Activo
+                btn.classList.remove('border-transparent', 'text-assist-gray');
+                btn.classList.add('border-assist-coral', 'text-white');
+            } else {
+                // Ocultar Pestaña
+                content.classList.remove('block');
+                content.classList.add('hidden');
+                
+                // Estilos Botón Inactivo
+                btn.classList.remove('border-assist-coral', 'text-white');
+                btn.classList.add('border-transparent', 'text-assist-gray');
+            }
+        });
+    }
+</script>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
 {% endblock %}

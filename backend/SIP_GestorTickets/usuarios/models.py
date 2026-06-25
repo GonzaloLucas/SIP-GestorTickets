@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 
 # ==========================================
 # MODELO: EMPRESA
@@ -99,6 +100,46 @@ class InfoTicket(models.Model):
     )
     solucion_resumen = models.TextField(blank=True, null=True)
 
+    def tiempo_resolucion(self):
+        """Calcula el tiempo transcurrido desde la creación hasta la resolución."""
+        if self.estado == 'RESUELTO_FAQ':
+            return None
+        
+        try:
+            from django.utils import timezone
+            
+            # Definir fecha inicial y final
+            inicio = self.fecha_creacion
+            fin = self.fecha_resolucion if (self.estado == 'RESUELTO' and self.fecha_resolucion) else timezone.now()
+            
+            if not inicio:
+                return "Sin fecha"
+
+            if timezone.is_aware(inicio):
+                inicio = timezone.make_naive(inicio)
+            if timezone.is_aware(fin):
+                fin = timezone.make_naive(fin)
+                
+            # Calcular diferencia
+            delta = fin - inicio
+            total_segundos = max(delta.total_seconds(), 0)
+            
+            # Desglose matemático
+            dias = int(total_segundos // 86400)
+            horas = int((total_segundos % 86400) // 3600)
+            minutos = int((total_segundos % 3600) // 60)
+            
+            # Formatear salida limpia
+            if dias > 0:
+                return f"{dias}d {horas}h {minutos}m"
+            elif horas > 0:
+                return f"{horas}h {minutos}m"
+            else:
+                return f"{minutos}m"
+                
+        except Exception as e:
+            return f"Error calc."
+    
     def __str__(self):
         return f"#{self.numero_ticket_empresa} - {self.titulo}"
     
