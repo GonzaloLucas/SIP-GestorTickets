@@ -25,11 +25,11 @@
     <!-- Filtros de Asignación -->
     <div class="mb-4 flex flex-col sm:flex-row gap-4">
         <div class="flex-1">
-            <input type="text" id="searchTecnico" onkeyup="filterTecnicos()" placeholder="Buscar técnico por nombre..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-assist-coral transition shadow-lg">
+            <input type="text" id="searchTecnico" onkeyup="filterTecnicos()" placeholder="Buscar soporte por nombre..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-assist-coral transition shadow-lg">
         </div>
         <div class="w-full sm:w-64">
             <select id="filterEstado" onchange="filterTecnicos()" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-assist-coral transition cursor-pointer shadow-lg">
-                <option value="todos">Todos los técnicos</option>
+                <option value="todos">Todos los soportes</option>
                 <option value="disponible">Disponibles</option>
                 <option value="fuera_horario">Fuera de horario</option>
                 <option value="lleno">Llenos (3+ tickets)</option>
@@ -42,7 +42,7 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-zinc-800/50 text-assist-gray text-sm">
-                        <th class="p-4">Técnico</th>
+                        <th class="p-4">Soporte</th>
                         <th class="p-4">Horario</th>
                         <th class="p-4">Carga actual</th>
                         <th class="p-4">Estado</th>
@@ -116,7 +116,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="p-8 text-center text-assist-gray">No hay técnicos de soporte en la empresa.</td>
+                        <td colspan="5" class="p-8 text-center text-assist-gray">No hay soporte en la empresa.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

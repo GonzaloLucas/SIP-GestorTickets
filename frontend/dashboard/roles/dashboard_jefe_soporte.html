@@ -95,11 +95,11 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             {% if request.user.empresa.plan != 'GRATIS' %}
             <div class="rounded-2xl border border-white/5 bg-assist-charcoal p-6 w-full">
-                <h3 class="text-xl font-semibold mb-4 text-white">Métricas por técnico</h3>
+                <h3 class="text-xl font-semibold mb-4 text-white">Métricas por soporte</h3>
                 <div class="space-y-3">
                     {% for metrica in metricas_tecnico %}
                     <div class="flex items-center justify-between rounded-lg border border-white/5 bg-white/5 p-4">
-                        <span class="font-medium text-white">{{ metrica.technician__username|default:"Sin técnico asignado" }}</span>
+                        <span class="font-medium text-white">{{ metrica.technician__username|default:"Sin soporte asignado" }}</span>
                         <span class="text-sm text-assist-gray">{{ metrica.promedio|floatformat:1 }}/5 · {{ metrica.cantidad }} feedback</span>
                     </div>
                     {% empty %}
@@ -127,7 +127,7 @@
             {% else %}
             <div class="lg:col-span-2 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-8 text-center">
                 <h3 class="text-xl font-bold mb-2 text-amber-400">Métricas Avanzadas Bloqueadas</h3>
-                <p class="text-amber-100/80 mb-4 max-w-2xl mx-auto">Tu empresa se encuentra en el plan <strong>Gratis</strong>. Este plan no incluye acceso a métricas de rendimiento por técnico ni reportes de calificaciones bajas. Actualizá tu plan a <strong>Básico</strong> o <strong>Premium</strong> para desbloquear estas herramientas y gestionar mejor a tu equipo.</p>
+                <p class="text-amber-100/80 mb-4 max-w-2xl mx-auto">Tu empresa se encuentra en el plan <strong>Gratis</strong>. Este plan no incluye acceso a métricas de rendimiento por soporte ni reportes de calificaciones bajas. Actualizá tu plan a <strong>Básico</strong> o <strong>Premium</strong> para desbloquear estas herramientas y gestionar mejor a tu equipo.</p>
             </div>
             {% endif %}
         </div>
@@ -141,7 +141,7 @@
             <table class="w-full text-left text-sm border-collapse">
                 <thead class="bg-white/5 text-assist-gray">
                     <tr>
-                        <th class="p-4 font-medium border-b border-white/5">Técnico</th>
+                        <th class="p-4 font-medium border-b border-white/5">Soporte</th>
                         <th class="p-4 font-medium border-b border-white/5">Estado</th>
                         <th class="p-4 font-medium border-b border-white/5">Horario y Días</th>
                         <th class="p-4 font-medium border-b border-white/5 text-center">Activos</th>
@@ -183,7 +183,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="p-12 text-center text-assist-gray">No hay técnicos de soporte registrados.</td>
+                        <td colspan="6" class="p-12 text-center text-assist-gray">No hay soporte registrado.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -248,7 +248,7 @@
 
         <div class="bg-assist-charcoal border border-white/5 rounded-2xl overflow-x-auto w-full mb-8">
             <div class="px-6 py-4 border-b border-white/5 bg-assist-slate">
-                <h3 class="font-semibold text-white">Feedback interno de técnicos</h3>
+                <h3 class="font-semibold text-white">Feedback interno de soporte</h3>
             </div>
             <div class="p-6 space-y-3">
                 {% for feedback in feedback_interno %}
@@ -261,14 +261,14 @@
                     <p class="mt-2 text-sm text-assist-gray"><strong class="text-white">Problemas:</strong> {{ feedback.problems_found|default:"Sin problemas registrados" }}</p>
                 </article>
                 {% empty %}
-                <p class="text-sm text-assist-gray text-center p-4">Aún no hay feedback interno reportado por los técnicos.</p>
+                <p class="text-sm text-assist-gray text-center p-4">Aún no hay feedback interno reportado por soporte.</p>
                 {% endfor %}
             </div>
         </div>
         {% else %}
         <div class="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-12 text-center w-full mb-8">
             <h3 class="text-2xl font-bold mb-2 text-amber-400">Sección Bloqueada</h3>
-            <p class="text-amber-100/80 max-w-2xl mx-auto">Tu empresa se encuentra en el plan <strong>Gratis</strong>. Actualizá tu plan para acceder al historial completo de feedbacks de clientes y reportes internos de los técnicos.</p>
+            <p class="text-amber-100/80 max-w-2xl mx-auto">Tu empresa se encuentra en el plan <strong>Gratis</strong>. Actualizá tu plan para acceder al historial completo de feedbacks de clientes y reportes internos de soporte.</p>
         </div>
         {% endif %}
     </div>

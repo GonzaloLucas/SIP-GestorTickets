@@ -56,7 +56,6 @@ def _obtener_empleado_controlado(request, pk):
 
 
 def _formatear_dias(dias_str):
-    """Transforma los índices de días ('0,1,2') en texto legible ('Lu Ma Mi')."""
     if not dias_str: 
         return "Sin definir"
     mapa = {'0': 'Lu', '1': 'Ma', '2': 'Mi', '3': 'Ju', '4': 'Vi', '5': 'Sá', '6': 'Do'}
@@ -64,7 +63,6 @@ def _formatear_dias(dias_str):
 
 
 def _verificar_horario_laboral(soporte, hora_actual, dia_actual):
-    """Determina si un técnico se encuentra dentro de su jornada laboral actual."""
     dias_soporte = soporte.dias_laborales.split(',') if soporte.dias_laborales else []
     if not (soporte.horario_ingreso and soporte.horario_egreso and dia_actual in dias_soporte):
         return False
@@ -544,9 +542,8 @@ def dashboard_jefe_soporte (request):
         else:
             promedio_resolucion_tiempo = "Sin datos"
             
-    # 3. Cálculo de métricas por técnico (Usa el feedback ya filtrado por plan)
     if plan != 'GRATIS':
-        metricas_tecnico = feedback_servicio.values(
+        metricas_tecnico = feedback_servicio.filter(technician__isnull=False).values(
             'technician__username'
         ).annotate(
             promedio=Avg('rating'),
@@ -679,7 +676,6 @@ def cambiar_suscripcion_view(request):
 def crear_ticket(request):
     ticket_creado = False
     
-    # KR1: Lista con los 15 problemas técnicos más recurrentes sin tecnicismos
     faqs_top15 = [
         {"id": 1, "titulo": "Mi computadora no enciende o no da video", "solucion": "Verificá que las conexiones de los cables de alimentación estén firmes. Si usas zapatilla, probá conectando directo a la pared. Mantené presionado el botón de encendido por 15 segundos para liberar estática."},
         {"id": 2, "titulo": "No tengo conexión a Internet (Wi-Fi o Cable)", "solucion": "Desconectá el módem de la corriente por 30 segundos y volvelo a conectar. Si estás por cable, desconectá y conectá la ficha RJ45 hasta escuchar el 'clic'."},
@@ -732,7 +728,7 @@ def crear_ticket(request):
             if jefes_emails:
                 send_mail(
                     subject=f"Nuevo Ticket en el Sistema: #{ticket.numero_ticket_empresa}",
-                    message=f"El usuario {ticket.solicitante.get_full_name()} ha creado el ticket #{ticket.numero_ticket_empresa}: '{ticket.titulo}'.\n\nIngresá al panel para asignarle un técnico.",
+                    message=f"El usuario {ticket.solicitante.get_full_name()} ha creado el ticket #{ticket.numero_ticket_empresa}: '{ticket.titulo}'.\n\nIngresá al panel para asignarle un soporte.",
                     from_email='assistech.soporte@gmail.com',
                     recipient_list=jefes_emails,
                     fail_silently=True
@@ -839,7 +835,7 @@ def actualizar_estado(request, pk):
         if nuevo_estado == 'RESUELTO':
             send_mail(
                 subject=f"Assistech - Solución de Ticket #{ticket.numero_ticket_empresa}",
-                message=f"Hola {ticket.solicitante.first_name},\n\nProblema solucionado, verificar solucion.\n\nTu ticket #{ticket.numero_ticket_empresa} ha sido marcado como resuelto por nuestro equipo técnico. Por favor, ingresá a validar la resolución y calificar la atención.",
+                message=f"Hola {ticket.solicitante.first_name},\n\nProblema solucionado, verificar solucion.\n\nTu ticket #{ticket.numero_ticket_empresa} ha sido marcado como resuelto por nuestro equipo de soporte. Por favor, ingresá a validar la resolución y calificar la atención.",
                 from_email='assistech.soporte@gmail.com',
                 recipient_list=[ticket.solicitante.email],
                 fail_silently=True
@@ -955,7 +951,7 @@ def asignar_ticket_view(request, pk):
         if request.POST.get('action') == 'deassign' and soporte_id:
             soporte_a_desasignar = get_object_or_404(Usuario, pk=soporte_id, empresa=request.user.empresa, rol='soporte')
             TicketAsignacion.objects.filter(ticket=ticket, soporte=soporte_a_desasignar, activo=True).update(activo=False)
-            messages.success(request, f'Se desasignó al técnico {soporte_a_desasignar.get_full_name()}.')
+            messages.success(request, f'Se desasignó al soporte {soporte_a_desasignar.get_full_name()}.')
             return redirect('asignar_ticket', pk=pk)
 
         if soporte_id:
@@ -966,7 +962,6 @@ def asignar_ticket_view(request, pk):
             TicketAsignacion.objects.filter(ticket=ticket, activo=True).update(activo=False)
             TicketAsignacion.objects.create(ticket=ticket, soporte=soporte_seleccionado, asignado_por=request.user, activo=True)
             
-            # Mail al Soporte Técnico asignado
             send_mail(
                 subject=f"Assistech - Se te asignó el Ticket #{ticket.numero_ticket_empresa}",
                 message=f"Hola {soporte_seleccionado.first_name},\n\nEl Jefe de Soporte te ha asignado el caso #{ticket.numero_ticket_empresa}: '{ticket.titulo}'.\n\nPor favor, ingresá a la plataforma para iniciar la resolución.",
@@ -975,10 +970,9 @@ def asignar_ticket_view(request, pk):
                 fail_silently=True
             )
             
-            # Mail al Cliente informando quién tiene su caso
             send_mail(
-                subject=f"Assistech - Técnico asignado a tu Ticket #{ticket.numero_ticket_empresa}",
-                message=f"Hola {ticket.solicitante.first_name},\n\nTe informamos que el técnico {soporte_seleccionado.get_full_name()} tiene tu ticket #{ticket.numero_ticket_empresa} asignado y ya está trabajando en él.",
+                subject=f"Assistech - Soporte asignado a tu Ticket #{ticket.numero_ticket_empresa}",
+                message=f"Hola {ticket.solicitante.first_name},\n\nTe informamos que el soporte {soporte_seleccionado.get_full_name()} tiene tu ticket #{ticket.numero_ticket_empresa} asignado y ya está trabajando en él.",
                 from_email='assistech.soporte@gmail.com',
                 recipient_list=[ticket.solicitante.email],
                 fail_silently=True
@@ -987,9 +981,9 @@ def asignar_ticket_view(request, pk):
             messages.success(request, f'Ticket asignado a {soporte_seleccionado.get_full_name()} correctamente.')
             
             if not trabaja_ahora:
-                messages.warning(request, 'Nota: El técnico fue asignado a pesar de estar fuera de su horario laboral.')
+                messages.warning(request, 'Nota: El soporte fue asignado a pesar de estar fuera de su horario laboral.')
             if tickets_activos_pre >= 3:
-                messages.warning(request, 'Nota: El técnico asignado superó el límite recomendado de 3 tickets en progreso.')
+                messages.warning(request, 'Nota: El soporte asignado superó el límite recomendado de 3 tickets en progreso.')
                 
             return redirect('dashboard')
 
