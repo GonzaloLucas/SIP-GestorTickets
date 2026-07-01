@@ -241,32 +241,26 @@
             const btnEncurso = document.getElementById('btn-encurso');
 
             if (tab === 'completados') {
-                // Mostrar Completados
                 tabCompletados.classList.remove('hidden');
                 tabCompletados.classList.add('block');
                 tabEncurso.classList.remove('block');
                 tabEncurso.classList.add('hidden');
 
-                // Estilos del botón Completados (Activo)
                 btnCompletados.classList.replace('border-transparent', 'border-assist-coral');
                 btnCompletados.classList.replace('text-assist-gray', 'text-white');
 
-                // Estilos del botón En Curso (Inactivo)
                 btnEncurso.classList.replace('border-assist-coral', 'border-transparent');
                 btnEncurso.classList.replace('text-white', 'text-assist-gray');
 
             } else if (tab === 'encurso') {
-                // Mostrar En Curso
                 tabEncurso.classList.remove('hidden');
                 tabEncurso.classList.add('block');
                 tabCompletados.classList.remove('block');
                 tabCompletados.classList.add('hidden');
 
-                // Estilos del botón En Curso (Activo)
                 btnEncurso.classList.replace('border-transparent', 'border-assist-coral');
                 btnEncurso.classList.replace('text-assist-gray', 'text-white');
 
-                // Estilos del botón Completados (Inactivo)
                 btnCompletados.classList.replace('border-assist-coral', 'border-transparent');
                 btnCompletados.classList.replace('text-white', 'text-assist-gray');
             }

@@ -242,7 +242,6 @@
 
 <script>
     function switchTab(tabId) {
-        // Array con todos los IDs de las pestañas en este dashboard
         const tabs = ['metricas', 'personal', 'historial'];
         
         tabs.forEach(t => {
@@ -250,19 +249,15 @@
             const btn = document.getElementById('btn-' + t);
             
             if (t === tabId) {
-                // Activar Pestaña
                 content.classList.remove('hidden');
                 content.classList.add('block');
                 
-                // Estilos Botón Activo
                 btn.classList.remove('border-transparent', 'text-assist-gray');
                 btn.classList.add('border-assist-coral', 'text-white');
             } else {
-                // Ocultar Pestaña
                 content.classList.remove('block');
                 content.classList.add('hidden');
                 
-                // Estilos Botón Inactivo
                 btn.classList.remove('border-assist-coral', 'text-white');
                 btn.classList.add('border-transparent', 'text-assist-gray');
             }

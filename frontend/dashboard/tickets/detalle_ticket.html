@@ -199,7 +199,6 @@
                 <h2 class="text-xl font-semibold">Feedback interno</h2>
             <p class="mt-1 text-sm text-assist-gray">Registrá información breve sobre el cierre del caso.</p>
             </div>
-            <!-- <button type="button" class="rounded-lg border border-white/10 px-3 py-1 text-sm text-assist-gray hover:text-white" onclick="closeTechnicianFeedbackModal()">Omitir</button> -->
         </div>
 
         <form action="{% url 'guardar_feedback_tecnico' ticket.id_ticket %}" method="POST" class="mt-5 space-y-4">
@@ -260,12 +259,5 @@
         const modal = document.getElementById('technicianFeedbackModal');
         if (modal) modal.classList.add('hidden');
     }
-
-    // function togglePlatformCategory() {
-    //     const typeField = document.getElementById('feedback_type');
-    //     const categoryField = document.getElementById('platformCategoryField');
-    //     if (!typeField || !categoryField) return;
-    //     categoryField.classList.toggle('hidden', typeField.value !== 'plataforma');
-    // }
 </script>
 {% endblock %}

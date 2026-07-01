@@ -306,7 +306,6 @@
 </div>
 
 <script>
-    // --- LÓGICA DE TABS DINÁMICA ---
     function switchTab(tabId) {
         const tabs = ['metricas', 'feedbacks'];
         
@@ -328,14 +327,12 @@
         });
     }
 
-    // UX: Si hay filtros en la URL, abrimos directamente la pestaña de Tablas
     document.addEventListener("DOMContentLoaded", function() {
         if (window.location.search.length > 0) {
             switchTab('feedbacks');
         }
     });
 
-    // --- LÓGICA DEL MODAL ---
     function setModalText(id, value) {
         const element = document.getElementById(id);
         if (element) element.textContent = value || '-';

@@ -438,7 +438,6 @@
 </div>
 
 <script>
-    // --- LÓGICA DE TABS DINÁMICA ---
     function switchTab(tabId) {
         const tabs = ['metricas', 'equipo', 'feedback', 'tickets'];
         
@@ -447,13 +446,11 @@
             const btn = document.getElementById('btn-' + t);
             
             if (t === tabId) {
-                // Mostrar panel y activar botón
                 content.classList.remove('hidden');
                 content.classList.add('block');
                 btn.classList.remove('border-transparent', 'text-assist-gray');
                 btn.classList.add('border-assist-coral', 'text-white');
             } else {
-                // Ocultar panel y desactivar botón
                 content.classList.remove('block');
                 content.classList.add('hidden');
                 btn.classList.remove('border-assist-coral', 'text-white');
@@ -462,7 +459,6 @@
         });
     }
 
-    // --- LÓGICA DE MODALES Y FILTRADOS ---
     function setServiceModalText(id, value) {
         const element = document.getElementById(id);
         if (element) element.textContent = value || '-';

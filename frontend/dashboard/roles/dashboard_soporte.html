@@ -76,13 +76,13 @@
                         {% else %}text-zinc-500{% endif %}">
                         
                         {% if promedio_rating >= 4.5 %}
-                            ★ Excelente servicio
+                            Excelente servicio
                         {% elif promedio_rating >= 4.0 %}
-                            ★ Muy buen servicio
+                            Muy buen servicio
                         {% elif promedio_rating >= 3.0 %}
-                            ★ Servicio regular
+                            Servicio regular
                         {% elif promedio_rating > 0 %}
-                            ⚠️ Requiere atención
+                            Requiere atención
                         {% else %}
                             Sin calificaciones
                         {% endif %}
@@ -220,7 +220,6 @@
 
 <script>
     function switchTab(tabId) {
-        // Array con las secciones de este dashboard
         const tabs = ['metricas', 'asignados', 'completados'];
         
         tabs.forEach(t => {
@@ -228,19 +227,15 @@
             const btn = document.getElementById('btn-' + t);
             
             if (t === tabId) {
-                // Activar Pestaña
                 content.classList.remove('hidden');
                 content.classList.add('block');
                 
-                // Estilos Botón Activo
                 btn.classList.remove('border-transparent', 'text-assist-gray');
                 btn.classList.add('border-assist-coral', 'text-white');
             } else {
-                // Ocultar Pestaña
                 content.classList.remove('block');
                 content.classList.add('hidden');
                 
-                // Estilos Botón Inactivo
                 btn.classList.remove('border-assist-coral', 'text-white');
                 btn.classList.add('border-transparent', 'text-assist-gray');
             }
