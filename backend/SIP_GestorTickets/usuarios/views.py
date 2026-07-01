@@ -67,7 +67,6 @@ def _verificar_horario_laboral(soporte, hora_actual, dia_actual):
     if not (soporte.horario_ingreso and soporte.horario_egreso and dia_actual in dias_soporte):
         return False
     
-    # Manejo de horarios normales y turnos nocturnos rotativos
     if soporte.horario_ingreso <= soporte.horario_egreso:
         return soporte.horario_ingreso <= hora_actual <= soporte.horario_egreso
     return hora_actual >= soporte.horario_ingreso or hora_actual <= soporte.horario_egreso
@@ -201,7 +200,6 @@ def crear_usuario_admin_view(request):
 
             try:
                 with transaction.atomic():
-                    # Creamos el usuario en la base con la clave generica.
                     nuevo_user = Usuario.objects.create_user(
                         username=email,email=email,password=password_aleatoria,
                         first_name=first_name,last_name=form.cleaned_data['last_name'],
@@ -242,7 +240,7 @@ def quitar_acceso_view(request, pk):
 
 def aprobar_usuario_view(request, pk):
     empleado = _obtener_empleado_controlado(request, pk)    
-    empleado.autorizado = True  # Esto es lo que saca la suspensión
+    empleado.autorizado = True  
     empleado.save()        
     return redirect('dashboard')
 
@@ -278,7 +276,6 @@ def confirmar_baja_view(request, pk):
 # ==========================================
 # SISTEMA DISTRIBUIDO DE DASHBOARDS
 # ==========================================
-
 def dashboard_view(request):
     if not request.user.is_authenticated:
         return redirect('login')
@@ -371,7 +368,6 @@ def _dashboard_cliente(request):
     tickets = InfoTicket.objects.filter(solicitante=request.user).order_by('-fecha_creacion')
     tickets = _filtrar_tickets_por_plan(request.user.empresa, tickets)
     
-    # --- CÁLCULO DE TIEMPO EN PANTALLA POR TICKET ---
     plan = request.user.empresa.plan
     if plan != 'GRATIS':
         for ticket in tickets:
@@ -381,7 +377,6 @@ def _dashboard_cliente(request):
                 inicio = ticket.fecha_creacion
                 fin = ticket.fecha_resolucion if (ticket.estado == 'RESUELTO' and ticket.fecha_resolucion) else timezone.now()
 
-                # Normalización de zonas horarias
                 if timezone.is_aware(inicio) and timezone.is_naive(fin):
                     inicio = timezone.make_naive(inicio)
                 elif timezone.is_naive(inicio) and timezone.is_aware(fin):
@@ -418,7 +413,6 @@ def _dashboard_soporte(request):
     tickets = InfoTicket.objects.filter(asignaciones__soporte=request.user, asignaciones__activo=True, solicitante__empresa=request.user.empresa).distinct()
     tickets = _filtrar_tickets_por_plan(request.user.empresa, tickets)
     
-    # --- CÁLCULO DE TIEMPO EN PANTALLA POR TICKET ---
     plan = request.user.empresa.plan
     if plan != 'GRATIS':
         for ticket in tickets:
@@ -428,7 +422,6 @@ def _dashboard_soporte(request):
                 inicio = ticket.fecha_creacion
                 fin = ticket.fecha_resolucion if (ticket.estado == 'RESUELTO' and ticket.fecha_resolucion) else timezone.now()
 
-                # Normalización de zonas horarias
                 if timezone.is_aware(inicio) and timezone.is_naive(fin):
                     inicio = timezone.make_naive(inicio)
                 elif timezone.is_naive(inicio) and timezone.is_aware(fin):
@@ -470,14 +463,12 @@ def dashboard_jefe_soporte (request):
     feedback_servicio = FeedbackService.objects.filter(ticket__solicitante__empresa=request.user.empresa)
     feedback_interno = FeedbackSupportInternal.objects.filter(ticket__solicitante__empresa=request.user.empresa)
     
-    # 1. Métricas del OKR 2 (Tasa de Deflexión vía FAQ)
     cant_tickets_humanos = tickets.exclude(estado='RESUELTO_FAQ').count()
     cant_deflexiones = tickets.filter(estado='RESUELTO_FAQ').count()
     volumen_total = cant_tickets_humanos + cant_deflexiones
     
     tasa_deflexion = round((cant_deflexiones / volumen_total) * 100, 1) if volumen_total > 0 else 0
 
-    # 2. Filtros de historial según el Plan de la Empresa
     plan = request.user.empresa.plan
     if plan == 'BASICO':
         limite = timezone.now() - timedelta(days=90)
@@ -494,14 +485,12 @@ def dashboard_jefe_soporte (request):
         contador_tickets_resueltos = 0
 
         for ticket in tickets:
-            # --- 1. CÁLCULO INDIVIDUAL PARA CADA FILA DE LA TABLA ---
             if ticket.estado == 'RESUELTO_FAQ':
                 ticket.tiempo_en_pantalla = "-"
             else:
                 inicio = ticket.fecha_creacion
                 fin = ticket.fecha_resolucion if (ticket.estado == 'RESUELTO' and ticket.fecha_resolucion) else timezone.now()
 
-                # Normalización estricta de zonas horarias
                 if timezone.is_aware(inicio) and timezone.is_naive(fin):
                     inicio = timezone.make_naive(inicio)
                 elif timezone.is_naive(inicio) and timezone.is_aware(fin):
@@ -521,12 +510,10 @@ def dashboard_jefe_soporte (request):
                 else:
                     ticket.tiempo_en_pantalla = f"{minutos}m"
 
-                # --- 2. ACUMULADOR EXCLUSIVO PARA LA TARJETA DE PROMEDIO GLOBAL ---
                 if ticket.estado == 'RESUELTO' and ticket.fecha_resolucion:
                     total_segundos_acumulados += total_segundos
                     contador_tickets_resueltos += 1
 
-        # --- 3. CÁLCULO FINAL DEL PROMEDIO GLOBAL ---
         if contador_tickets_resueltos > 0:
             promedio_segundos = total_segundos_acumulados / contador_tickets_resueltos
             p_dias = int(promedio_segundos // 86400)
@@ -694,7 +681,6 @@ def crear_ticket(request):
         {"id": 15, "titulo": "Mi perfil muestra información desactualizada", "solucion": "Cerrá tu sesión de usuario por completo, volvé a ingresar con tus credenciales y los cambios se verán reflejados inmediatamente."},
     ]
     
-    # 1. Definimos la cantidad de tickets al principio para que siempre exista (GET o POST)
     hoy = timezone.now()
     cantidad_tickets = InfoTicket.objects.filter(
         solicitante__empresa=request.user.empresa,
@@ -714,7 +700,6 @@ def crear_ticket(request):
             ticket.save()
             ticket_creado = True
             
-            # Mail al Cliente
             send_mail(
                 subject=f"Assistech - Ticket #{ticket.numero_ticket_empresa} Registrado",
                 message=f"Hola {ticket.solicitante.first_name},\n\nTu ticket '{ticket.titulo}' fue creado correctamente.\nTe avisaremos por este medio cuando haya novedades de nuestro equipo.",
@@ -723,7 +708,6 @@ def crear_ticket(request):
                 fail_silently=True
             )
             
-            # Mail a todos los Jefes de Soporte activos de la misma empresa
             jefes_emails = list(Usuario.objects.filter(empresa=request.user.empresa, rol='jefe', is_active=True).values_list('email', flat=True))
             if jefes_emails:
                 send_mail(
@@ -735,7 +719,6 @@ def crear_ticket(request):
                 )
                 
             form = TicketForm()  
-            # Actualizamos la cantidad después de crear uno nuevo
             cantidad_tickets = InfoTicket.objects.filter(
                 solicitante__empresa=request.user.empresa,
                 fecha_creacion__year=hoy.year,
@@ -762,7 +745,6 @@ def registrar_deflexion(request):
             fecha_resolucion=timezone.now()
         )
         
-        # Guardamos la métrica
         FAQDeflexion.objects.create(
             usuario=request.user,
             empresa=request.user.empresa,
@@ -989,8 +971,6 @@ def asignar_ticket_view(request, pk):
 
     return render(request, 'dashboard/tickets/asignar_ticket.html', {'ticket': ticket, 'soportes_info': soportes_info})
 
-
-# Contacto de la landing
 def landing_view(request):
     if request.method == 'POST' and 'email' in request.POST:
         nombre = request.POST.get('nombre')
