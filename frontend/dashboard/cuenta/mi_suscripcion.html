@@ -37,13 +37,12 @@
     {% endif %}
 
     <div class="mb-8">
+        <a href="{% url 'dashboard' %}" style="color: #e05353; text-decoration: none; font-size: 0.95rem; font-weight: 500;">Volver al panel</a>
         <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Gestión de Suscripción</h1>
         <p class="mt-2 text-sm text-assist-body">Administrá el plan de tu empresa y los límites de tu cuenta.</p>
     </div>
 
-    <!-- Planes -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <!-- Plan Gratis -->
         <article class="relative flex flex-col rounded-2xl border {% if empresa.plan == 'GRATIS' %}border-assist-coral bg-assist-coral/5{% else %}border-white/10 bg-zinc-900/50{% endif %} p-6">
             <div class="flex-1">
                 <h3 class="text-xl font-semibold text-white mb-2">Plan Gratis</h3>
@@ -62,7 +61,6 @@
             {% endif %}
         </article>
 
-        <!-- Plan Básico -->
         <article class="relative flex flex-col rounded-2xl border {% if empresa.plan == 'BASICO' %}border-assist-coral bg-assist-coral/5{% else %}border-white/10 bg-zinc-900/50{% endif %} p-6">
             <div class="flex-1">
                 <h3 class="text-xl font-semibold text-white mb-2">Plan Básico</h3>
@@ -87,7 +85,6 @@
             {% endif %}
         </article>
 
-        <!-- Plan Premium -->
         <article class="relative flex flex-col rounded-2xl border {% if empresa.plan == 'PREMIUM' %}border-assist-coral bg-assist-coral/5{% else %}border-white/10 bg-zinc-900/50{% endif %} p-6">
             <div class="flex-1">
                 <h3 class="text-xl font-semibold text-white mb-2">Plan Premium</h3>
@@ -107,7 +104,6 @@
         </article>
     </div>
 
-    <!-- Consumo actual -->
     <div class="bg-zinc-900 border border-white/10 rounded-2xl p-6">
         <h3 class="text-lg font-semibold text-white mb-4">Tu consumo actual</h3>
         

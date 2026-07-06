@@ -78,6 +78,7 @@
                             <th class="p-4 text-sm font-semibold text-assist-gray">Categoría</th>
                             <th class="p-4 text-sm font-semibold text-assist-gray">Estado</th>
                             <th class="p-4 text-sm font-semibold text-assist-gray">Última Actualización</th>
+                            <th class="p-4 text-sm font-semibold text-assist-gray">Tiempo Transcurrido</th>
                             <th class="p-4 text-sm font-semibold text-assist-gray text-right">Acción</th>
                         </tr>
                     </thead>
@@ -96,6 +97,17 @@
                                     {% endif %}
                                 </td>
                                 <td class="p-4 text-sm text-assist-gray">{{ ticket.fecha_actualizacion|date:"d/m/Y H:i" }}</td>
+
+                                <td class="p-4 text-sm">
+                                    {% if request.user.empresa.plan != 'GRATIS' %}
+                                        <span class="text-zinc-300 font-mono bg-black/20 px-2 py-1 rounded border border-white/5">
+                                            {{ ticket.tiempo_en_pantalla|default:"-" }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-zinc-600 italic text-xs">No disponible</span>
+                                    {% endif %}
+                                </td>
+
                                 <td class="p-4 text-right">
                                     <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="text-assist-coral text-sm font-medium hover:underline">Ver detalle</a>
                                 </td>
@@ -121,6 +133,7 @@
                             <th class="p-4 text-sm font-semibold text-assist-gray">Categoría</th>
                             <th class="p-4 text-sm font-semibold text-assist-gray">Estado</th>
                             <th class="p-4 text-sm font-semibold text-assist-gray">Última Actualización</th>
+                            <th class="p-4 text-sm font-semibold text-assist-gray">Tiempo Transcurrido</th>
                             <th class="p-4 text-sm font-semibold text-assist-gray text-right">Acción</th>
                         </tr>
                     </thead>
@@ -139,6 +152,17 @@
                                     {% endif %}
                                 </td>
                                 <td class="p-4 text-sm text-assist-gray">{{ ticket.fecha_actualizacion|date:"d/m/Y H:i" }}</td>
+
+                                <td class="p-4 text-sm">
+                                    {% if request.user.empresa.plan != 'GRATIS' %}
+                                        <span class="text-zinc-300 font-mono bg-black/20 px-2 py-1 rounded border border-white/5">
+                                            {{ ticket.tiempo_en_pantalla|default:"-" }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-zinc-600 italic text-xs">No disponible</span>
+                                    {% endif %}
+                                </td>
+
                                 <td class="p-4 text-right">
                                     <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="text-assist-coral text-sm font-medium hover:underline">Ver detalle</a>
                                 </td>
@@ -217,32 +241,26 @@
             const btnEncurso = document.getElementById('btn-encurso');
 
             if (tab === 'completados') {
-                // Mostrar Completados
                 tabCompletados.classList.remove('hidden');
                 tabCompletados.classList.add('block');
                 tabEncurso.classList.remove('block');
                 tabEncurso.classList.add('hidden');
 
-                // Estilos del botón Completados (Activo)
                 btnCompletados.classList.replace('border-transparent', 'border-assist-coral');
                 btnCompletados.classList.replace('text-assist-gray', 'text-white');
 
-                // Estilos del botón En Curso (Inactivo)
                 btnEncurso.classList.replace('border-assist-coral', 'border-transparent');
                 btnEncurso.classList.replace('text-white', 'text-assist-gray');
 
             } else if (tab === 'encurso') {
-                // Mostrar En Curso
                 tabEncurso.classList.remove('hidden');
                 tabEncurso.classList.add('block');
                 tabCompletados.classList.remove('block');
                 tabCompletados.classList.add('hidden');
 
-                // Estilos del botón En Curso (Activo)
                 btnEncurso.classList.replace('border-transparent', 'border-assist-coral');
                 btnEncurso.classList.replace('text-assist-gray', 'text-white');
 
-                // Estilos del botón Completados (Inactivo)
                 btnCompletados.classList.replace('border-assist-coral', 'border-transparent');
                 btnCompletados.classList.replace('text-white', 'text-assist-gray');
             }
@@ -281,5 +299,32 @@
         }
     </style>
 
-    
+    <div class="mt-16 mb-8 flex flex-col items-center justify-center border-t border-white/10 pt-10 w-full">
+    <div class="flex flex-col md:flex-row items-center gap-6 p-6 rounded-2xl bg-assist-charcoal border border-white/5 shadow-2xl max-w-3xl w-full">
+        <div class="flex-shrink-0 w-16 h-16 rounded-xl bg-assist-coral/10 flex items-center justify-center text-assist-coral">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+            </svg>
+        </div>
+        
+        <div class="flex-grow text-center md:text-left">
+            <h3 class="text-lg font-bold text-white">Centro de Ayuda y Documentación</h3>
+            <p class="text-sm text-assist-gray mt-1 leading-relaxed">
+                Consultá el manual oficial de <strong>Assistech</strong> para conocer todas las funciones de tu panel, flujos de tickets y herramientas de gestión.
+            </p>
+        </div>
+        
+        <div class="flex-shrink-0">
+            <a href="{% static 'documentos/manual_usuario_assistech.pdf' %}" 
+               target="_blank" 
+               download 
+               class="inline-flex items-center gap-2 px-6 py-3 bg-assist-coral hover:bg-assist-coral/90 text-white font-bold rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(242,92,84,0.3)] hover:shadow-[0_0_25px_rgba(242,92,84,0.5)] active:scale-95 whitespace-nowrap">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+                Descargar PDF
+            </a>
+        </div>
+    </div>
+    </div>
 {% endblock %}

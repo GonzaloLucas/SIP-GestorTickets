@@ -1,10 +1,12 @@
 import re
+import os
 
 from django import forms
 from django_countries import countries
-from django.contrib.auth.password_validation import validate_password
+from django.conf import settings
+
 from .models import FeedbackPlatform, FeedbackSupportInternal, Usuario, InfoTicket, Empresa
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from django.utils.crypto import get_random_string
 import unicodedata
 
@@ -112,17 +114,28 @@ class EmpresaRegisterForm(forms.Form):
             Hola {first_name}, tu empresa '{nueva_empresa.nombre}' se registró correctamente.
 
             Acá tenés tus datos de acceso al sistema:
-            - Sitio web:{link_acceso}
+            - Sitio web: {link_acceso}
             - Tu Usuario (Email): {email}
             - Tu Contraseña provisoria: {password_aleatoria}
 
             Por motivos de seguridad, el sistema te pedirá cambiar esta contraseña en tu primer ingreso.
 
+            Abajo se adjunta el manual de usuario oficial de la plataforma para que puedas distribuirlo con tu equipo.
+
             ¡Gracias por confiar en Assistech!
             """
             
-            send_mail(
-                subject=asunto,message=mensaje_cuerpo,from_email='assistech.soporte@gmail.com',recipient_list=[email],fail_silently=False,)
+            email_msg = EmailMessage(
+                subject=asunto,
+                body=mensaje_cuerpo,
+                from_email='assistech.soporte@gmail.com',
+                to=[email],
+            )
+            
+            ruta_manual = os.path.join(settings.BASE_DIR, 'usuarios','static', 'documentos', 'manual_usuario_assistech.pdf')
+            email_msg.attach_file(ruta_manual) 
+
+            email_msg.send(fail_silently=False)
             
         return user
 

@@ -95,11 +95,11 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             {% if request.user.empresa.plan != 'GRATIS' %}
             <div class="rounded-2xl border border-white/5 bg-assist-charcoal p-6 w-full">
-                <h3 class="text-xl font-semibold mb-4 text-white">Métricas por técnico</h3>
+                <h3 class="text-xl font-semibold mb-4 text-white">Métricas por soporte</h3>
                 <div class="space-y-3">
                     {% for metrica in metricas_tecnico %}
                     <div class="flex items-center justify-between rounded-lg border border-white/5 bg-white/5 p-4">
-                        <span class="font-medium text-white">{{ metrica.technician__username|default:"Sin técnico asignado" }}</span>
+                        <span class="font-medium text-white">{{ metrica.technician__username|default:"Sin soporte asignado" }}</span>
                         <span class="text-sm text-assist-gray">{{ metrica.promedio|floatformat:1 }}/5 · {{ metrica.cantidad }} feedback</span>
                     </div>
                     {% empty %}
@@ -127,7 +127,7 @@
             {% else %}
             <div class="lg:col-span-2 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-8 text-center">
                 <h3 class="text-xl font-bold mb-2 text-amber-400">Métricas Avanzadas Bloqueadas</h3>
-                <p class="text-amber-100/80 mb-4 max-w-2xl mx-auto">Tu empresa se encuentra en el plan <strong>Gratis</strong>. Este plan no incluye acceso a métricas de rendimiento por técnico ni reportes de calificaciones bajas. Actualizá tu plan a <strong>Básico</strong> o <strong>Premium</strong> para desbloquear estas herramientas y gestionar mejor a tu equipo.</p>
+                <p class="text-amber-100/80 mb-4 max-w-2xl mx-auto">Tu empresa se encuentra en el plan <strong>Gratis</strong>. Este plan no incluye acceso a métricas de rendimiento por soporte ni reportes de calificaciones bajas. Actualizá tu plan a <strong>Básico</strong> o <strong>Premium</strong> para desbloquear estas herramientas y gestionar mejor a tu equipo.</p>
             </div>
             {% endif %}
         </div>
@@ -141,7 +141,7 @@
             <table class="w-full text-left text-sm border-collapse">
                 <thead class="bg-white/5 text-assist-gray">
                     <tr>
-                        <th class="p-4 font-medium border-b border-white/5">Técnico</th>
+                        <th class="p-4 font-medium border-b border-white/5">Soporte</th>
                         <th class="p-4 font-medium border-b border-white/5">Estado</th>
                         <th class="p-4 font-medium border-b border-white/5">Horario y Días</th>
                         <th class="p-4 font-medium border-b border-white/5 text-center">Activos</th>
@@ -183,7 +183,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="p-12 text-center text-assist-gray">No hay técnicos de soporte registrados.</td>
+                        <td colspan="6" class="p-12 text-center text-assist-gray">No hay soporte registrado.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -248,7 +248,7 @@
 
         <div class="bg-assist-charcoal border border-white/5 rounded-2xl overflow-x-auto w-full mb-8">
             <div class="px-6 py-4 border-b border-white/5 bg-assist-slate">
-                <h3 class="font-semibold text-white">Feedback interno de técnicos</h3>
+                <h3 class="font-semibold text-white">Feedback interno de soporte</h3>
             </div>
             <div class="p-6 space-y-3">
                 {% for feedback in feedback_interno %}
@@ -261,14 +261,14 @@
                     <p class="mt-2 text-sm text-assist-gray"><strong class="text-white">Problemas:</strong> {{ feedback.problems_found|default:"Sin problemas registrados" }}</p>
                 </article>
                 {% empty %}
-                <p class="text-sm text-assist-gray text-center p-4">Aún no hay feedback interno reportado por los técnicos.</p>
+                <p class="text-sm text-assist-gray text-center p-4">Aún no hay feedback interno reportado por soporte.</p>
                 {% endfor %}
             </div>
         </div>
         {% else %}
         <div class="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-12 text-center w-full mb-8">
             <h3 class="text-2xl font-bold mb-2 text-amber-400">Sección Bloqueada</h3>
-            <p class="text-amber-100/80 max-w-2xl mx-auto">Tu empresa se encuentra en el plan <strong>Gratis</strong>. Actualizá tu plan para acceder al historial completo de feedbacks de clientes y reportes internos de los técnicos.</p>
+            <p class="text-amber-100/80 max-w-2xl mx-auto">Tu empresa se encuentra en el plan <strong>Gratis</strong>. Actualizá tu plan para acceder al historial completo de feedbacks de clientes y reportes internos de soporte.</p>
         </div>
         {% endif %}
     </div>
@@ -438,7 +438,6 @@
 </div>
 
 <script>
-    // --- LÓGICA DE TABS DINÁMICA ---
     function switchTab(tabId) {
         const tabs = ['metricas', 'equipo', 'feedback', 'tickets'];
         
@@ -447,13 +446,11 @@
             const btn = document.getElementById('btn-' + t);
             
             if (t === tabId) {
-                // Mostrar panel y activar botón
                 content.classList.remove('hidden');
                 content.classList.add('block');
                 btn.classList.remove('border-transparent', 'text-assist-gray');
                 btn.classList.add('border-assist-coral', 'text-white');
             } else {
-                // Ocultar panel y desactivar botón
                 content.classList.remove('block');
                 content.classList.add('hidden');
                 btn.classList.remove('border-assist-coral', 'text-white');
@@ -462,7 +459,6 @@
         });
     }
 
-    // --- LÓGICA DE MODALES Y FILTRADOS ---
     function setServiceModalText(id, value) {
         const element = document.getElementById(id);
         if (element) element.textContent = value || '-';
@@ -548,4 +544,34 @@
         to { opacity: 1; transform: translateY(0); }
     }
 </style>
+
+<div class="mt-16 mb-8 flex flex-col items-center justify-center border-t border-white/10 pt-10 w-full">
+    <div class="flex flex-col md:flex-row items-center gap-6 p-6 rounded-2xl bg-assist-charcoal border border-white/5 shadow-2xl max-w-3xl w-full">
+        <div class="flex-shrink-0 w-16 h-16 rounded-xl bg-assist-coral/10 flex items-center justify-center text-assist-coral">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+            </svg>
+        </div>
+        
+        <div class="flex-grow text-center md:text-left">
+            <h3 class="text-lg font-bold text-white">Centro de Ayuda y Documentación</h3>
+            <p class="text-sm text-assist-gray mt-1 leading-relaxed">
+                Consultá el manual oficial de <strong>Assistech</strong> para conocer todas las funciones de tu panel, flujos de tickets y herramientas de gestión.
+            </p>
+        </div>
+        
+        <div class="flex-shrink-0">
+            <a href="{% static 'documentos/manual_usuario_assistech.pdf' %}" 
+               target="_blank" 
+               download 
+               class="inline-flex items-center gap-2 px-6 py-3 bg-assist-coral hover:bg-assist-coral/90 text-white font-bold rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(242,92,84,0.3)] hover:shadow-[0_0_25px_rgba(242,92,84,0.5)] active:scale-95 whitespace-nowrap">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+                Descargar PDF
+            </a>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

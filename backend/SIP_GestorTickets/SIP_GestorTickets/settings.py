@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -133,13 +134,12 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-# 🔴 TU NUEVA CUENTA DE ASSISTECH
 EMAIL_HOST_USER = 'assistech.soporte@gmail.com' 
 
-# 🔴 PEGÁ ACÁ LAS 16 LETRAS QUE TE DIO GOOGLE (Todo junto, sin los espacios)
 EMAIL_HOST_PASSWORD = 'rhvf inpg steo mxab' 
 
-# Esto es lo que va a figurar como remitente en la bandeja de entrada de los clientes
 DEFAULT_FROM_EMAIL = 'Assistech Soporte <assistech.soporte@gmail.com>'
 
 CSRF_TRUSTED_ORIGINS = ['https://assistech.pythonanywhere.com']
+
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]

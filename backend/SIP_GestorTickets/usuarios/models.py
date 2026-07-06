@@ -108,7 +108,6 @@ class InfoTicket(models.Model):
         try:
             from django.utils import timezone
             
-            # Definir fecha inicial y final
             inicio = self.fecha_creacion
             fin = self.fecha_resolucion if (self.estado == 'RESUELTO' and self.fecha_resolucion) else timezone.now()
             
@@ -120,16 +119,13 @@ class InfoTicket(models.Model):
             if timezone.is_aware(fin):
                 fin = timezone.make_naive(fin)
                 
-            # Calcular diferencia
             delta = fin - inicio
             total_segundos = max(delta.total_seconds(), 0)
             
-            # Desglose matemático
             dias = int(total_segundos // 86400)
             horas = int((total_segundos % 86400) // 3600)
             minutos = int((total_segundos % 3600) // 60)
             
-            # Formatear salida limpia
             if dias > 0:
                 return f"{dias}d {horas}h {minutos}m"
             elif horas > 0:
