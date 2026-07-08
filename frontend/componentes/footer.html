@@ -1,49 +1,129 @@
 {% load static %}
-<footer class="border-t border-white/5 bg-[#000000] pb-10 pt-16">
+<footer
+    class="bg-zinc-50 dark:bg-[#07070a] border-t border-zinc-200 dark:border-white/5 py-12 md:py-16 transition-colors duration-200">
     <div class="mx-auto max-w-7xl px-4 md:px-6">
-        
-        <div class="flex flex-col gap-8 border-b border-white/10 pb-10 md:flex-row md:items-center md:justify-between">
-            <div class="flex items-center justify-center md:justify-start gap-2">
+
+        <!-- Top Section with Brand and Socials -->
+        <div
+            class="flex flex-col gap-8 border-b border-zinc-200 dark:border-white/10 pb-10 md:flex-row md:items-center md:justify-between">
+            <div class="flex items-center justify-center md:justify-start gap-2.5">
                 <img src="{% static 'usuarios/logo-solo.png' %}" alt="Assistech Logo" class="h-8 w-8 object-contain" />
-                <span class="text-lg font-semibold text-white">Assistech</span>
+                <span class="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">Assistech</span>
             </div>
-            
-            <div class="flex flex-wrap items-center justify-center md:justify-end gap-6 text-zinc-400">
-                <div class="flex gap-4" aria-label="Redes sociales">
-                    <a href="#" class="hover:text-white transition">in</a>
-                    <a href="#" class="hover:text-white transition">𝕏</a>
-                    <a href="#" class="hover:text-white transition">▶</a>
+
+            <div
+                class="flex flex-wrap items-center justify-center md:justify-end gap-6 text-zinc-500 dark:text-zinc-400">
+                <div class="flex gap-5 items-center" aria-label="Redes sociales">
+                    <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"
+                        class="hover:text-assist-coral transition-colors duration-200" title="LinkedIn">
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                        </svg>
+                    </a>
+                    <a href="https://twitter.com" target="_blank" rel="noopener noreferrer"
+                        class="hover:text-assist-coral transition-colors duration-200" title="Twitter / X">
+                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
+                    </a>
                 </div>
-                
-                <label class="sr-only" for="lang">Idioma</label>
-                <select id="lang" class="rounded border border-white/10 bg-[#1a1a1a] px-3 py-2 text-sm text-white focus:outline-none focus:border-[#6F42C1]">
-                    <option value="es" selected>Español</option>
-                    <option value="en">English</option>
-                </select>
+
+                <!-- Language Selector Dropdown -->
+                <div class="relative inline-block text-left" id="lang-selector-container">
+                    <button type="button" id="lang-select-btn"
+                        class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#1a1a1a] text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:border-assist-coral dark:hover:border-assist-coral transition duration-150"
+                        aria-expanded="false" aria-haspopup="true">
+                        <span id="current-lang-text">Español</span>
+                        <svg class="w-3 h-3 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+
+                    <div id="lang-dropdown-menu"
+                        class="hidden absolute right-0 bottom-full mb-2 w-32 rounded-xl border border-zinc-200 dark:border-white/10 shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none z-50 animate-[fadeIn_0.15s_ease-in-out] bg-white dark:bg-[#1a1a1a]">
+                        <div class="py-1" role="menu" aria-orientation="vertical">
+                            <button onclick="setLanguage('es')"
+                                class="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:text-assist-coral dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 transition text-left"
+                                role="menuitem">
+                                Español
+                            </button>
+                            <button onclick="setLanguage('en')"
+                                class="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:text-assist-coral dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 transition text-left"
+                                role="menuitem">
+                                English
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div id="recursos" class="mt-12 grid grid-cols-2 gap-10 md:grid-cols-5 text-center md:text-left">
+        <!-- Middle Grid Section -->
+        <div id="recursos" class="mt-12 grid grid-cols-2 gap-10 md:grid-cols-4 lg:grid-cols-5 text-left">
             <div>
-                <p class="text-sm font-semibold text-white">Producto</p>
-                <ul class="mt-4 space-y-2 text-sm text-zinc-400">
-                    <li><a href="#producto" class="hover:text-white transition">Funciones</a></li>
-                    <li><a href="#precios" class="hover:text-white transition">Precios</a></li>
-                </ul>
-            </div>
-
-            <div>
-                <p class="text-sm font-semibold text-white">Redes Sociales</p>
-                <ul class="mt-4 space-y-2 text-sm text-zinc-400">
-                    <li><a href="#" class="hover:text-white transition">LinkedIn</a></li>
-                    <li><a href="#" class="hover:text-white transition">Twitter</a></li>
+                <p class="text-sm font-semibold text-zinc-900 dark:text-white uppercase tracking-wider">Producto</p>
+                <ul class="mt-4 space-y-2.5 text-sm text-zinc-500 dark:text-zinc-400">
+                    <li><a href="#producto"
+                            class="hover:text-assist-coral dark:hover:text-white transition-colors">Funciones</a></li>
+                    <li><a href="#precios"
+                            class="hover:text-assist-coral dark:hover:text-white transition-colors">Precios</a></li>
+                    <li><a href="#funciones"
+                            class="hover:text-assist-coral dark:hover:text-white transition-colors">Ventajas</a></li>
+                    <li><a href="#preguntas"
+                            class="hover:text-assist-coral dark:hover:text-white transition-colors">Preguntas
+                            Frecuentes</a></li>
                 </ul>
             </div>
         </div>
 
-        <div class="mt-10 flex flex-col gap-4 border-t border-white/10 pt-8 text-xs text-zinc-500 text-center md:flex-row md:justify-between">
+        <!-- Bottom Copyright -->
+        <div
+            class="mt-12 flex flex-col gap-4 border-t border-zinc-200 dark:border-white/10 pt-8 text-xs text-zinc-400 dark:text-zinc-500 text-center md:flex-row md:justify-between">
             <p>© 2026 Assistech. Todos los derechos reservados.</p>
         </div>
 
     </div>
+
+    <script>
+        (function () {
+            const btn = document.getElementById('lang-select-btn');
+            const menu = document.getElementById('lang-dropdown-menu');
+            const currentText = document.getElementById('current-lang-text');
+
+            if (!btn || !menu || !currentText) return;
+
+            // Toggle del menú dropdown
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                const isHidden = menu.classList.contains('hidden');
+                if (isHidden) {
+                    menu.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                } else {
+                    menu.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            // Cerrar menú al hacer clic afuera
+            document.addEventListener('click', function () {
+                menu.classList.add('hidden');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+
+            // Función global setLanguage
+            window.setLanguage = function (lang) {
+                currentText.textContent = lang === 'es' ? 'Español' : 'English';
+                localStorage.setItem('lang', lang);
+                menu.classList.add('hidden');
+                btn.setAttribute('aria-expanded', 'false');
+            };
+
+            // Cargar idioma guardado
+            const savedLang = localStorage.getItem('lang') || 'es';
+            setLanguage(savedLang);
+        })();
+    </script>
 </footer>
