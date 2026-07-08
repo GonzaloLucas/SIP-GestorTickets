@@ -58,7 +58,7 @@
         </div>
     {% endif %}
 
-    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between border-b border-white/10 pb-6 mb-6 sm:mb-8 gap-6">
+    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between mb-6 sm:mb-8 gap-6">
         
         <div class="flex-1 pb-1">
             <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Panel de {{ request.user.empresa.nombre }}</h1>
@@ -220,11 +220,11 @@
                         </div>
                         
                         <div class="flex items-center gap-3 self-start sm:self-center">
-                            <span class="px-3 py-1 rounded-full text-xs font-semibold 
-                                {% if ticket.estado == 'ABIERTO' %}bg-green-500/10 text-green-400 border border-green-500/20
-                                {% elif ticket.estado == 'EN_PROCESO' %}bg-blue-500/10 text-blue-400 border border-blue-500/20
-                                {% elif ticket.estado == 'RESUELTO' %}bg-zinc-500/10 text-zinc-400 border border-zinc-500/20
-                                {% elif ticket.estado == 'RESUELTO_FAQ' %}bg-purple-500/10 text-purple-400 border border-purple-500/20{% endif %}">
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold border 
+                                {% if ticket.estado == 'ABIERTO' %}badge-abierto
+                                {% elif ticket.estado == 'EN_PROCESO' %}badge-proceso
+                                {% elif ticket.estado == 'RESUELTO' %}badge-resuelto
+                                {% elif ticket.estado == 'RESUELTO_FAQ' %}badge-resuelto-faq{% endif %}">
                                 {{ ticket.get_estado_display }}
                             </span>
                             <a href="{% url 'detalle_ticket' ticket.pk %}" class="text-sm text-white font-medium hover:underline whitespace-nowrap">Ver detalles →</a>

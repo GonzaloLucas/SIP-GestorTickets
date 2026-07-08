@@ -55,18 +55,18 @@
             /* Tema Claro */
             --assist-bg: #EAEBEF;
             --assist-black: #E0E1E6;
-            --assist-dark: #D1D5DB;
-            --assist-charcoal: #E0E1E6;
+            --assist-dark: #ffffff;
+            --assist-charcoal: rgba(201, 210, 252, 0.7);
             --assist-slate: #EAEBEF;
             --assist-gray: #000000;
             --assist-body: #000000;
             --assist-white: #000000;
             --assist-coral: #F25C54;
             --assist-shadow-glow: 0 0 50px 10px rgba(111, 66, 193, 0.08);
-            --bg-nav: rgba(201, 210, 252, 0.4);
+            --bg-nav: rgba(201, 210, 252, 0.7);
             --border-white-5: rgba(0, 0, 0, 0.08);
             --border-white-10: rgba(0, 0, 0, 0.12);
-            --hero-gradient: linear-gradient(135deg, #5693b1 0%, #95c3ff 65%, #316ca7 100%);
+            --hero-gradient: linear-gradient(135deg, #b56abb 0%, #95c3ff 65%, #316ca7 100%);
         }
 
         .dark {
@@ -84,7 +84,7 @@
             --bg-nav: rgba(18, 18, 18, 0.7);
             --border-white-5: rgba(255, 255, 255, 0.05);
             --border-white-10: rgba(255, 255, 255, 0.1);
-            --hero-gradient: linear-gradient(135deg, #2d1b4e 0%, #1e3a5f 50%, #1a0f2e 100%);
+            --hero-gradient: linear-gradient(135deg, #560c5e 0%, #454b93 50%, #2415ac 100%);
         }
 
         /* Sobreescrituras de clases estáticas de Tailwind en Tema Claro */
@@ -93,16 +93,6 @@
         }
 
         /* Conservar texto blanco para elementos específicos con fondos de color */
-        html:not(.dark) button .text-white,
-        html:not(.dark) button.text-white,
-        html:not(.dark) a.text-white.bg-assist-coral,
-        html:not(.dark) a.text-white.bg-\[\#ff6b35\],
-        html:not(.dark) .bg-assist-coral .text-white,
-        html:not(.dark) .bg-assist-coral.text-white,
-        html:not(.dark) .bg-\[\#ff6b35\] .text-white,
-        html:not(.dark) .bg-\[\#ff6b35\].text-white,
-        html:not(.dark) [class*="bg-gradient-"] .text-white,
-        html:not(.dark) [class*="bg-gradient-"].text-white,
         html:not(.dark) [class*="bg-green-"] .text-white,
         html:not(.dark) [class*="bg-green-"].text-white,
         html:not(.dark) [class*="bg-red-"] .text-white,
@@ -115,6 +105,90 @@
         html:not(.dark) [class*="bg-indigo-"].text-white,
         html:not(.dark) .text-white-keep {
             color: #ffffff !important;
+        }
+
+        /* Active tab text color - overrides white on active transparent tabs in all themes */
+        button.border-b-2.border-assist-coral.text-white {
+            color: var(--assist-coral) !important;
+        }
+
+        /* Hovered inactive tab text color - overrides white on hover in all themes */
+        button.border-b-2.border-transparent:hover {
+            color: var(--assist-coral) !important;
+        }
+
+        /* Badge Colors - Centralized for Dark and Light themes */
+        .badge-abierto {
+            background-color: rgba(34, 197, 94, 0.1) !important;
+            border-color: rgba(34, 197, 94, 0.2) !important;
+            color: #4ade80 !important;
+        }
+        .badge-proceso {
+            background-color: rgba(59, 130, 246, 0.1) !important;
+            border-color: rgba(59, 130, 246, 0.2) !important;
+            color: #60a5fa !important;
+        }
+        .badge-resuelto {
+            background-color: rgba(161, 161, 170, 0.1) !important;
+            border-color: rgba(161, 161, 170, 0.2) !important;
+            color: #a1a1aa !important;
+        }
+        .badge-resuelto-faq {
+            background-color: rgba(168, 85, 247, 0.1) !important;
+            border-color: rgba(168, 85, 247, 0.2) !important;
+            color: #c084fc !important;
+        }
+        .badge-indigo {
+            background-color: rgba(99, 102, 241, 0.1) !important;
+            border-color: rgba(99, 102, 241, 0.2) !important;
+            color: #818cf8 !important;
+        }
+        .badge-success {
+            background-color: rgba(34, 197, 94, 0.1) !important;
+            border-color: rgba(34, 197, 94, 0.2) !important;
+            color: #4ade80 !important;
+        }
+        .badge-error {
+            background-color: rgba(239, 68, 68, 0.1) !important;
+            border-color: rgba(239, 68, 68, 0.2) !important;
+            color: #f87171 !important;
+        }
+
+        /* Tema Claro overrides (html:not(.dark)) */
+        html:not(.dark) .badge-abierto {
+            background-color: rgba(34, 197, 94, 0.15) !important;
+            border-color: rgba(34, 197, 94, 0.3) !important;
+            color: #15803d !important; /* Green-700 for high visibility and contrast */
+        }
+        html:not(.dark) .badge-proceso {
+            background-color: rgba(59, 130, 246, 0.15) !important;
+            border-color: rgba(59, 130, 246, 0.3) !important;
+            color: #1d4ed8 !important; /* Blue-700 */
+        }
+        html:not(.dark) .badge-resuelto {
+            background-color: rgba(107, 114, 128, 0.15) !important;
+            border-color: rgba(107, 114, 128, 0.3) !important;
+            color: #374151 !important; /* Gray-700 */
+        }
+        html:not(.dark) .badge-resuelto-faq {
+            background-color: rgba(168, 85, 247, 0.15) !important;
+            border-color: rgba(168, 85, 247, 0.3) !important;
+            color: #7e22ce !important; /* Purple-700 */
+        }
+        html:not(.dark) .badge-indigo {
+            background-color: rgba(99, 102, 241, 0.15) !important;
+            border-color: rgba(99, 102, 241, 0.3) !important;
+            color: #4338ca !important; /* Indigo-700 */
+        }
+        html:not(.dark) .badge-success {
+            background-color: rgba(34, 197, 94, 0.15) !important;
+            border-color: rgba(34, 197, 94, 0.3) !important;
+            color: #15803d !important;
+        }
+        html:not(.dark) .badge-error {
+            background-color: rgba(239, 68, 68, 0.15) !important;
+            border-color: rgba(239, 68, 68, 0.3) !important;
+            color: #b91c1c !important;
         }
 
         html:not(.dark) .border-white\/5 {
@@ -155,6 +229,10 @@
 
         html:not(.dark) .bg-zinc-900 {
             background-color: #f3f4f6 !important;
+        }
+
+        html:not(.dark) .bg-zinc-800 {
+            background-color: #e5e7eb !important;
         }
 
         html:not(.dark) .from-zinc-900 {

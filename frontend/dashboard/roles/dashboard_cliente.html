@@ -91,9 +91,9 @@
                                 <td class="p-4 text-sm text-assist-gray">{{ ticket.categoria }}</td>
                                 <td class="p-4">
                                     {% if ticket.estado == 'RESUELTO' %}
-                                        <span class="bg-purple-500/20 text-purple-400 text-xs px-2 py-1 rounded-full border border-purple-500/30">Resuelto</span>
+                                        <span class="badge-resuelto-faq text-xs px-2 py-1 rounded-full border">Resuelto</span>
                                     {% elif ticket.estado == 'RESUELTO_FAQ' %}
-                                        <span class="bg-indigo-500/20 text-indigo-400 text-xs px-2 py-1 rounded-full border border-indigo-500/30">Resuelto vía FAQ</span>
+                                        <span class="badge-indigo text-xs px-2 py-1 rounded-full border">Resuelto vía FAQ</span>
                                     {% endif %}
                                 </td>
                                 <td class="p-4 text-sm text-assist-gray">{{ ticket.fecha_actualizacion|date:"d/m/Y H:i" }}</td>
@@ -146,9 +146,9 @@
                                 <td class="p-4 text-sm text-assist-gray">{{ ticket.categoria }}</td>
                                 <td class="p-4">
                                     {% if ticket.estado == 'ABIERTO' %}
-                                        <span class="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded-full border border-green-500/30">Abierto</span>
+                                        <span class="badge-abierto text-xs px-2 py-1 rounded-full border">Abierto</span>
                                     {% elif ticket.estado == 'EN_PROCESO' %}
-                                        <span class="bg-blue-500/20 text-blue-400 text-xs px-2 py-1 rounded-full border border-blue-500/30">En Proceso</span>
+                                        <span class="badge-proceso text-xs px-2 py-1 rounded-full border">En Proceso</span>
                                     {% endif %}
                                 </td>
                                 <td class="p-4 text-sm text-assist-gray">{{ ticket.fecha_actualizacion|date:"d/m/Y H:i" }}</td>

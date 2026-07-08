@@ -29,7 +29,7 @@
     {% if messages %}
         <div class="mb-6 space-y-3">
             {% for message in messages %}
-                <div class="rounded-xl border px-4 py-3 text-sm font-semibold {% if message.tags == 'error' %}border-red-500/30 bg-red-500/10 text-red-200{% else %}border-emerald-500/30 bg-emerald-500/10 text-emerald-200{% endif %}">
+                <div class="rounded-xl border px-4 py-3 text-sm font-semibold {% if message.tags == 'error' %}badge-error{% else %}badge-success{% endif %}">
                     {{ message|safe }}
                 </div>
             {% endfor %}
@@ -43,7 +43,7 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <article class="relative flex flex-col rounded-2xl border {% if empresa.plan == 'GRATIS' %}border-assist-coral bg-assist-coral/5{% else %}border-white/10 bg-zinc-900/50{% endif %} p-6">
+        <article class="relative flex flex-col rounded-2xl border {% if empresa.plan == 'GRATIS' %}border-assist-coral bg-assist-coral/5{% else %}border-white/10 bg-zinc-900{% endif %} p-6">
             <div class="flex-1">
                 <h3 class="text-xl font-semibold text-white mb-2">Plan Gratis</h3>
                 <p class="text-3xl font-bold text-white mb-4">$0 <span class="text-sm font-normal text-zinc-400">/mes</span></p>
@@ -61,7 +61,7 @@
             {% endif %}
         </article>
 
-        <article class="relative flex flex-col rounded-2xl border {% if empresa.plan == 'BASICO' %}border-assist-coral bg-assist-coral/5{% else %}border-white/10 bg-zinc-900/50{% endif %} p-6">
+        <article class="relative flex flex-col rounded-2xl border {% if empresa.plan == 'BASICO' %}border-assist-coral bg-assist-coral/5{% else %}border-white/10 bg-zinc-900{% endif %} p-6">
             <div class="flex-1">
                 <h3 class="text-xl font-semibold text-white mb-2">Plan Básico</h3>
                 <p class="text-3xl font-bold text-white mb-4">$80 <span class="text-sm font-normal text-zinc-400">/mes</span></p>
@@ -85,7 +85,7 @@
             {% endif %}
         </article>
 
-        <article class="relative flex flex-col rounded-2xl border {% if empresa.plan == 'PREMIUM' %}border-assist-coral bg-assist-coral/5{% else %}border-white/10 bg-zinc-900/50{% endif %} p-6">
+        <article class="relative flex flex-col rounded-2xl border {% if empresa.plan == 'PREMIUM' %}border-assist-coral bg-assist-coral/5{% else %}border-white/10 bg-zinc-900{% endif %} p-6">
             <div class="flex-1">
                 <h3 class="text-xl font-semibold text-white mb-2">Plan Premium</h3>
                 <p class="text-3xl font-bold text-white mb-4">$150 <span class="text-sm font-normal text-zinc-400">/mes</span></p>
