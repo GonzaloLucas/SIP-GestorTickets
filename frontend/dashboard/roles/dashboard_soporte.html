@@ -44,7 +44,7 @@
     </div>
 
     <div id="tab-metricas" class="block animate-[fadeIn_0.3s_ease-in-out]">
-        <div class="bg-assist-charcoal border border-white/5 rounded-2xl w-full p-6 mb-8">
+        <div class="bg-assist-dark border border-white/5 rounded-2xl w-full p-6 mb-8">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 
                 <div class="bg-black/20 p-6 rounded-xl border border-white/5 flex flex-col justify-center shadow-inner">
@@ -94,7 +94,7 @@
     </div>
 
     <div id="tab-asignados" class="hidden animate-[fadeIn_0.3s_ease-in-out]">
-        <div class="bg-assist-charcoal border border-white/5 rounded-2xl overflow-x-auto w-full mb-8">
+        <div class="bg-assist-dark border border-white/5 rounded-2xl overflow-x-auto w-full mb-8">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-white/5 text-assist-gray text-xs uppercase tracking-wider">
@@ -139,7 +139,7 @@
                             </td>
 
                             <td class="p-4 text-right">
-                                <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="bg-white text-assist-black px-4 py-2 rounded-lg text-xs font-bold hover:bg-assist-gray transition whitespace-nowrap">
+                                <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="text-xs font-bold bg-white text-black border border-zinc-200 dark:border-zinc-700 px-4 py-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-200 transition whitespace-nowrap shadow-sm">
                                     Ver Ticket
                                 </a>
                             </td>
@@ -156,7 +156,7 @@
     </div>
 
     <div id="tab-completados" class="hidden animate-[fadeIn_0.3s_ease-in-out]">
-        <div class="bg-assist-charcoal border border-white/5 rounded-2xl overflow-x-auto w-full mb-8">
+        <div class="bg-assist-dark border border-white/5 rounded-2xl overflow-x-auto w-full mb-8">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-white/5 text-assist-gray text-xs uppercase tracking-wider">
@@ -201,7 +201,7 @@
                             </td>
 
                             <td class="p-4 text-right">
-                                <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="bg-white text-assist-black px-4 py-2 rounded-lg text-xs font-bold hover:bg-assist-gray transition whitespace-nowrap">
+                                <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="text-xs font-bold bg-white text-black border border-zinc-200 dark:border-zinc-700 px-4 py-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-200 transition whitespace-nowrap shadow-sm">
                                     Ver Ticket
                                 </a>
                             </td>
@@ -251,7 +251,7 @@
 </style>
 
 <div class="mt-16 mb-8 flex flex-col items-center justify-center border-t border-white/10 pt-10 w-full">
-    <div class="flex flex-col md:flex-row items-center gap-6 p-6 rounded-2xl bg-assist-charcoal border border-white/5 shadow-2xl max-w-3xl w-full">
+    <div class="flex flex-col md:flex-row items-center gap-6 p-6 rounded-2xl bg-assist-dark border border-white/5 shadow-2xl max-w-3xl w-full">
         <div class="flex-shrink-0 w-16 h-16 rounded-xl bg-assist-coral/10 flex items-center justify-center text-assist-coral">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />

@@ -13,21 +13,24 @@
     </div>
 
     {% if messages %}
-        <div class="mb-6 space-y-3">
-            {% for message in messages %}
-                <div class="rounded-xl border px-4 py-3 text-sm font-semibold {% if message.tags == 'error' %}border-red-500/30 bg-red-500/10 text-red-200{% elif message.tags == 'warning' %}border-amber-500/30 bg-amber-500/10 text-amber-200{% else %}border-emerald-500/30 bg-emerald-500/10 text-emerald-200{% endif %}">
-                    {{ message }}
-                </div>
-            {% endfor %}
+    <div class="mb-6 space-y-3">
+        {% for message in messages %}
+        <div
+            class="rounded-xl border px-4 py-3 text-sm font-semibold {% if message.tags == 'error' %}border-red-500/30 bg-red-500/10 text-red-200{% elif message.tags == 'warning' %}border-amber-500/30 bg-amber-500/10 text-amber-200{% else %}border-emerald-500/30 bg-emerald-500/10 text-emerald-200{% endif %}">
+            {{ message }}
         </div>
+        {% endfor %}
+    </div>
     {% endif %}
 
     <div class="mb-4 flex flex-col sm:flex-row gap-4">
         <div class="flex-1">
-            <input type="text" id="searchTecnico" onkeyup="filterTecnicos()" placeholder="Buscar soporte por nombre..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-assist-coral transition shadow-lg">
+            <input type="text" id="searchTecnico" onkeyup="filterTecnicos()" placeholder="Buscar soporte por nombre..."
+                class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-assist-coral transition shadow-lg">
         </div>
         <div class="w-full sm:w-64">
-            <select id="filterEstado" onchange="filterTecnicos()" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-assist-coral transition cursor-pointer shadow-lg">
+            <select id="filterEstado" onchange="filterTecnicos()"
+                class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-assist-coral transition cursor-pointer shadow-lg">
                 <option value="todos">Todos los soportes</option>
                 <option value="disponible">Disponibles</option>
                 <option value="fuera_horario">Fuera de horario</option>
@@ -50,66 +53,85 @@
                 </thead>
                 <tbody id="tecnicosTableBody" class="divide-y divide-zinc-800 text-white">
                     {% for info in soportes_info %}
-                    <tr class="hover:bg-zinc-800/30 transition tecnico-row" data-nombre="{{ info.soporte.first_name|lower }} {{ info.soporte.last_name|lower }}" data-estado="{% if info.esta_trabajando and info.tickets_activos < 3 %}disponible{% elif not info.esta_trabajando %}fuera_horario{% else %}lleno{% endif %}">
+                    <tr class="hover:bg-zinc-800/30 transition tecnico-row"
+                        data-nombre="{{ info.soporte.first_name|lower }} {{ info.soporte.last_name|lower }}"
+                        data-estado="{% if info.esta_trabajando and info.tickets_activos < 3 %}disponible{% elif not info.esta_trabajando %}fuera_horario{% else %}lleno{% endif %}">
                         <td class="p-4">
                             <div class="font-medium">{{ info.soporte.first_name }} {{ info.soporte.last_name }}</div>
                             <div class="text-xs text-assist-gray">{{ info.soporte.email }}</div>
                         </td>
                         <td class="p-4 text-sm">
                             {% if info.soporte.horario_ingreso and info.soporte.horario_egreso %}
-                                <div class="font-medium text-assist-coral">{{ info.soporte.horario_ingreso }} a {{ info.soporte.horario_egreso }}</div>
-                                <div class="text-xs text-assist-gray mt-1">{{ info.dias_formateados }}</div>
+                            <div class="font-medium text-assist-coral">{{ info.soporte.horario_ingreso }} a {{
+                                info.soporte.horario_egreso }}</div>
+                            <div class="text-xs text-assist-gray mt-1">{{ info.dias_formateados }}</div>
                             {% else %}
-                                <span class="text-zinc-500">No especificado</span>
+                            <span class="text-zinc-500">No especificado</span>
                             {% endif %}
                         </td>
                         <td class="p-4">
                             <div class="flex items-center gap-2">
                                 <div class="w-full bg-zinc-800 rounded-full h-2 max-w-[100px]">
-                                    <div class="h-2 rounded-full {% if info.tickets_activos == 0 %}bg-emerald-500{% elif info.tickets_activos == 1 %}bg-emerald-400{% elif info.tickets_activos == 2 %}bg-amber-500{% else %}bg-red-500{% endif %}"></div>
+                                    <div
+                                        class="h-2 rounded-full {% if info.tickets_activos == 0 %}bg-emerald-500{% elif info.tickets_activos == 1 %}bg-emerald-400{% elif info.tickets_activos == 2 %}bg-amber-500{% else %}bg-red-500{% endif %}">
+                                    </div>
                                 </div>
                                 <span class="text-xs text-assist-gray">{{ info.tickets_activos }}/3</span>
                             </div>
                         </td>
                         <td class="p-4">
                             {% if info.es_asignado_actual %}
-                                <span class="inline-flex items-center rounded-md {% if ticket.estado == 'RESUELTO' %}bg-zinc-400/10 text-zinc-400 ring-zinc-400/30{% else %}bg-blue-400/10 text-blue-400 ring-blue-400/30{% endif %} px-2 py-1 text-xs font-medium ring-1 ring-inset">Asignado actual</span>
+                            <span
+                                class="inline-flex items-center rounded-md {% if ticket.estado == 'RESUELTO' %}bg-zinc-400/10 text-zinc-400 ring-zinc-400/30{% else %}bg-blue-400/10 text-blue-400 ring-blue-400/30{% endif %} px-2 py-1 text-xs font-medium ring-1 ring-inset">Asignado
+                                actual</span>
                             {% elif not info.esta_trabajando %}
-                                <span class="inline-flex items-center rounded-md bg-amber-400/10 px-2 py-1 text-xs font-medium text-amber-400 ring-1 ring-inset ring-amber-400/30">Fuera de horario</span>
-                            {% elif info.tickets_activos < 3 %}
-                                <span class="inline-flex items-center rounded-md bg-emerald-400/10 px-2 py-1 text-xs font-medium text-emerald-400 ring-1 ring-inset ring-emerald-400/30">Disponible</span>
-                            {% else %}
-                                <span class="inline-flex items-center rounded-md bg-orange-400/10 px-2 py-1 text-xs font-medium text-orange-400 ring-1 ring-inset ring-orange-400/30">Lleno</span>
-                            {% endif %}
+                            <span
+                                class="inline-flex items-center rounded-md bg-amber-400/10 px-2 py-1 text-xs font-medium text-amber-400 ring-1 ring-inset ring-amber-400/30">Fuera
+                                de horario</span>
+                            {% elif info.tickets_activos < 3 %} <span
+                                class="inline-flex items-center rounded-md bg-emerald-400/10 px-2 py-1 text-xs font-medium text-emerald-400 ring-1 ring-inset ring-emerald-400/30">
+                                Disponible</span>
+                                {% else %}
+                                <span
+                                    class="inline-flex items-center rounded-md bg-orange-400/10 px-2 py-1 text-xs font-medium text-orange-400 ring-1 ring-inset ring-orange-400/30">Lleno</span>
+                                {% endif %}
                         </td>
                         <td class="p-4">
                             {% if ticket.estado == 'RESUELTO' %}
-                                {% if info.es_asignado_actual %}
-                                    <button disabled class="opacity-50 cursor-not-allowed rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-xs font-bold text-zinc-400" title="El ticket ya fue finalizado">Finalizado</button>
-                                {% else %}
-                                    <span class="text-zinc-600 pl-4">-</span>
-                                {% endif %}
+                            {% if info.es_asignado_actual %}
+                            <button disabled
+                                class="opacity-50 cursor-not-allowed rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-xs font-bold text-zinc-400"
+                                title="El ticket ya fue finalizado">Finalizado</button>
                             {% else %}
-                                {% if info.es_asignado_actual %}
-                                    <form method="post" action="{% url 'asignar_ticket' ticket.id_ticket %}">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="soporte_id" value="{{ info.soporte.pk }}">
-                                        <input type="hidden" name="action" value="deassign">
-                                        <button type="submit" class="rounded-lg border border-red-500/40 px-3 py-2 text-xs font-bold text-red-400 transition hover:bg-red-500 hover:text-white">Desasignar</button>
-                                    </form>
+                            <span class="text-zinc-600 pl-4">-</span>
+                            {% endif %}
+                            {% else %}
+                            {% if info.es_asignado_actual %}
+                            <form method="post" action="{% url 'asignar_ticket' ticket.id_ticket %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="soporte_id" value="{{ info.soporte.pk }}">
+                                <input type="hidden" name="action" value="deassign">
+                                <button type="submit"
+                                    class="rounded-lg border border-red-500/40 px-3 py-2 text-xs font-bold text-red-400 transition hover:bg-red-500 hover:text-white">Desasignar</button>
+                            </form>
+                            {% else %}
+                            <form method="post" action="{% url 'asignar_ticket' ticket.id_ticket %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="soporte_id" value="{{ info.soporte.pk }}">
+                                {% if not info.esta_trabajando %}
+                                <button type="submit"
+                                    class="rounded-lg border border-amber-500/40 px-3 py-2 text-xs font-bold text-amber-500 transition hover:bg-amber-500 hover:text-white"
+                                    title="Forzar asignación fuera de horario">Asignar igual</button>
+                                {% elif info.tickets_activos >= 3 %}
+                                <button type="submit"
+                                    class="rounded-lg border border-orange-500/40 px-3 py-2 text-xs font-bold text-orange-500 transition hover:bg-orange-500 hover:text-white"
+                                    title="Forzar asignación al estar lleno">Asignar igual</button>
                                 {% else %}
-                                    <form method="post" action="{% url 'asignar_ticket' ticket.id_ticket %}">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="soporte_id" value="{{ info.soporte.pk }}">
-                                        {% if not info.esta_trabajando %}
-                                            <button type="submit" class="rounded-lg border border-amber-500/40 px-3 py-2 text-xs font-bold text-amber-500 transition hover:bg-amber-500 hover:text-white" title="Forzar asignación fuera de horario">Asignar igual</button>
-                                        {% elif info.tickets_activos >= 3 %}
-                                            <button type="submit" class="rounded-lg border border-orange-500/40 px-3 py-2 text-xs font-bold text-orange-500 transition hover:bg-orange-500 hover:text-white" title="Forzar asignación al estar lleno">Asignar igual</button>
-                                        {% else %}
-                                            <button type="submit" class="rounded-lg border border-assist-coral/40 px-3 py-2 text-xs font-bold text-assist-coral transition hover:bg-assist-coral hover:text-white">Asignar</button>
-                                        {% endif %}
-                                    </form>
+                                <button type="submit"
+                                    class="rounded-lg border border-assist-coral/40 px-3 py-2 text-xs font-bold text-assist-coral transition hover:bg-assist-coral hover:text-white">Asignar</button>
                                 {% endif %}
+                            </form>
+                            {% endif %}
                             {% endif %}
                         </td>
                     </tr>

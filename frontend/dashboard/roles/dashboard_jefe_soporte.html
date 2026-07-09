@@ -28,7 +28,10 @@
     {% if messages %}
         <div class="mb-6 space-y-3">
             {% for message in messages %}
-                <div class="rounded-xl border px-4 py-3 text-sm font-semibold {% if message.tags == 'error' %}border-red-500/30 bg-red-500/10 text-red-200{% elif message.tags == 'warning' %}border-amber-500/30 bg-amber-500/10 text-amber-200{% else %}border-emerald-500/30 bg-emerald-500/10 text-emerald-200{% endif %}">
+                <div class="rounded-xl border px-4 py-3 text-sm font-semibold 
+                    {% if message.tags == 'error' %}badge-error
+                    {% elif message.tags == 'warning' %}badge-proceso
+                    {% else %}badge-success{% endif %}">
                     {{ message|safe }}
                 </div>
             {% endfor %}
@@ -37,7 +40,7 @@
 
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <h2 class="text-2xl sm:text-3xl font-bold">Panel de Control Global (Jefe de Soporte)</h2>
-        <div class="px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-right">
+        <div class="px-4 py-2 rounded-lg border border-white/10 bg-assist-dark text-right">
             <p class="text-xs text-assist-gray uppercase tracking-wider">Plan Actual</p>
             <p class="text-lg font-bold text-assist-coral">{{ request.user.empresa.get_plan_display }}</p>
         </div>
@@ -60,32 +63,32 @@
 
     <div id="tab-metricas" class="block animate-[fadeIn_0.3s_ease-in-out]">
         <div class="grid grid-cols-1 {% if request.user.empresa.plan != 'GRATIS' %}sm:grid-cols-4{% endif %} gap-4 mb-8">
-            <div class="p-6 bg-assist-charcoal border border-white/5 rounded-xl shadow-lg">
+            <div class="p-6 bg-assist-dark border border-white/5 rounded-xl shadow-lg">
                 <p class="text-assist-gray text-sm uppercase font-semibold tracking-wider">Tickets Humanos</p>
                 <strong class="text-2xl text-white block mt-1">{{ cant_tickets_humanos }}</strong>
             </div>
-            <div class="p-6 bg-assist-charcoal border border-assist-coral/30 rounded-xl shadow-[0_0_15px_rgba(242,92,84,0.05)]">
+            <div class="p-6 bg-assist-dark border border-assist-coral/30 rounded-xl shadow-[0_0_15px_rgba(242,92,84,0.05)]">
                 <p class="text-assist-coral text-sm uppercase font-semibold tracking-wider">Tasa de Deflexión</p>
                 <strong class="text-2xl text-white block mt-1">{{ tasa_deflexion }}%</strong>
                 <span class="text-xs text-assist-gray mt-1 block">{{ cant_autogestionados }} casos vía FAQ</span>
             </div>
             {% if request.user.empresa.plan != 'GRATIS' %}
-            <div class="p-6 bg-assist-charcoal border border-white/5 rounded-xl shadow-lg">
+            <div class="p-6 bg-assist-dark border border-white/5 rounded-xl shadow-lg">
                 <p class="text-assist-gray text-sm uppercase font-semibold tracking-wider">Promedio soporte</p>
                 <strong class="text-2xl text-white block mt-1">{% if promedio_soporte %}{{ promedio_soporte|floatformat:1 }}/5{% else %}-{% endif %}</strong>
             </div>
 
-            <div class="p-6 bg-assist-charcoal border border-white/5 rounded-xl shadow-lg">
+            <div class="p-6 bg-assist-dark border border-white/5 rounded-xl shadow-lg">
                 <p class="text-assist-gray text-sm uppercase font-semibold tracking-wider">T. Promedio Resolución</p>
                 <strong class="text-2xl text-white block mt-1">{{ promedio_resolucion_tiempo|default:"-" }}</strong>
             </div>
 
-            <div class="p-6 bg-assist-charcoal border border-white/5 rounded-xl shadow-lg">
+            <div class="p-6 bg-assist-dark border border-white/5 rounded-xl shadow-lg">
                 <p class="text-assist-gray text-sm uppercase font-semibold tracking-wider">Comentarios</p>
                 <strong class="text-2xl text-white block mt-1">{{ feedback_servicio.count }}</strong>
             </div>
 
-            <div class="p-6 bg-assist-charcoal border border-red-900/60 rounded-xl shadow-lg">
+            <div class="p-6 bg-assist-dark border border-red-900/60 rounded-xl shadow-lg">
                 <p class="text-red-400 text-sm uppercase font-semibold tracking-wider">Calificaciones bajas</p>
                 <strong class="text-2xl text-red-400 block mt-1">{{ feedback_bajo.count }}</strong>
             </div>
@@ -94,7 +97,7 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             {% if request.user.empresa.plan != 'GRATIS' %}
-            <div class="rounded-2xl border border-white/5 bg-assist-charcoal p-6 w-full">
+            <div class="rounded-2xl border border-white/5 bg-assist-dark p-6 w-full">
                 <h3 class="text-xl font-semibold mb-4 text-white">Métricas por soporte</h3>
                 <div class="space-y-3">
                     {% for metrica in metricas_tecnico %}
@@ -108,7 +111,7 @@
                 </div>
             </div>
 
-            <div class="rounded-2xl border border-red-900/60 bg-red-950/20 p-6 w-full">
+            <div class="rounded-2xl border border-red-900/60 bg-assist-dark p-6 w-full">
                 <h3 class="text-xl font-semibold mb-4 text-red-400">Tickets con calificación baja</h3>
                 <div class="space-y-3">
                     {% for feedback in feedback_bajo %}
@@ -134,8 +137,8 @@
     </div>
 
     <div id="tab-equipo" class="hidden animate-[fadeIn_0.3s_ease-in-out]">
-        <div class="bg-assist-charcoal border border-white/5 rounded-2xl overflow-x-auto w-full mb-8">
-            <div class="px-6 py-4 border-b border-white/5 bg-assist-slate">
+        <div class="bg-assist-dark border border-white/5 rounded-2xl overflow-x-auto w-full mb-8">
+            <div class="px-6 py-4 border-b border-white/5 bg-white/5">
                 <h3 class="font-semibold text-white">Equipo de Soporte</h3>
             </div>
             <table class="w-full text-left text-sm border-collapse">
@@ -193,8 +196,8 @@
 
     <div id="tab-feedback" class="hidden animate-[fadeIn_0.3s_ease-in-out]">
         {% if request.user.empresa.plan != 'GRATIS' %}
-        <div class="bg-assist-charcoal border border-white/5 rounded-2xl overflow-x-auto w-full mb-8">
-            <div class="px-6 py-4 border-b border-white/5 bg-assist-slate flex flex-col gap-1">
+        <div class="bg-assist-dark border border-white/5 rounded-2xl overflow-x-auto w-full mb-8">
+            <div class="px-6 py-4 border-b border-white/5 bg-white/5 flex flex-col gap-1">
                 <h3 class="font-semibold text-white">Feedbacks de Servicio</h3>
                 <p class="text-xs text-assist-gray">Comentarios enviados por los clientes al cerrar un ticket.</p>
             </div>
@@ -246,8 +249,8 @@
             </table>
         </div>
 
-        <div class="bg-assist-charcoal border border-white/5 rounded-2xl overflow-x-auto w-full mb-8">
-            <div class="px-6 py-4 border-b border-white/5 bg-assist-slate">
+        <div class="bg-assist-dark border border-white/5 rounded-2xl overflow-x-auto w-full mb-8">
+            <div class="px-6 py-4 border-b border-white/5 bg-white/5">
                 <h3 class="font-semibold text-white">Feedback interno de soporte</h3>
             </div>
             <div class="p-6 space-y-3">
@@ -274,7 +277,7 @@
     </div>
 
     <div id="tab-tickets" class="hidden animate-[fadeIn_0.3s_ease-in-out]">
-        <div class="flex flex-col md:flex-row gap-4 mb-6 bg-assist-charcoal p-4 rounded-xl border border-white/5 shadow-lg">
+        <div class="flex flex-col md:flex-row gap-4 mb-6 bg-assist-dark p-4 rounded-xl border border-white/5 shadow-lg">
             <div class="flex-1">
                 <label for="searchInput" class="block text-xs font-medium text-assist-gray mb-1">Buscar</label>
                 <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Buscar por título, ID o solicitante..." class="w-full bg-zinc-900 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-assist-coral transition">
@@ -301,7 +304,7 @@
             </div>
         </div>
 
-        <div class="bg-assist-charcoal border border-white/5 rounded-2xl overflow-x-auto w-full mb-8">
+        <div class="bg-assist-dark border border-white/5 rounded-2xl overflow-x-auto w-full mb-8">
             <table class="w-full text-left border-collapse" id="ticketsTable">
                 <thead class="bg-white/5 text-assist-gray text-sm">
                     <tr>
@@ -331,17 +334,13 @@
                                 <select name="prioridad" 
                                     onchange="this.form.submit()" 
                                     {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ' %}disabled{% endif %}
-                                    class="text-xs px-2.5 py-1.5 pr-8 rounded-full font-medium border appearance-none transition-colors duration-200 focus:outline-none cursor-pointer
-                                    {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ' %} pointer-events-none bg-zinc-800/40 text-zinc-500 border-white/5 opacity-50
-                                    {% elif ticket.prioridad == 'alta' or ticket.prioridad == 'ALTA' %} bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20
-                                    {% elif ticket.prioridad == 'media' or ticket.prioridad == 'MEDIA' %} bg-amber-500/10 text-amber-400 border-amber-500/20 hover:bg-amber-500/20
-                                    {% elif ticket.prioridad == 'baja' or ticket.prioridad == 'BAJA' %} bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20
-                                    {% else %} bg-zinc-800 text-zinc-400 border-white/10 hover:bg-zinc-700 {% endif %}"
-                                    style="background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23a1a1aa%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22></polyline></svg>'); background-size: 12px; background-position: right 10px center; background-repeat: no-repeat;">
-                                    <option value="" class="bg-zinc-800 text-zinc-400" {% if not ticket.prioridad %}selected{% endif %} disabled>Sin asignar</option>
-                                    <option value="baja" class="bg-zinc-800 text-zinc-300" {% if ticket.prioridad == 'baja' or ticket.prioridad == 'BAJA' %}selected{% endif %}>Baja</option>
-                                    <option value="media" class="bg-zinc-800 text-zinc-300" {% if ticket.prioridad == 'media' or ticket.prioridad == 'MEDIA' %}selected{% endif %}>Media</option>
-                                    <option value="alta" class="bg-zinc-800 text-zinc-300" {% if ticket.prioridad == 'alta' or ticket.prioridad == 'ALTA' %}selected{% endif %}>Alta</option>
+                                    class="text-xs px-2.5 py-1.5 pr-8 rounded-full font-medium border appearance-none transition-colors duration-200 focus:outline-none cursor-pointer bg-white text-black border-zinc-300 hover:bg-zinc-100
+                                    {% if ticket.estado == 'RESUELTO' or ticket.estado == 'RESUELTO_FAQ' %} pointer-events-none opacity-50 bg-white/70 text-black/70 border-zinc-200 {% endif %}"
+                                    style="background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000000%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22></polyline></svg>'); background-size: 12px; background-position: right 10px center; background-repeat: no-repeat;">
+                                    <option value="" class="bg-white text-black" {% if not ticket.prioridad %}selected{% endif %} disabled>Sin asignar</option>
+                                    <option value="baja" class="bg-white text-black" {% if ticket.prioridad == 'baja' or ticket.prioridad == 'BAJA' %}selected{% endif %}>Baja</option>
+                                    <option value="media" class="bg-white text-black" {% if ticket.prioridad == 'media' or ticket.prioridad == 'MEDIA' %}selected{% endif %}>Media</option>
+                                    <option value="alta" class="bg-white text-black" {% if ticket.prioridad == 'alta' or ticket.prioridad == 'ALTA' %}selected{% endif %}>Alta</option>
                                 </select>
                             </form>
                         </td>
@@ -379,7 +378,7 @@
                         </td>
                         
                         <td class="p-4">
-                            <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="text-xs font-bold bg-white text-assist-black px-3 py-1.5 rounded-lg hover:bg-assist-gray transition whitespace-nowrap">Ver / Cambiar</a>
+                            <a href="{% url 'detalle_ticket' ticket.id_ticket %}" class="text-xs font-bold bg-white text-black border border-zinc-200 dark:border-zinc-700 px-3 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-200 transition whitespace-nowrap shadow-sm">Ver / Cambiar</a>
                         </td>
                     </tr>
                     {% empty %}
@@ -394,7 +393,7 @@
 </div>
 
 <div id="serviceFeedbackModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 px-4">
-    <section class="w-full max-w-2xl rounded-xl border border-white/10 bg-assist-charcoal p-6 shadow-2xl">
+    <section class="w-full max-w-2xl rounded-xl border border-white/10 bg-assist-dark p-6 shadow-2xl">
         <div class="flex items-start justify-between gap-4">
             <div>
                 <p class="text-xs font-bold uppercase tracking-wider text-assist-coral">Soporte</p>
@@ -546,7 +545,7 @@
 </style>
 
 <div class="mt-16 mb-8 flex flex-col items-center justify-center border-t border-white/10 pt-10 w-full">
-    <div class="flex flex-col md:flex-row items-center gap-6 p-6 rounded-2xl bg-assist-charcoal border border-white/5 shadow-2xl max-w-3xl w-full">
+    <div class="flex flex-col md:flex-row items-center gap-6 p-6 rounded-2xl bg-assist-dark border border-white/5 shadow-2xl max-w-3xl w-full">
         <div class="flex-shrink-0 w-16 h-16 rounded-xl bg-assist-coral/10 flex items-center justify-center text-assist-coral">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
