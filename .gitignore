@@ -1,4 +1,10 @@
 venv/
+.venv/
+env/
 
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+
+staticfiles/
+.env
