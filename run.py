@@ -7,9 +7,13 @@ import signal
 
 MANAGE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'backend', 'SIP_GestorTickets')
 
+env = os.environ.copy()
+env.setdefault('DJANGO_DEBUG', 'True')
+
 server = subprocess.Popen(
     [sys.executable, 'manage.py', 'runserver'],
-    cwd=MANAGE_DIR
+    cwd=MANAGE_DIR,
+    env=env
 )
 
 time.sleep(2)
